@@ -15,6 +15,10 @@ interface AdminDashboardProps {
     pendingReviewComments: number;
     activeUsers: number;
     lockedUsers: number;
+    totalReports: number;
+    pendingReports: number;
+    approvedReports: number;
+    rejectedReports: number;
   };
   monthlyStats?: Array<{ month: string; posts: number; users: number }>;
 }
@@ -22,15 +26,15 @@ interface AdminDashboardProps {
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats, monthlyStats = [] }) => {
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Thống kê tổng quan</h2>
         <p className="text-gray-600 mt-1">Dashboard quản trị BlogHub</p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Tổng số bài viết */}
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-[16px] p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
@@ -46,7 +50,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats, monthlyStats = [
           </div>
         </div>
 
-        {/* Tổng số người dùng */}
+        
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-[16px] p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
@@ -58,11 +62,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats, monthlyStats = [
             </div>
           </div>
           <div className="mt-4 text-sm text-green-100">
-            {stats.activeUsers} đang hoạt động
+            {stats.activeUsers} tài khoản bình thường
           </div>
         </div>
 
-        {/* Bài viết Hot */}
+        
         <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-[16px] p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
@@ -78,7 +82,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats, monthlyStats = [
           </div>
         </div>
 
-        {/* Bình luận cần duyệt */}
+        
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-[16px] p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
@@ -93,14 +97,30 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats, monthlyStats = [
             Cần kiểm duyệt
           </div>
         </div>
+
+        
+        <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-[16px] p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-red-100 text-sm font-medium">Báo cáo vi phạm</p>
+              <p className="text-3xl font-bold mt-2">{stats.totalReports}</p>
+            </div>
+            <div className="text-5xl opacity-50">
+              <i className="fa-solid fa-triangle-exclamation"></i>
+            </div>
+          </div>
+          <div className="mt-4 text-sm text-red-100">
+            {stats.pendingReports} chờ xử lý
+          </div>
+        </div>
       </div>
 
-      {/* Additional Stats */}
+      
       <div className="bg-white rounded-[16px] p-6 shadow-lg">
         <h3 className="text-xl font-bold text-gray-800 mb-4">Chi tiết hoạt động</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 bg-blue-50 rounded-xl">
-            <p className="text-sm text-blue-600 font-medium">Người dùng hoạt động</p>
+            <p className="text-sm text-blue-600 font-medium">Tài khoản bình thường</p>
             <p className="text-2xl font-bold text-blue-700 mt-1">{stats.activeUsers}</p>
           </div>
           <div className="p-4 bg-red-50 rounded-xl">
@@ -108,7 +128,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats, monthlyStats = [
             <p className="text-2xl font-bold text-red-700 mt-1">{stats.lockedUsers}</p>
           </div>
           <div className="p-4 bg-yellow-50 rounded-xl">
-            <p className="text-sm text-yellow-600 font-medium">Tổng cần kiểm duyệt</p>
+            <p className="text-sm text-yellow-600 font-medium">Tổng bài viết cần kiểm duyệt</p>
             <p className="text-2xl font-bold text-yellow-700 mt-1">
               {stats.pendingReviewPosts + stats.pendingReviewComments}
             </p>
@@ -116,9 +136,32 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats, monthlyStats = [
         </div>
       </div>
 
-      {/* Charts Section */}
+      
+      <div className="bg-white rounded-[16px] p-6 shadow-lg">
+        <h3 className="text-xl font-bold text-gray-800 mb-4">Thống kê báo cáo vi phạm</h3>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
+            <p className="text-sm text-gray-600 font-medium">Tổng báo cáo bài viết</p>
+            <p className="text-2xl font-bold text-gray-700 mt-1">{stats.totalReports}</p>
+          </div>
+          <div className="p-4 bg-yellow-50 rounded-xl border-2 border-yellow-200">
+            <p className="text-sm text-yellow-600 font-medium">Bài viết đang chờ xử lý</p>
+            <p className="text-2xl font-bold text-yellow-700 mt-1">{stats.pendingReports}</p>
+          </div>
+          <div className="p-4 bg-red-50 rounded-xl border-2 border-red-200">
+            <p className="text-sm text-red-600 font-medium">Bài viết đã duyệt</p>
+            <p className="text-2xl font-bold text-red-700 mt-1">{stats.approvedReports}</p>
+          </div>
+          <div className="p-4 bg-green-50 rounded-xl border-2 border-green-200">
+            <p className="text-sm text-green-600 font-medium">Bài viết đã từ chối</p>
+            <p className="text-2xl font-bold text-green-700 mt-1">{stats.rejectedReports}</p>
+          </div>
+        </div>
+      </div>
+
+      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Biểu đồ xu hướng bài viết */}
+        
         <div className="bg-white rounded-[16px] p-6 shadow-lg">
           <h3 className="text-xl font-bold text-gray-800 mb-4">Xu hướng bài viết theo tháng</h3>
           {monthlyStats.length === 0 || monthlyStats.every(m => m.posts === 0) ? (
@@ -139,7 +182,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats, monthlyStats = [
           )}
         </div>
 
-        {/* Biểu đồ người dùng mới */}
+        
         <div className="bg-white rounded-[16px] p-6 shadow-lg">
           <h3 className="text-xl font-bold text-gray-800 mb-4">Người dùng mới theo tháng</h3>
           {monthlyStats.length === 0 || monthlyStats.every(m => m.users === 0) ? (

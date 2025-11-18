@@ -19,8 +19,6 @@ export interface UseAuthReturn extends AuthState {
 export const useAuth = (): UseAuthReturn => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Check for existing session on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -42,11 +40,7 @@ export const useAuth = (): UseAuthReturn => {
   const login = useCallback(async (email: string, _password: string): Promise<boolean> => {
     try {
       setLoading(true);
-      
-      // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Find user by email (in real app, this would be an API call)
       const foundUser = mockUsers.find(u => u.email === email);
       
       if (foundUser) {
@@ -67,17 +61,11 @@ export const useAuth = (): UseAuthReturn => {
   const register = useCallback(async (userData: Omit<User, 'id' | 'joinDate' | 'postsCount' | 'followersCount'>): Promise<boolean> => {
     try {
       setLoading(true);
-      
-      // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Check if email already exists
       const existingUser = mockUsers.find(u => u.email === userData.email);
       if (existingUser) {
         return false;
       }
-      
-      // Create new user
       const newUser: User = {
         ...userData,
         id: Date.now().toString(),

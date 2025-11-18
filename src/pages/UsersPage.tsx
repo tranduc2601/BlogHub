@@ -1,62 +1,148 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useUsers } from "../hooks/useUsers";
+import { useAuth } from "../context/AuthContext";
+import axios from "../config/axios";
+import toast from "react-hot-toast";
 
 
-function FollowButton({ userId }: { userId: number }) {
-  // Lưu trạng thái theo dõi từng user vào localStorage
-  const [following, setFollowing] = useState(() => {
-    const followed = localStorage.getItem("followedUsers");
-    if (followed) {
+function FollowButton({ userId, onFollowChange }: { userId: number; onFollowChange: () => void }) {
+  const [following, setFollowing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const checkFollowStatus = async () => {
       try {
-        const arr = JSON.parse(followed);
-        return Array.isArray(arr) && arr.includes(userId);
-      } catch {
-        return false;
+        const response = await axios.get(`/users/${userId}/follow-status`);
+        if (response.data.success) {
+          setFollowing(response.data.isFollowing);
+        }
+      } catch (error) {
+        console.error('Error checking follow status:', error);
       }
-    }
-    return false;
-  });
+    };
+    checkFollowStatus();
+  }, [userId]);
 
-  const handleFollow = () => {
-    setFollowing(true);
-    // Lưu vào localStorage
-    const followed = localStorage.getItem("followedUsers");
-    let arr: number[] = [];
-    if (followed) {
-      try {
-        arr = JSON.parse(followed);
-        if (!Array.isArray(arr)) arr = [];
-      } catch {
-        arr = [];
-      }
+  const handleFollow = async () => {
+    setLoading(true);
+    try {
+      await axios.post(`/users/${userId}/follow`);
+      setFollowing(true);
+      onFollowChange();
+      toast.success("Đã theo dõi thành công!", {
+        duration: 2000,
+        position: 'top-right',
+      });
+    } catch (error) {
+      console.error('Error following user:', error);
+      toast.error("Đã xảy ra lỗi!", {
+        duration: 2000,
+        position: 'top-right',
+      });
+    } finally {
+      setLoading(false);
     }
-    if (!arr.includes(userId)) {
-      arr.push(userId);
-      localStorage.setItem("followedUsers", JSON.stringify(arr));
+  };
+
+  const handleUnfollow = async () => {
+    setLoading(true);
+    try {
+      await axios.delete(`/users/${userId}/follow`);
+      setFollowing(false);
+      onFollowChange();
+      toast.success("Đã hủy theo dõi thành công!", {
+        duration: 2000,
+        position: 'top-right',
+      });
+    } catch (error) {
+      console.error('Error unfollowing user:', error);
+      toast.error("Đã xảy ra lỗi!", {
+        duration: 2000,
+        position: 'top-right',
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <button
-      className={`flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 px-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 ${following ? "opacity-60 pointer-events-none" : ""}`}
-      onClick={handleFollow}
-      disabled={following}
+      className={`flex-1 py-2.5 px-4 rounded-xl font-semibold transition-all duration-300 transform cursor-pointer ${
+        following 
+          ? "bg-gray-100 text-gray-700 border-3 border-gray-300 hover:bg-red-50 hover:text-red-600 hover:border-red-300" 
+          : "bg-blue-600 text-white border-3 border-blue-600 hover:bg-blue-700 hover:border-blue-700 hover:shadow-lg hover:scale-105 active:scale-95"
+      } ${loading ? 'opacity-50 cursor-wait' : ''}`}
+      onClick={following ? handleUnfollow : handleFollow}
+      disabled={loading}
     >
-      {following ? "Đã theo dõi" : "Theo dõi"}
+      {loading ? (
+        <span className="flex items-center justify-center gap-1.5">
+          <i className="fa-solid fa-spinner fa-spin text-sm"></i>
+          Đang xử lý...
+        </span>
+      ) : following ? (
+        <span className="flex items-center justify-center gap-1.5">
+          <i className="fa-solid fa-user-minus text-sm mr-1"></i>
+          Bỏ theo dõi
+        </span>
+      ) : (
+        <span className="flex items-center justify-center gap-1.5">
+          <i className="fa-solid fa-user-plus text-sm mr-1"></i>
+          Theo dõi
+        </span>
+      )}
     </button>
   );
 }
 
 export default function UsersPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState<"name" | "posts" | "comments">("name");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  
+  // Lấy giá trị từ URL query params
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
+  const [sortBy, setSortBy] = useState<"name" | "posts" | "comments" | "followers" | "likes">(
+    (searchParams.get("sortBy") as "name" | "posts" | "comments" | "followers" | "likes") || "followers"
+  );
+  
   const { users, loading, error } = useUsers();
+  const { user: currentUser } = useAuth();
+  const [localUsers, setLocalUsers] = useState(users);
+  useEffect(() => {
+    setLocalUsers(users);
+  }, [users]);
 
-  const filteredAndSortedUsers = users
+  // Cập nhật URL khi searchTerm hoặc sortBy thay đổi
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchTerm) {
+      params.set("search", searchTerm);
+    }
+    if (sortBy !== "followers") {
+      params.set("sortBy", sortBy);
+    }
+    setSearchParams(params, { replace: true });
+  }, [searchTerm, sortBy, setSearchParams]);
+
+  const handleFollowChange = async () => {
+    // Refetch users list to get accurate follower counts
+    try {
+      const response = await axios.get('/users');
+      if (response.data.success) {
+        setLocalUsers(response.data.users);
+      }
+    } catch (error) {
+      console.error('Error refreshing users:', error);
+    }
+  };
+
+  const filteredAndSortedUsers = localUsers
     .filter(
       (user) =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        user.id !== currentUser?.id &&
+        (user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()))
     )
     .sort((a, b) => {
       switch (sortBy) {
@@ -66,6 +152,18 @@ export default function UsersPage() {
           return b.postsCount - a.postsCount;
         case "comments":
           return b.commentsCount - a.commentsCount;
+        case "followers": {
+          const aFollowers = a.followersCount || 0;
+          const bFollowers = b.followersCount || 0;
+          return bFollowers - aFollowers;
+        }
+        case "likes": {
+          const aLikes = a.totalLikes || 0;
+          const bLikes = b.totalLikes || 0;
+          const aAvgLikes = a.postsCount > 0 ? aLikes / a.postsCount : 0;
+          const bAvgLikes = b.postsCount > 0 ? bLikes / b.postsCount : 0;
+          return bAvgLikes - aAvgLikes;
+        }
         default:
           return 0;
       }
@@ -80,36 +178,28 @@ export default function UsersPage() {
     });
   };
 
-  const getAuthorInitial = (name: string) =>
-    name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-
   return (
-    <div className="max-w-6xl mx-auto">
-      {/* Header */}
+    <div className="max-w-6xl mx-auto select-none">
+      
       <div className="mb-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-          Danh sách tác giả
+          Danh sách các tác giả
         </h1>
         <p className="text-gray-600 text-lg">
-          Khám phá những tác giả tài năng trong cộng đồng BlogHub
+          Khám phá những tác giả tài năng trong cộng đồng BlogHub!
         </p>
       </div>
 
-      {/* Search & Filter */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 mb-8">
+      
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-4 sm:p-6 mb-8">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
+          <div className="relative flex-1">
             <input
               type="text"
               placeholder="Tìm kiếm tác giả..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300"
+              className="w-full pl-11 pr-4 py-2.5 border-3 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300"
             />
             <svg
               className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2"
@@ -126,15 +216,17 @@ export default function UsersPage() {
             </svg>
           </div>
 
-          <div className="md:w-64">
+          <div className="w-full md:w-80">
             <select
               value={sortBy}
               onChange={(e) =>
-                setSortBy(e.target.value as "name" | "posts" | "comments")
+                setSortBy(e.target.value as "name" | "posts" | "comments" | "followers" | "likes")
               }
-              className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300"
+              className="w-full p-3 border-3 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300 cursor-pointer select-none"
             >
               <option value="name">Sắp xếp theo tên</option>
+              <option value="followers">Sắp xếp theo số người theo dõi</option>
+              <option value="likes">Sắp xếp theo lượt tim/bài viết</option>
               <option value="posts">Sắp xếp theo số bài viết</option>
               <option value="comments">Sắp xếp theo số bình luận</option>
             </select>
@@ -142,31 +234,7 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20">
-          <div className="text-3xl font-bold text-blue-600 mb-2">
-            {users.length}
-          </div>
-          <div className="text-gray-600">Tổng số người dùng</div>
-        </div>
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20">
-          <div className="text-3xl font-bold text-purple-600 mb-2">
-            {users.reduce((sum: number, u) => sum + u.postsCount, 0)}
-          </div>
-          <div className="text-gray-600">Tổng số bài viết</div>
-        </div>
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20">
-          <div className="text-3xl font-bold text-indigo-600 mb-2">
-            {users
-              .reduce((sum: number, u) => sum + u.commentsCount, 0)
-              .toLocaleString()}
-          </div>
-          <div className="text-gray-600">Tổng số bình luận</div>
-        </div>
-      </div>
-
-      {/* Loading State */}
+      
       {loading && (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -174,83 +242,106 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* Error State */}
+      
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
           <p className="text-red-600">{error}</p>
         </div>
       )}
 
-      {/* Empty State */}
+      
       {!loading && !error && filteredAndSortedUsers.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-600 text-lg">Không tìm thấy người dùng nào</p>
         </div>
       )}
 
-      {/* Users Grid */}
+      
       {!loading && !error && filteredAndSortedUsers.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredAndSortedUsers.map((user, index) => (
           <div
             key={user.id}
-            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 hover:shadow-xl transition-all duration-300 animate-fadeInUp"
+            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 hover:shadow-xl transition-all duration-300 animate-fadeInUp h-full flex flex-col cursor-pointer"
             style={{ animationDelay: `${index * 100}ms` }}
+            onClick={() => navigate(`/users/${user.id}/posts`)}
           >
-            {/* Avatar */}
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                {getAuthorInitial(user.name)}
+            
+            <div className="flex-grow">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="relative w-16 h-16 flex-shrink-0">
+                  {user.avatarUrl ? (
+                    <>
+                      <img 
+                        src={user.avatarUrl}
+                        alt={user.name}
+                        className="w-16 h-16 rounded-full object-cover border-4 border-blue-500 shadow-lg"
+                        draggable={false}
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                          if (fallback) {
+                            fallback.style.display = 'flex';
+                          }
+                        }}
+                      />
+                      <div 
+                        className="w-16 h-16 bg-blue-100 rounded-full items-center justify-center text-blue-700 font-bold text-xl border-4 border-blue-500 shadow-lg absolute top-0 left-0"
+                        style={{ display: 'none' }}
+                      >
+                        {user.name.trim().split(' ').slice(-1)[0].charAt(0).toUpperCase()}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-xl border-4 border-blue-500 shadow-lg">
+                      {user.name.trim().split(' ').slice(-1)[0].charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xl font-bold text-gray-800 truncate">
+                    {user.name}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Tham gia {formatDate(user.joinedAt)}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-800">
-                  {user.name}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Tham gia {formatDate(user.joinedAt)}
-                </p>
+
+              
+              <p className="text-gray-600 text-sm mb-4 leading-relaxed text-center flex items-center justify-center gap-2 truncate">
+                <span className="inline-block w-5 h-5 align-middle flex-shrink-0">
+                  <i className="fa-light fa-envelope"></i>
+                </span>
+                <span className="truncate">{user.email}</span>
+              </p>
+
+              
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {user.postsCount}
+                  </div>
+                  <div className="text-xs text-gray-500">Bài viết</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {user.followersCount || 0}
+                  </div>
+                  <div className="text-xs text-gray-500">Người theo dõi</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {user.commentsCount}
+                  </div>
+                  <div className="text-xs text-gray-500">Bình luận</div>
+                </div>
               </div>
             </div>
 
-            {/* Email */}
-            <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-              📧 {user.email}
-            </p>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {user.postsCount}
-                </div>
-                <div className="text-xs text-gray-500">Bài viết</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">
-                  {user.commentsCount}
-                </div>
-                <div className="text-xs text-gray-500">Bình luận</div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-2">
-              <FollowButton userId={user.id} />
-              <button className="px-4 py-2 border-2 border-gray-200 text-gray-600 rounded-xl hover:border-gray-300 transition-all duration-300">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                  />
-                </svg>
-              </button>
+            
+            <div className="flex gap-2 mt-auto" onClick={(e) => e.stopPropagation()}>
+              <FollowButton userId={user.id} onFollowChange={handleFollowChange} />
             </div>
           </div>
           ))}

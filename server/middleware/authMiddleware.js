@@ -1,9 +1,10 @@
 import jwt from 'jsonwebtoken';
+import db from '../config/database.js';
 
-// Verify JWT token and attach user to request
+
 export const authMiddleware = async (req, res, next) => {
   try {
-    // Get token from header
+
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -13,17 +14,43 @@ export const authMiddleware = async (req, res, next) => {
       });
     }
 
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    const token = authHeader.substring(7); 
 
-    // Verify token
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // Attach user info to request
+
+    const [users] = await db.query(
+      'SELECT id, username, email, role, status FROM users WHERE id = ?',
+      [decoded.id]
+    );
+
+    if (users.length === 0) {
+      return res.status(401).json({ 
+        success: false,
+        message: 'Tài khoản không tồn tại!',
+        accountLocked: true
+      });
+    }
+
+    const user = users[0];
+
+
+    if (user.status === 'locked') {
+      return res.status(403).json({ 
+        success: false,
+        message: 'Tài khoản của bạn đã bị khóa bởi quản trị viên!',
+        accountLocked: true
+      });
+    }
+    
+
     req.user = {
-      id: decoded.id,
-      username: decoded.username,
-      email: decoded.email,
-      role: decoded.role
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      status: user.status
     };
 
     next();
@@ -32,26 +59,26 @@ export const authMiddleware = async (req, res, next) => {
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({ 
         success: false,
-        message: 'Token đã hết hạn, vui lòng đăng nhập lại' 
+        message: 'Token đã hết hạn, vui lòng đăng nhập lại!' 
       });
     }
     
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({ 
         success: false,
-        message: 'Token không hợp lệ' 
+        message: 'Token không hợp lệ!' 
       });
     }
 
     console.error('Auth middleware error:', error);
     res.status(500).json({ 
       success: false,
-      message: 'Lỗi xác thực' 
+      message: 'Lỗi xác thực!' 
     });
   }
 };
 
-// Check if user is admin
+
 export const adminMiddleware = (req, res, next) => {
   try {
     if (!req.user) {
@@ -64,7 +91,7 @@ export const adminMiddleware = (req, res, next) => {
     if (req.user.role !== 'admin') {
       return res.status(403).json({ 
         success: false,
-        message: 'Không có quyền truy cập. Chỉ admin mới được phép' 
+        message: 'Không có quyền truy cập. Chỉ Admin mới được phép!' 
       });
     }
 
@@ -74,12 +101,12 @@ export const adminMiddleware = (req, res, next) => {
     console.error('Admin middleware error:', error);
     res.status(500).json({ 
       success: false,
-      message: 'Lỗi xác thực quyền' 
+      message: 'Lỗi xác thực quyền!' 
     });
   }
 };
 
-// Optional auth middleware (doesn't fail if no token)
+
 export const optionalAuthMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -96,7 +123,7 @@ export const optionalAuthMiddleware = async (req, res, next) => {
           role: decoded.role
         };
       } catch (error) {
-        // Token invalid but continue anyway
+
         req.user = null;
       }
     }

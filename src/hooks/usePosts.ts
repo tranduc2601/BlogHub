@@ -20,8 +20,6 @@ export const usePosts = (type: 'recent' | 'popular' = 'recent', limit: number = 
       setLoading(true);
       setError(null);
       const url = '/posts';
-      // Nếu muốn phân loại popular/recent, có thể truyền query hoặc xử lý ở backend
-      // Ở đây chỉ lấy tất cả bài viết, có thể sort ở frontend
       const res = await axios.get(url);
       let fetchedPosts: Post[] = res.data.posts || [];
       if (type === 'recent') {

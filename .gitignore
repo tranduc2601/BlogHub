@@ -21,6 +21,9 @@ dist-ssr
 uploads/
 server/uploads/
 
+# Database backups and exports
+server/data/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

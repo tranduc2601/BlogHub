@@ -1,12 +1,14 @@
 import db from '../config/database.js';
+import { getFullAvatarUrl } from '../utils/urlHelper.js';
+import { createNotification } from './notificationController.js';
 
-// Controller xoá bài viết
+
 export const deletePost = async (req, res) => {
   try {
     const postId = parseInt(req.params.id);
     const userId = req.user?.id;
 
-    // Kiểm tra quyền xoá: chỉ tác giả hoặc admin mới được xoá
+
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     if (posts.length === 0) {
       return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
@@ -24,10 +26,11 @@ export const deletePost = async (req, res) => {
   }
 };
 
-// Get all visible posts for public viewing
+
 export const getPosts = async (req, res) => {
   try {
     const { authorId } = req.query;
+    const currentUserId = req.user?.id;
     
     let query = `
       SELECT 
@@ -35,36 +38,72 @@ export const getPosts = async (req, res) => {
         p.title,
         p.content,
         p.likes,
+        COALESCE(p.views, 0) as views,
         p.status,
+        p.privacy,
         p.createdAt,
         p.authorId,
         p.category,
         p.tags,
         u.username as author,
-        u.avatarUrl as authorAvatar
+        u.avatarUrl as authorAvatar,
+        (COUNT(DISTINCT c.id) + COALESCE((
+          SELECT COUNT(*) 
+          FROM comment_replies cr 
+          JOIN comments c2 ON cr.commentId = c2.id 
+          WHERE c2.postId = p.id
+        ), 0)) as comments
       FROM posts p
       LEFT JOIN users u ON p.authorId = u.id
+      LEFT JOIN comments c ON p.id = c.postId
     `;
     
     const params = [];
     
-    // If authorId is provided, show all posts by that author (including hidden)
-    // Otherwise, only show visible posts
+
+
     if (authorId) {
+      const authorIdInt = parseInt(authorId);
       query += ' WHERE p.authorId = ?';
-      params.push(parseInt(authorId)); // Parse to integer
+      params.push(authorIdInt);
+      
+      // If viewing other user's posts, apply privacy filter
+      if (currentUserId && currentUserId !== authorIdInt) {
+        query += ' AND (p.privacy = "public"';
+        // Check if current user follows this author
+        query += ' OR (p.privacy = "followers" AND EXISTS (SELECT 1 FROM follows WHERE followerId = ? AND followingId = ?))';
+        params.push(currentUserId, authorIdInt);
+        query += ')';
+      } else if (!currentUserId) {
+        // Not logged in, only show public posts
+        query += ' AND p.privacy = "public"';
+      }
+      // If viewing own posts, show all
     } else {
       query += ' WHERE p.status = "visible"';
+      
+      // Apply privacy filter for general feed
+      if (currentUserId) {
+        query += ' AND (p.privacy = "public" OR p.authorId = ?';
+        params.push(currentUserId);
+        // Show followers-only posts from people current user follows
+        query += ' OR (p.privacy = "followers" AND EXISTS (SELECT 1 FROM follows WHERE followerId = ? AND followingId = p.authorId))';
+        params.push(currentUserId);
+        query += ')';
+      } else {
+        // Not logged in, only show public posts
+        query += ' AND p.privacy = "public"';
+      }
     }
     
-    query += ' ORDER BY p.createdAt DESC';
+    query += ' GROUP BY p.id ORDER BY p.createdAt DESC';
     
     const [posts] = await db.query(query, params);
 
     res.json({ 
       success: true, 
       posts: posts.map(p => {
-        // Parse tags from JSON string
+
         let tags = [];
         try {
           tags = p.tags ? JSON.parse(p.tags) : [];
@@ -72,15 +111,17 @@ export const getPosts = async (req, res) => {
           tags = [];
         }
         
-        // Calculate read time (average 200 words per minute)
+
         const wordCount = p.content ? p.content.split(/\s+/).length : 0;
         const readTime = Math.ceil(wordCount / 200);
         
         return {
           ...p,
+          authorAvatar: getFullAvatarUrl(p.authorAvatar),
           tags,
           readTime,
-          createdAt: p.createdAt?.toISOString() || new Date().toISOString()
+          comments: parseInt(p.comments) || 0,
+          createdAt: p.createdAt instanceof Date ? p.createdAt.toISOString() : new Date(p.createdAt).toISOString()
         };
       })
     });
@@ -93,18 +134,22 @@ export const getPosts = async (req, res) => {
   }
 };
 
-// Get single post by ID
+
 export const getPostById = async (req, res) => {
   try {
     const postId = parseInt(req.params.id);
+    const userId = req.user?.id; 
     
+
     const [posts] = await db.query(`
       SELECT 
         p.id,
         p.title,
         p.content,
         p.likes,
+        COALESCE(p.views, 0) as views,
         p.status,
+        p.privacy,
         p.createdAt,
         p.category,
         p.tags,
@@ -113,35 +158,80 @@ export const getPostById = async (req, res) => {
         u.avatarUrl as authorAvatar
       FROM posts p
       LEFT JOIN users u ON p.authorId = u.id
-      WHERE p.id = ? AND p.status = 'visible'
+      WHERE p.id = ?
     `, [postId]);
 
     if (posts.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Bài viết không tồn tại' 
+      });
+    }
+
+    const post = posts[0];
+
+
+    const isAuthor = userId && post.authorId === userId;
+    const isAdmin = req.user?.role === 'admin';
+    const isVisible = post.status === 'visible';
+
+    if (!isVisible && !isAuthor && !isAdmin) {
       return res.status(404).json({ 
         success: false, 
         message: 'Bài viết không tồn tại hoặc đã bị ẩn' 
       });
     }
 
-    // Parse tags from JSON string
+    // Check privacy settings
+    if (post.privacy === 'private' && !isAuthor && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Bài viết này là riêng tư'
+      });
+    }
+
+    if (post.privacy === 'followers' && !isAuthor && !isAdmin) {
+      // Check if current user follows the author
+      if (!userId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Chỉ người theo dõi mới có thể xem bài viết này'
+        });
+      }
+
+      const [followCheck] = await db.query(
+        'SELECT 1 FROM follows WHERE followerId = ? AND followingId = ?',
+        [userId, post.authorId]
+      );
+
+      if (followCheck.length === 0) {
+        return res.status(403).json({
+          success: false,
+          message: 'Chỉ người theo dõi mới có thể xem bài viết này'
+        });
+      }
+    }
+
+
     let tags = [];
     try {
-      tags = posts[0].tags ? JSON.parse(posts[0].tags) : [];
+      tags = post.tags ? JSON.parse(post.tags) : [];
     } catch (e) {
       tags = [];
     }
     
-    // Calculate read time
-    const wordCount = posts[0].content ? posts[0].content.split(/\s+/).length : 0;
+
+    const wordCount = post.content ? post.content.split(/\s+/).length : 0;
     const readTime = Math.ceil(wordCount / 200);
 
     res.json({ 
       success: true, 
       post: {
-        ...posts[0],
+        ...post,
+        authorAvatar: getFullAvatarUrl(post.authorAvatar),
         tags,
         readTime,
-        createdAt: posts[0].createdAt?.toISOString() || new Date().toISOString()
+        createdAt: post.createdAt instanceof Date ? post.createdAt.toISOString() : new Date(post.createdAt).toISOString()
       }
     });
   } catch (error) {
@@ -153,14 +243,14 @@ export const getPostById = async (req, res) => {
   }
 };
 
-// Controller đăng bài viết mới
+
 export const createPost = async (req, res) => {
-  const { title, category, tags, content } = req.body;
-  console.log('Nhận yêu cầu đăng bài viết:', { title, category, tags, content });
+  const { title, category, tags, content, privacy } = req.body;
   
   try {
-    // Get user ID from auth middleware
+
     const authorId = req.user?.id;
+    const userRole = req.user?.role;
     
     if (!authorId) {
       return res.status(401).json({ 
@@ -169,13 +259,17 @@ export const createPost = async (req, res) => {
       });
     }
 
-    // Convert tags array to JSON string
+
     const tagsJson = tags ? JSON.stringify(tags) : null;
+    const postPrivacy = privacy || 'public';
     
-    // Create post with 'visible' status (automatically published)
+
+    const postStatus = userRole === 'admin' ? 'visible' : 'pending';
+    
+
     const [result] = await db.query(
-      'INSERT INTO posts (title, content, authorId, status, likes, category, tags) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [title, content, authorId, 'visible', 0, category, tagsJson]
+      'INSERT INTO posts (title, content, authorId, status, likes, category, tags, privacy) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [title, content, authorId, postStatus, 0, category, tagsJson, postPrivacy]
     );
 
     const [newPost] = await db.query(
@@ -183,9 +277,31 @@ export const createPost = async (req, res) => {
       [result.insertId]
     );
 
+    const message = userRole === 'admin' 
+      ? 'Bài viết đã được đăng thành công!' 
+      : 'Bài viết đã được gửi và đang chờ admin duyệt!';
+
+    // Gửi thông báo cho admin khi có bài viết mới cần duyệt
+    if (postStatus === 'pending') {
+      try {
+        const [admins] = await db.query('SELECT id FROM users WHERE role = "admin"');
+        for (const admin of admins) {
+          await createNotification(
+            admin.id,
+            'post_approved',
+            authorId,
+            `đã tạo bài viết "${title}" cần duyệt`,
+            result.insertId
+          );
+        }
+      } catch (notifError) {
+        console.error('Error creating admin notification:', notifError);
+      }
+    }
+
     res.json({ 
       success: true, 
-      message: 'Đăng bài viết thành công!',
+      message: message,
       post: newPost[0]
     });
   } catch (error) {
@@ -197,7 +313,7 @@ export const createPost = async (req, res) => {
   }
 };
 
-// Controller xử lý báo cáo bài viết vi phạm
+
 export const reportPost = async (req, res) => {
   try {
     const postId = parseInt(req.params.id);
@@ -218,7 +334,7 @@ export const reportPost = async (req, res) => {
       });
     }
 
-    // Check if post exists
+
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     if (posts.length === 0) {
       return res.status(404).json({ 
@@ -227,7 +343,7 @@ export const reportPost = async (req, res) => {
       });
     }
 
-    // Check if user already reported this post
+
     const [existingReports] = await db.query(
       'SELECT * FROM reports WHERE postId = ? AND reportedBy = ? AND status = "pending"',
       [postId, reportedBy]
@@ -240,11 +356,30 @@ export const reportPost = async (req, res) => {
       });
     }
 
-    // Create report
-    await db.query(
+
+    const [insertResult] = await db.query(
       'INSERT INTO reports (postId, reportedBy, reason) VALUES (?, ?, ?)',
       [postId, reportedBy, reason]
     );
+
+    // Gửi thông báo cho admin khi có báo cáo mới
+    try {
+      const [postInfo] = await db.query('SELECT title FROM posts WHERE id = ?', [postId]);
+      const postTitle = postInfo.length > 0 ? postInfo[0].title : 'một bài viết';
+      
+      const [admins] = await db.query('SELECT id FROM users WHERE role = "admin"');
+      for (const admin of admins) {
+        await createNotification(
+          admin.id,
+          'post_reported',
+          reportedBy,
+          `đã báo cáo bài viết "${postTitle}" cần xử lý`,
+          postId
+        );
+      }
+    } catch (notifError) {
+      console.error('Error creating admin notification:', notifError);
+    }
 
     res.json({ 
       success: true, 
@@ -259,54 +394,436 @@ export const reportPost = async (req, res) => {
   }
 };
 
-// API xử lý logic thả tim bài viết
-export const likePost = async (req, res) => {
+
+export const reactPost = async (req, res) => {
   try {
     const postId = parseInt(req.params.id);
     const userId = req.user?.id;
+    const { reactionType } = req.body; 
 
     if (!userId) {
-      return res.status(401).json({ success: false, message: 'Vui lòng đăng nhập để thả tim' });
+      return res.status(401).json({ success: false, message: 'Vui lòng đăng nhập để thả cảm xúc' });
     }
 
-    // Kiểm tra bài viết có tồn tại không
+
+    const validReactions = ['like', 'love', 'haha', 'wow', 'sad', 'angry'];
+    if (!reactionType || !validReactions.includes(reactionType)) {
+      return res.status(400).json({ success: false, message: 'Loại cảm xúc không hợp lệ' });
+    }
+
+
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     if (posts.length === 0) {
       return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
     }
 
-    // Kiểm tra người dùng đã thả tim chưa
-    const [likes] = await db.query('SELECT * FROM likes WHERE postId = ? AND userId = ?', [postId, userId]);
-    if (likes.length > 0) {
-      return res.status(409).json({ success: false, message: 'Bạn đã thả tim bài viết này rồi' });
+
+    const [reactions] = await db.query('SELECT * FROM reactions WHERE postId = ? AND userId = ?', [postId, userId]);
+    
+    if (reactions.length > 0) {
+      const currentReaction = reactions[0].reactionType;
+      
+      if (currentReaction === reactionType) {
+
+        await db.query('DELETE FROM reactions WHERE postId = ? AND userId = ?', [postId, userId]);
+        
+
+        await db.query(`UPDATE posts SET 
+          reaction_${reactionType} = GREATEST(reaction_${reactionType} - 1, 0),
+          total_reactions = GREATEST(total_reactions - 1, 0),
+          likes = GREATEST(likes - 1, 0)
+          WHERE id = ?`, [postId]);
+        
+        return res.json({ success: true, message: 'Đã bỏ cảm xúc', action: 'unreact', reactionType: null });
+      } else {
+
+        await db.query('UPDATE reactions SET reactionType = ?, updatedAt = NOW() WHERE postId = ? AND userId = ?', 
+          [reactionType, postId, userId]);
+        
+
+        await db.query(`UPDATE posts SET 
+          reaction_${currentReaction} = GREATEST(reaction_${currentReaction} - 1, 0),
+          reaction_${reactionType} = reaction_${reactionType} + 1
+          WHERE id = ?`, [postId]);
+        
+        return res.json({ success: true, message: 'Đã thay đổi cảm xúc', action: 'change', reactionType });
+      }
+    } else {
+
+      await db.query('INSERT INTO reactions (postId, userId, reactionType) VALUES (?, ?, ?)', 
+        [postId, userId, reactionType]);
+      
+
+      await db.query(`UPDATE posts SET 
+        reaction_${reactionType} = reaction_${reactionType} + 1,
+        total_reactions = total_reactions + 1,
+        likes = likes + 1
+        WHERE id = ?`, [postId]);
+      
+      // Create notification for post author
+      try {
+        const post = posts[0];
+        const reactionEmojis = {
+          like: '👍',
+          love: '❤️',
+          haha: '😂',
+          wow: '😮',
+          sad: '😢',
+          angry: '😠'
+        };
+        const emoji = reactionEmojis[reactionType] || '👍';
+        await createNotification(
+          post.authorId,
+          'reaction',
+          userId,
+          `đã thả ${emoji} vào bài viết "${post.title}"`,
+          postId
+        );
+      } catch (notifError) {
+        console.error('Error creating reaction notification:', notifError);
+      }
+      
+      return res.json({ success: true, message: 'Đã thả cảm xúc', action: 'react', reactionType });
     }
-
-    // Thêm lượt thích
-    await db.query('INSERT INTO likes (postId, userId) VALUES (?, ?)', [postId, userId]);
-    await db.query('UPDATE posts SET likes = likes + 1 WHERE id = ?', [postId]);
-
-    res.json({ success: true, message: 'Đã thả tim bài viết' });
   } catch (error) {
-    console.error('Like post error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi thả tim bài viết' });
+    console.error('React post error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi khi thả cảm xúc' });
   }
 };
 
-// API kiểm tra xem người dùng đã like bài viết chưa
+
+export const getUserReaction = async (req, res) => {
+  try {
+    const postId = parseInt(req.params.id);
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.json({ success: true, reactionType: null });
+    }
+
+    const [reactions] = await db.query('SELECT reactionType FROM reactions WHERE postId = ? AND userId = ?', 
+      [postId, userId]);
+    
+    res.json({ 
+      success: true, 
+      reactionType: reactions.length > 0 ? reactions[0].reactionType : null 
+    });
+  } catch (error) {
+    console.error('Get user reaction error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi khi lấy thông tin cảm xúc' });
+  }
+};
+
+
+export const getReactionStats = async (req, res) => {
+  try {
+    const postId = parseInt(req.params.id);
+
+    const [stats] = await db.query(`
+      SELECT 
+        reaction_like as \`like\`,
+        reaction_love as love,
+        reaction_haha as haha,
+        reaction_wow as wow,
+        reaction_sad as sad,
+        reaction_angry as angry,
+        total_reactions as total
+      FROM posts 
+      WHERE id = ?`, [postId]);
+
+    if (stats.length === 0) {
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+    }
+
+    res.json({ success: true, counts: stats[0] });
+  } catch (error) {
+    console.error('Get reaction stats error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi khi lấy thống kê cảm xúc' });
+  }
+};
+
+
+export const likePost = async (req, res) => {
+
+  req.body.reactionType = 'like';
+  return reactPost(req, res);
+};
+
+
 export const isPostLiked = async (req, res) => {
   try {
     const postId = parseInt(req.params.id);
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.json({ success: true, isLiked: false });
+      return res.json({ success: true, isLiked: false, reactionType: null });
     }
 
-    const [likes] = await db.query('SELECT * FROM likes WHERE postId = ? AND userId = ?', [postId, userId]);
+    const [reactions] = await db.query('SELECT reactionType FROM reactions WHERE postId = ? AND userId = ?', 
+      [postId, userId]);
     
-    res.json({ success: true, isLiked: likes.length > 0 });
+    res.json({ 
+      success: true, 
+      isLiked: reactions.length > 0,
+      reactionType: reactions.length > 0 ? reactions[0].reactionType : null
+    });
   } catch (error) {
     console.error('Check like status error:', error);
     res.status(500).json({ success: false, message: 'Lỗi khi kiểm tra trạng thái like' });
+  }
+};
+
+
+export const updatePost = async (req, res) => {
+  try {
+    const postId = parseInt(req.params.id);
+    const userId = req.user?.id;
+    const { title, content, category, tags } = req.body;
+
+
+    const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
+    if (posts.length === 0) {
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+    }
+
+    const post = posts[0];
+    if (post.authorId !== userId) {
+      return res.status(403).json({ success: false, message: 'Bạn không có quyền chỉnh sửa bài viết này' });
+    }
+
+
+    if (!title || !content) {
+      return res.status(400).json({ success: false, message: 'Tiêu đề và nội dung không được để trống' });
+    }
+
+
+    const tagsJson = Array.isArray(tags) ? JSON.stringify(tags) : tags;
+    await db.query(
+      'UPDATE posts SET title = ?, content = ?, category = ?, tags = ?, updatedAt = NOW() WHERE id = ?',
+      [title, content, category, tagsJson, postId]
+    );
+
+
+    const [updatedPosts] = await db.query(`
+      SELECT 
+        p.id,
+        p.title,
+        p.content,
+        p.likes,
+        p.status,
+        p.createdAt,
+        p.updatedAt,
+        p.authorId,
+        p.category,
+        p.tags,
+        u.username as author,
+        u.avatarUrl as authorAvatar
+      FROM posts p
+      LEFT JOIN users u ON p.authorId = u.id
+      WHERE p.id = ?
+    `, [postId]);
+
+    res.json({ 
+      success: true, 
+      message: 'Cập nhật bài viết thành công',
+      post: updatedPosts[0]
+    });
+  } catch (error) {
+    console.error('Update post error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi khi cập nhật bài viết' });
+  }
+};
+
+
+export const trackPostView = async (req, res) => {
+  try {
+    const postId = parseInt(req.params.id);
+    const userId = req.user?.id || null; 
+    const sessionId = req.body.sessionId || null; 
+    
+
+    const [posts] = await db.query('SELECT id, authorId FROM posts WHERE id = ?', [postId]);
+    if (posts.length === 0) {
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+    }
+    
+    const post = posts[0];
+    
+
+    if (userId && post.authorId === userId) {
+      return res.json({ success: true, message: 'Không tính lượt xem của tác giả' });
+    }
+    
+
+    let checkQuery = 'SELECT id FROM post_views WHERE postId = ? AND viewedAt > DATE_SUB(NOW(), INTERVAL 1 MINUTE)';
+    const checkParams = [postId];
+    
+    if (userId) {
+      checkQuery += ' AND userId = ?';
+      checkParams.push(userId);
+    } else if (sessionId) {
+      checkQuery += ' AND sessionId = ?';
+      checkParams.push(sessionId);
+    } else {
+
+      checkQuery += ' AND userId IS NULL AND sessionId IS NULL';
+    }
+    
+    const [existingViews] = await db.query(checkQuery, checkParams);
+    
+    if (existingViews.length > 0) {
+      return res.json({ success: true, message: 'Đã tính lượt xem trong 1 phút qua' });
+    }
+    
+
+    await db.query(
+      'INSERT INTO post_views (postId, userId, sessionId) VALUES (?, ?, ?)',
+      [postId, userId, sessionId]
+    );
+    
+
+    await db.query(
+      'UPDATE posts SET views = (SELECT COUNT(*) FROM post_views WHERE postId = ?) WHERE id = ?',
+      [postId, postId]
+    );
+    
+    res.json({ success: true, message: 'Đã ghi nhận lượt xem' });
+  } catch (error) {
+    console.error('Track view error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi khi ghi nhận lượt xem' });
+  }
+};
+
+// Pin comment
+export const pinComment = async (req, res) => {
+  try {
+    const postId = parseInt(req.params.postId);
+    const { commentId } = req.body;
+    const userId = req.user?.id;
+
+    // Kiểm tra bài viết tồn tại
+    const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
+    if (posts.length === 0) {
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+    }
+
+    const post = posts[0];
+
+    // Kiểm tra quyền (chỉ tác giả bài viết mới được ghim)
+    if (post.authorId !== userId) {
+      return res.status(403).json({ success: false, message: 'Bạn không có quyền ghim bình luận' });
+    }
+
+    // Kiểm tra bình luận tồn tại và thuộc về bài viết này
+    const [comments] = await db.query(
+      'SELECT * FROM comments WHERE id = ? AND postId = ? AND parentId IS NULL',
+      [commentId, postId]
+    );
+
+    if (comments.length === 0) {
+      return res.status(404).json({ success: false, message: 'Bình luận không tồn tại hoặc không phải bình luận gốc' });
+    }
+
+    // Cập nhật pinnedCommentId trong posts
+    await db.query('UPDATE posts SET pinnedCommentId = ? WHERE id = ?', [commentId, postId]);
+
+    res.json({ success: true, message: 'Đã ghim bình luận thành công', pinnedCommentId: commentId });
+  } catch (error) {
+    console.error('Pin comment error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi khi ghim bình luận' });
+  }
+};
+
+// Unpin comment
+export const unpinComment = async (req, res) => {
+  try {
+    const postId = parseInt(req.params.postId);
+    const userId = req.user?.id;
+
+    // Kiểm tra bài viết tồn tại
+    const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
+    if (posts.length === 0) {
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+    }
+
+    const post = posts[0];
+
+    // Kiểm tra quyền (chỉ tác giả bài viết mới được gỡ ghim)
+    if (post.authorId !== userId) {
+      return res.status(403).json({ success: false, message: 'Bạn không có quyền gỡ ghim bình luận' });
+    }
+
+    // Gỡ ghim bằng cách set pinnedCommentId = NULL
+    await db.query('UPDATE posts SET pinnedCommentId = NULL WHERE id = ?', [postId]);
+
+    res.json({ success: true, message: 'Đã gỡ ghim bình luận thành công' });
+  } catch (error) {
+    console.error('Unpin comment error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi khi gỡ ghim bình luận' });
+  }
+};
+
+// Get pinned comment
+export const getPinnedComment = async (req, res) => {
+  try {
+    const postId = parseInt(req.params.postId);
+
+    // Lấy pinnedCommentId từ posts
+    const [posts] = await db.query('SELECT pinnedCommentId FROM posts WHERE id = ?', [postId]);
+    
+    if (posts.length === 0) {
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+    }
+
+    const pinnedCommentId = posts[0].pinnedCommentId;
+
+    res.json({ success: true, pinnedCommentId });
+  } catch (error) {
+    console.error('Get pinned comment error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi khi lấy thông tin bình luận ghim' });
+  }
+};
+
+// Share post with user
+export const sharePost = async (req, res) => {
+  try {
+    const postId = parseInt(req.params.id);
+    const { recipientId } = req.body;
+    const senderId = req.user.id;
+
+    // Check if post exists
+    const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
+    if (posts.length === 0) {
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+    }
+
+    // Check if recipient exists
+    const [recipients] = await db.query('SELECT id FROM users WHERE id = ?', [recipientId]);
+    if (recipients.length === 0) {
+      return res.status(404).json({ success: false, message: 'Người dùng không tồn tại' });
+    }
+
+    // Check if sender cannot share with themselves
+    if (senderId === recipientId) {
+      return res.status(400).json({ success: false, message: 'Không thể chia sẻ cho chính mình' });
+    }
+
+    const post = posts[0];
+    
+    // Get sender info
+    const [senders] = await db.query('SELECT username FROM users WHERE id = ?', [senderId]);
+    const senderName = senders[0]?.username || 'Ai đó';
+
+    // Create notification
+    const message = `${senderName} đã chia sẻ bài viết "${post.title}" với bạn`;
+    await createNotification(recipientId, 'share', senderId, message, postId);
+
+    res.json({ 
+      success: true, 
+      message: 'Đã chia sẻ bài viết thành công' 
+    });
+  } catch (error) {
+    console.error('Share post error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi khi chia sẻ bài viết' });
   }
 };

@@ -62,6 +62,17 @@ body {
   }
 }
 
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
@@ -98,12 +109,42 @@ body {
   }
 }
 
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+}
+
 @keyframes shimmer {
   0% {
     background-position: -200px 0;
   }
   100% {
     background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes rotating-shadow {
+  0% {
+    box-shadow: 0 -6px 16px rgba(59, 130, 246, 0.6), 0 0 0 rgba(59, 130, 246, 0);
+  }
+  25% {
+    box-shadow: 0 0 0 rgba(59, 130, 246, 0), 6px 0 16px rgba(59, 130, 246, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 rgba(59, 130, 246, 0), 0 6px 16px rgba(59, 130, 246, 0.6);
+  }
+  75% {
+    box-shadow: -6px 0 16px rgba(59, 130, 246, 0.6), 0 0 0 rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 -6px 16px rgba(59, 130, 246, 0.6), 0 0 0 rgba(59, 130, 246, 0);
   }
 }
 
@@ -128,6 +169,10 @@ body {
   animation: scaleIn 0.5s ease-out;
 }
 
+.animate-slideUp {
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 .animate-pulse {
   animation: pulse 2s infinite;
 }
@@ -140,10 +185,18 @@ body {
   animation: float 3s ease-in-out infinite;
 }
 
+.animate-wiggle {
+  animation: wiggle 1s ease-in-out infinite;
+}
+
 .animate-shimmer {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
   background-size: 200px 100%;
   animation: shimmer 2s infinite;
+}
+
+.hover\:shadow-rotating:hover {
+  animation: rotating-shadow 1.5s linear infinite;
 }
 
 /* Animation Delays */
@@ -315,4 +368,53 @@ body {
   .desktop-hidden {
     display: none;
   }
+}
+
+/* RGB Border Streaming Animation */
+@keyframes rgbRotate {
+  0% {
+    --angle: 0deg;
+  }
+  100% {
+    --angle: 360deg;
+  }
+}
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.rgb-border {
+  position: relative;
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  background: white;
+  background-clip: padding-box;
+}
+
+.rgb-border::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  padding: 3px;
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    #ff0000 0deg,
+    #ff7f00 51.43deg,
+    #ffff00 102.86deg,
+    #00ff00 154.29deg,
+    #00ffff 205.72deg,
+    #0000ff 257.15deg,
+    #ff00ff 308.58deg,
+    #ff0000 360deg
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  animation: rgbRotate 3s linear infinite;
+  pointer-events: none;
 }

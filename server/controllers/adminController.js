@@ -1,13 +1,7 @@
-/**
- * Admin Controller - Quản lý CRUD cho admin dashboard
- * Tích hợp trực tiếp với MySQL database
- */
-
 import db from '../config/database.js';
+import { getFullAvatarUrl } from '../utils/urlHelper.js';
+import { createNotification } from './notificationController.js';
 
-// ==================== POSTS ====================
-
-// Get all posts for admin
 export const getPosts = async (req, res) => {
   try {
     const [posts] = await db.query(`
@@ -18,13 +12,17 @@ export const getPosts = async (req, res) => {
         p.status,
         p.likes,
         p.createdAt,
-        p.hasReports,
-        p.reportCount,
-        u.username as author,
-        CASE WHEN p.status = 'hidden' THEN true ELSE false END as needsReview
+        p.category,
+        u.username as author
       FROM posts p
       LEFT JOIN users u ON p.authorId = u.id
-      ORDER BY p.createdAt DESC
+      ORDER BY 
+        CASE 
+          WHEN p.status = 'pending' THEN 1
+          WHEN p.status = 'visible' THEN 2
+          WHEN p.status = 'hidden' THEN 3
+        END,
+        p.createdAt DESC
     `);
 
     res.json({ 
@@ -32,9 +30,9 @@ export const getPosts = async (req, res) => {
       posts: posts.map(p => ({
         ...p,
         createdAt: p.createdAt?.toISOString().slice(0, 10) || '',
-        needsReview: p.needsReview === 1 || p.status === 'hidden',
-        hasReports: p.hasReports === 1 || p.hasReports === true,
-        reportCount: p.reportCount || 0
+        needsReview: p.status === 'pending',
+        hasReports: false,
+        reportCount: 0
       }))
     });
   } catch (error) {
@@ -46,7 +44,6 @@ export const getPosts = async (req, res) => {
   }
 };
 
-// Create new post
 export const createPost = async (req, res) => {
   try {
     const { title, content, author, authorId = 1, status = 'visible', likes = 0 } = req.body;
@@ -75,13 +72,12 @@ export const createPost = async (req, res) => {
   }
 };
 
-// Toggle post status
 export const togglePostStatus = async (req, res) => {
   try {
     const postId = parseInt(req.params.id);
     const { status } = req.body;
+    const adminId = req.user?.id;
 
-    // Get current post
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     
     if (posts.length === 0) {
@@ -91,17 +87,35 @@ export const togglePostStatus = async (req, res) => {
       });
     }
 
-    const currentStatus = posts[0].status;
+    const post = posts[0];
+    const currentStatus = post.status;
     const newStatus = status || (currentStatus === 'visible' ? 'hidden' : 'visible');
 
-    // Update status
     await db.query('UPDATE posts SET status = ? WHERE id = ?', [newStatus, postId]);
 
-    // Get updated post with author info
     const [updated] = await db.query(
       'SELECT p.*, u.username as author FROM posts p LEFT JOIN users u ON p.authorId = u.id WHERE p.id = ?',
       [postId]
     );
+
+    // Create notification for post author
+    if (adminId) {
+      try {
+        const message = newStatus === 'visible' 
+          ? `đã hiển thị lại bài viết "${post.title}" của bạn`
+          : `đã ẩn bài viết "${post.title}" của bạn`;
+        
+        await createNotification(
+          post.authorId,
+          newStatus === 'visible' ? 'post_approved' : 'post_reported',
+          adminId,
+          message,
+          postId
+        );
+      } catch (notifError) {
+        console.error('Error creating toggle status notification:', notifError);
+      }
+    }
 
     res.json({ 
       success: true, 
@@ -117,12 +131,12 @@ export const togglePostStatus = async (req, res) => {
   }
 };
 
-// Approve post (duyệt bài viết)
 export const approvePost = async (req, res) => {
   try {
     const postId = parseInt(req.params.id);
+    const adminId = req.user?.id;
 
-    // Get current post
+
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     
     if (posts.length === 0) {
@@ -132,18 +146,34 @@ export const approvePost = async (req, res) => {
       });
     }
 
-    // Update status to visible (approved)
+    const post = posts[0];
+
     await db.query('UPDATE posts SET status = ? WHERE id = ?', ['visible', postId]);
 
-    // Get updated post with author info
+
     const [updated] = await db.query(
       'SELECT p.*, u.username as author FROM posts p LEFT JOIN users u ON p.authorId = u.id WHERE p.id = ?',
       [postId]
     );
 
+    // Create notification for post author
+    if (adminId) {
+      try {
+        await createNotification(
+          post.authorId,
+          'post_approved',
+          adminId,
+          `đã duyệt bài viết "${post.title}" của bạn`,
+          postId
+        );
+      } catch (notifError) {
+        console.error('Error creating approval notification:', notifError);
+      }
+    }
+
     res.json({ 
       success: true, 
-      message: 'Đã duyệt bài viết thành công. Bài viết sẽ hiển thị trên trang chủ.',
+      message: 'Đã duyệt bài viết thành công. Bài viết sẽ hiển thị trên trang chủ!',
       post: {
         ...updated[0],
         needsReview: false,
@@ -159,12 +189,13 @@ export const approvePost = async (req, res) => {
   }
 };
 
-// Delete post
-export const deletePost = async (req, res) => {
+
+export const rejectPost = async (req, res) => {
   try {
     const postId = parseInt(req.params.id);
+    const { reason } = req.body;
 
-    // Get current post
+
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     
     if (posts.length === 0) {
@@ -174,7 +205,67 @@ export const deletePost = async (req, res) => {
       });
     }
 
-    // Delete all comments for this post first
+
+    await db.query('UPDATE posts SET status = ? WHERE id = ?', ['hidden', postId]);
+
+
+    const [updated] = await db.query(
+      'SELECT p.*, u.username as author FROM posts p LEFT JOIN users u ON p.authorId = u.id WHERE p.id = ?',
+      [postId]
+    );
+
+    res.json({ 
+      success: true, 
+      message: reason || 'Đã từ chối bài viết. Bài viết sẽ không hiển thị công khai.',
+      post: {
+        ...updated[0],
+        needsReview: false,
+        status: 'hidden'
+      }
+    });
+  } catch (error) {
+    console.error('Reject post error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi khi từ chối bài viết' 
+    });
+  }
+};
+
+
+export const deletePost = async (req, res) => {
+  try {
+    const postId = parseInt(req.params.id);
+    const adminId = req.user?.id;
+
+    // Get post info before deleting
+    const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
+    
+    if (posts.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Bài viết không tồn tại' 
+      });
+    }
+
+    const post = posts[0];
+
+    // Create notification for post author before deleting
+    if (adminId) {
+      try {
+        await createNotification(
+          post.authorId,
+          'post_reported',
+          adminId,
+          `đã xóa bài viết "${post.title}" của bạn`,
+          null
+        );
+      } catch (notifError) {
+        console.error('Error creating delete notification:', notifError);
+      }
+    }
+
+    // Delete comments first
     await db.query('DELETE FROM comments WHERE postId = ?', [postId]);
 
     // Delete the post
@@ -193,9 +284,9 @@ export const deletePost = async (req, res) => {
   }
 };
 
-// ==================== COMMENTS ====================
 
-// Get all comments for admin
+
+
 export const getComments = async (req, res) => {
   try {
     const [comments] = await db.query(`
@@ -231,7 +322,7 @@ export const getComments = async (req, res) => {
   }
 };
 
-// Create new comment
+
 export const createComment = async (req, res) => {
   try {
     const { postId, content, userId = 1, status = 'visible' } = req.body;
@@ -264,13 +355,13 @@ export const createComment = async (req, res) => {
   }
 };
 
-// Toggle comment status
+
 export const toggleCommentStatus = async (req, res) => {
   try {
     const commentId = parseInt(req.params.id);
     const { status } = req.body;
 
-    // Get current comment
+
     const [comments] = await db.query('SELECT * FROM comments WHERE id = ?', [commentId]);
     
     if (comments.length === 0) {
@@ -283,10 +374,10 @@ export const toggleCommentStatus = async (req, res) => {
     const currentStatus = comments[0].status;
     const newStatus = status || (currentStatus === 'visible' ? 'hidden' : 'visible');
 
-    // Update status
+
     await db.query('UPDATE comments SET status = ? WHERE id = ?', [newStatus, commentId]);
 
-    // Get updated comment with user and post info
+
     const [updated] = await db.query(
       `SELECT c.*, u.username as author, p.title as postTitle 
        FROM comments c 
@@ -310,9 +401,9 @@ export const toggleCommentStatus = async (req, res) => {
   }
 };
 
-// ==================== USERS ====================
 
-// Get all users for admin
+
+
 export const getUsers = async (req, res) => {
   try {
     const [users] = await db.query(`
@@ -321,6 +412,7 @@ export const getUsers = async (req, res) => {
         u.username as name,
         u.email,
         u.role,
+        u.avatarUrl,
         COALESCE(u.status, 'active') as status,
         COUNT(DISTINCT p.id) as postsCount,
         COUNT(DISTINCT c.id) as commentsCount,
@@ -329,11 +421,17 @@ export const getUsers = async (req, res) => {
       LEFT JOIN posts p ON u.id = p.authorId
       LEFT JOIN comments c ON u.id = c.userId
       WHERE u.role != 'admin'
-      GROUP BY u.id, u.username, u.email, u.role, u.status, u.createdAt
+      GROUP BY u.id, u.username, u.email, u.role, u.avatarUrl, u.status, u.createdAt
       ORDER BY u.createdAt DESC
     `);
 
-    res.json({ success: true, users });
+
+    const usersWithFullAvatarUrls = users.map(user => ({
+      ...user,
+      avatarUrl: getFullAvatarUrl(user.avatarUrl)
+    }));
+
+    res.json({ success: true, users: usersWithFullAvatarUrls });
   } catch (error) {
     console.error('Get users error:', error);
     res.status(500).json({ 
@@ -343,13 +441,13 @@ export const getUsers = async (req, res) => {
   }
 };
 
-// Toggle user status
+
 export const toggleUserStatus = async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
     const { status } = req.body;
 
-    // Get current user
+
     const [users] = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
     
     if (users.length === 0) {
@@ -359,7 +457,7 @@ export const toggleUserStatus = async (req, res) => {
       });
     }
 
-    // Don't allow locking admin users
+
     if (users[0].role === 'admin') {
       return res.status(403).json({ 
         success: false, 
@@ -370,16 +468,17 @@ export const toggleUserStatus = async (req, res) => {
     const currentStatus = users[0].status || 'active';
     const newStatus = status || (currentStatus === 'active' ? 'locked' : 'active');
 
-    // Update status
+
     await db.query('UPDATE users SET status = ? WHERE id = ?', [newStatus, userId]);
 
-    // Get updated user info
+
     const [updated] = await db.query(
       `SELECT 
         u.id,
         u.username as name,
         u.email,
         u.role,
+        u.avatarUrl,
         u.status,
         COUNT(DISTINCT p.id) as postsCount,
         COUNT(DISTINCT c.id) as commentsCount,
@@ -395,7 +494,10 @@ export const toggleUserStatus = async (req, res) => {
     res.json({ 
       success: true, 
       message: `Đã ${newStatus === 'locked' ? 'khóa' : 'mở khóa'} tài khoản`,
-      user: updated[0]
+      user: {
+        ...updated[0],
+        avatarUrl: getFullAvatarUrl(updated[0].avatarUrl)
+      }
     });
   } catch (error) {
     console.error('Toggle user status error:', error);
@@ -406,12 +508,12 @@ export const toggleUserStatus = async (req, res) => {
   }
 };
 
-// Delete user and all associated data
+
 export const deleteUser = async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
 
-    // Get current user
+
     const [users] = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
     
     if (users.length === 0) {
@@ -421,7 +523,7 @@ export const deleteUser = async (req, res) => {
       });
     }
 
-    // Don't allow deleting admin users
+
     if (users[0].role === 'admin') {
       return res.status(403).json({ 
         success: false, 
@@ -429,27 +531,21 @@ export const deleteUser = async (req, res) => {
       });
     }
 
-    // Delete all comments by this user
+
     await db.query('DELETE FROM comments WHERE userId = ?', [userId]);
 
-    // Delete all posts by this user (and their associated comments)
+
     const [userPosts] = await db.query('SELECT id FROM posts WHERE authorId = ?', [userId]);
     for (const post of userPosts) {
       await db.query('DELETE FROM comments WHERE postId = ?', [post.id]);
     }
     await db.query('DELETE FROM posts WHERE authorId = ?', [userId]);
 
-    // Delete all reports by this user
+
     await db.query('DELETE FROM reports WHERE reportedBy = ?', [userId]);
 
-    // Delete the user
-    await db.query('DELETE FROM users WHERE id = ?', [userId]);
 
-    // Optimize: Reset AUTO_INCREMENT if this was the last user
-    // This helps keep IDs sequential when deleting the most recent users
-    const [maxId] = await db.query('SELECT MAX(id) as maxId FROM users');
-    const nextId = (maxId[0].maxId || 0) + 1;
-    await db.query('ALTER TABLE users AUTO_INCREMENT = ?', [nextId]);
+    await db.query('DELETE FROM users WHERE id = ?', [userId]);
 
     res.json({ 
       success: true, 
@@ -464,12 +560,12 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-// ==================== STATS ====================
 
-// Get monthly statistics
+
+
 export const getStats = async (req, res) => {
   try {
-    // Get all posts with their creation dates
+
     const [allPosts] = await db.query(`
       SELECT 
         DATE_FORMAT(createdAt, '%Y-%m') as yearMonth,
@@ -478,33 +574,34 @@ export const getStats = async (req, res) => {
       WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
     `);
 
-    // Get all users with their creation dates
+
     const [allUsers] = await db.query(`
       SELECT 
         DATE_FORMAT(createdAt, '%Y-%m') as yearMonth,
         DATE_FORMAT(createdAt, '%m') as monthNum
       FROM users
       WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        AND role != 'admin'
     `);
 
-    // Count posts by month
+
     const postsByMonth = {};
     allPosts.forEach(post => {
       const month = post.monthNum;
       postsByMonth[month] = (postsByMonth[month] || 0) + 1;
     });
 
-    // Count users by month
+
     const usersByMonth = {};
     allUsers.forEach(user => {
       const month = user.monthNum;
       usersByMonth[month] = (usersByMonth[month] || 0) + 1;
     });
 
-    // Get current month
-    const currentMonth = new Date().getMonth() + 1; // 1-12
+
+    const currentMonth = new Date().getMonth() + 1; 
     
-    // Generate last 6 months data
+
     const monthlyStats = [];
     for (let i = 5; i >= 0; i--) {
       let month = currentMonth - i;
@@ -514,7 +611,7 @@ export const getStats = async (req, res) => {
         month += 12;
       }
       
-      // Vietnamese month names
+
       monthName = `T${month}`;
       
       const monthStr = month.toString().padStart(2, '0');
@@ -537,9 +634,9 @@ export const getStats = async (req, res) => {
   }
 };
 
-// ==================== REPORTS ====================
 
-// Get all reports
+
+
 export const getReports = async (req, res) => {
   try {
     const [reports] = await db.query(`
@@ -580,13 +677,13 @@ export const getReports = async (req, res) => {
   }
 };
 
-// Approve report (vi phạm) - tăng warning cho user
+
 export const approveReport = async (req, res) => {
   try {
     const reportId = parseInt(req.params.id);
     const adminId = req.user?.id;
 
-    // Get report info
+
     const [reports] = await db.query(`
       SELECT r.*, p.authorId 
       FROM reports r
@@ -604,35 +701,70 @@ export const approveReport = async (req, res) => {
     const report = reports[0];
     const postAuthorId = report.authorId;
 
-    // Update report status
+
     await db.query(
       'UPDATE reports SET status = ?, reviewedAt = NOW(), reviewedBy = ? WHERE id = ?',
-      ['approved', adminId, reportId]
+      ['resolved', adminId, reportId]
     );
 
-    // Increment warning count for post author
+
+    const [warningColumn] = await db.query('SHOW COLUMNS FROM users LIKE "warningCount"');
+    if (warningColumn.length === 0) {
+      await db.query('ALTER TABLE users ADD COLUMN warningCount INT DEFAULT 0');
+    }
+
+
     await db.query(
       'UPDATE users SET warningCount = warningCount + 1 WHERE id = ?',
       [postAuthorId]
     );
 
-    // Get updated warning count
-    const [users] = await db.query('SELECT warningCount, status FROM users WHERE id = ?', [postAuthorId]);
-    const warningCount = users[0].warningCount;
 
-    // If warning count >= 3, lock account
+    const [users] = await db.query('SELECT warningCount, status FROM users WHERE id = ?', [postAuthorId]);
+    const warningCount = users[0].warningCount || 0;
+
+    // Get post title for notification
+    const [postData] = await db.query('SELECT title FROM posts WHERE id = ?', [report.postId]);
+    const postTitle = postData.length > 0 ? postData[0].title : 'bài viết của bạn';
+
+    // Create notification for post author
+    try {
+      await createNotification(
+        postAuthorId,
+        'post_reported',
+        adminId,
+        `đã xử lý báo cáo về "${postTitle}". Bạn đã nhận cảnh cáo (${warningCount}/3)`,
+        report.postId
+      );
+    } catch (notifError) {
+      console.error('Error creating report notification:', notifError);
+    }
+
+    // Create notification for reporter (person who reported)
+    try {
+      await createNotification(
+        report.reportedBy,
+        'post_approved',
+        adminId,
+        `đã duyệt báo cáo của bạn về "${postTitle}". Người dùng đã nhận cảnh cáo`,
+        report.postId
+      );
+    } catch (notifError) {
+      console.error('Error creating reporter notification:', notifError);
+    }
+
     if (warningCount >= 3) {
       await db.query('UPDATE users SET status = ? WHERE id = ?', ['locked', postAuthorId]);
       
       return res.json({ 
         success: true, 
-        message: `Đã duyệt báo cáo và cảnh cáo người dùng (${warningCount}/3). Tài khoản đã bị khóa do vi phạm 3 lần.`
+        message: `Đã duyệt báo cáo và cảnh cáo người dùng (${warningCount}/3). Tài khoản đã bị khóa do vi phạm 3 lần!`
       });
     }
 
     res.json({ 
       success: true, 
-      message: `Đã duyệt báo cáo và cảnh cáo người dùng (${warningCount}/3)`
+      message: `Đã duyệt báo cáo và cảnh cáo người dùng (${warningCount}/3)!`
     });
   } catch (error) {
     console.error('Approve report error:', error);
@@ -643,14 +775,19 @@ export const approveReport = async (req, res) => {
   }
 };
 
-// Reject report (không vi phạm)
+
 export const rejectReport = async (req, res) => {
   try {
     const reportId = parseInt(req.params.id);
     const adminId = req.user?.id;
 
-    // Get report info
-    const [reports] = await db.query('SELECT * FROM reports WHERE id = ?', [reportId]);
+    // Get report with post title
+    const [reports] = await db.query(`
+      SELECT r.*, p.title as postTitle
+      FROM reports r
+      LEFT JOIN posts p ON r.postId = p.id
+      WHERE r.id = ?
+    `, [reportId]);
     
     if (reports.length === 0) {
       return res.status(404).json({ 
@@ -659,11 +796,27 @@ export const rejectReport = async (req, res) => {
       });
     }
 
+    const report = reports[0];
+
     // Update report status
     await db.query(
       'UPDATE reports SET status = ?, reviewedAt = NOW(), reviewedBy = ? WHERE id = ?',
-      ['rejected', adminId, reportId]
+      ['reviewed', adminId, reportId]
     );
+
+    // Create notification for reporter (person who reported)
+    try {
+      const postTitle = report.postTitle || 'bài viết';
+      await createNotification(
+        report.reportedBy,
+        'post_approved',
+        adminId,
+        `đã từ chối báo cáo của bạn về "${postTitle}". Bài viết không vi phạm`,
+        report.postId
+      );
+    } catch (notifError) {
+      console.error('Error creating reporter notification:', notifError);
+    }
 
     res.json({ 
       success: true, 

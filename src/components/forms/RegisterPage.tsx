@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import Modal from "../components/Modal";
+import { useAuth } from "../../context/AuthContext";
+import toast from "react-hot-toast";
+import backgroundImage from "../../assets/Login_Register_Background.jpg";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -19,17 +20,6 @@ export default function RegisterPage() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [modal, setModal] = useState<{
-    isOpen: boolean;
-    type: 'info' | 'warning' | 'error' | 'success' | 'confirm';
-    title: string;
-    message: string;
-  }>({
-    isOpen: false,
-    type: 'info',
-    title: '',
-    message: ''
-  });
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -50,12 +40,18 @@ export default function RegisterPage() {
       newErrors.password = "Vui lòng nhập mật khẩu";
     } else if (formData.password.length < 6) {
       newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+    } else if (!/[A-Z]/.test(formData.password)) {
+      newErrors.password = "Mật khẩu phải có ít nhất 1 ký tự viết hoa";
+    } else if (!/[0-9]/.test(formData.password)) {
+      newErrors.password = "Mật khẩu phải có ít nhất 1 chữ số";
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
+      newErrors.password = "Mật khẩu phải có ít nhất 1 ký tự đặc biệt";
     }
 
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Vui lòng xác nhận mật khẩu";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Mật khẩu không khớp";
+      newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
     }
 
     if (!agreeTerms) {
@@ -81,20 +77,29 @@ export default function RegisterPage() {
         formData.password,
         formData.confirmPassword
       );
-      navigate("/");
+      toast.success('Đăng ký thành công! Chào mừng bạn đến với BlogHub.', {
+        duration: 3000,
+        position: 'top-right',
+      });
+      
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
     } catch (error: unknown) {
-      // Check if account is locked
       const err = error as { response?: { data?: { locked?: boolean } } };
       if (err.response?.data?.locked) {
-        setModal({
-          isOpen: true,
-          type: 'error',
-          title: 'Tài khoản bị khóa',
-          message: 'Email đã bị khóa'
+        toast.error('🔒 Email này đã bị khóa. Vui lòng liên hệ admin để biết thêm chi tiết.', {
+          duration: 5000,
+          position: 'top-right',
         });
       } else {
+        const errorMessage = error instanceof Error ? error.message : "Đăng ký thất bại";
+        toast.error(errorMessage, {
+          duration: 4000,
+          position: 'top-right',
+        });
         setErrors({ 
-          submit: error instanceof Error ? error.message : "Đăng ký thất bại" 
+          submit: errorMessage
         });
       }
     } finally {
@@ -105,32 +110,35 @@ export default function RegisterPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error when user types
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: "" }));
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="max-w-md w-full mx-4">
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8">
-          {/* Header */}
+    <div 
+      className="min-h-screen flex items-center justify-center select-none bg-cover bg-center bg-no-repeat relative"
+      style={{ backgroundImage: `url(${backgroundImage})` }}
+    >
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"></div>
+      <div className="max-w-md w-full mx-4 relative z-10">
+        <div className="bg-white backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8">
+          
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-blue-700 mb-2">
               Tham gia BlogHub
             </h1>
-            <p className="text-gray-600">Tạo tài khoản để bắt đầu chia sẻ câu chuyện của bạn</p>
+            <p className="text-gray-600">Tạo tài khoản để bắt đầu chia sẻ câu chuyện của bạn!</p>
           </div>
 
-          {/* Error Message */}
+          
           {errors.submit && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
               {errors.submit}
             </div>
           )}
 
-          {/* Form */}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Tên người dùng</label>
@@ -141,7 +149,7 @@ export default function RegisterPage() {
                   value={formData.username}
                   onChange={handleChange}
                   placeholder="Nhập tên người dùng"
-                  className={`w-full p-4 pl-12 border-2 ${errors.username ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300`}
+                  className={`w-full p-4 pl-12 border-3 ${errors.username ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300`}
                 />
                 <svg className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -159,7 +167,8 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Nhập email của bạn"
-                  className={`w-full p-4 pl-12 border-2 ${errors.email ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300`}
+                  autoComplete="email"
+                  className={`w-full p-4 pl-12 border-3 ${errors.email ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300`}
                 />
                 <svg className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
@@ -176,28 +185,40 @@ export default function RegisterPage() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
+                  autoComplete="new-password"
                   placeholder="Tạo mật khẩu mạnh"
-                  className={`w-full p-4 pl-12 pr-12 border-2 ${errors.password ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300`}
+                  className={`w-full p-4 pl-12 pr-12 border-3 ${errors.password ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300`}
                 />
                 <svg className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
                 <button
                   type="button"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500"
-                  tabIndex={-1}
-                  onClick={() => setShowPassword(v => !v)}
+                  className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-200 
+                    ${formData.password
+                      ? 'text-gray-400 hover:text-blue-500 cursor-pointer opacity-100'
+                      : 'text-gray-200 cursor-default opacity-50 pointer-events-none'}
+                  `}
+                  tabIndex={formData.password ? 0 : -1}
+                  onClick={formData.password ? () => setShowPassword(v => !v) : undefined}
                   aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  aria-disabled={!formData.password}
                 >
-                  <i className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                  <i className={`fa-solid ${formData.password ? 'cursor-pointer' : 'cursor-default'} ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
                 </button>
               </div>
               {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-              {!errors.password && (
-                <div className="text-xs text-gray-500">
-                  Mật khẩu phải có ít nhất 6 ký tự
+              {/* {!errors.password && (
+                <div className="text-xs text-gray-500 space-y-1">
+                  <div>Mật khẩu phải có ít nhất:</div>
+                  <ul className="list-disc list-inside pl-2">
+                    <li>6 ký tự</li>
+                    <li>1 ký tự viết hoa (A-Z)</li>
+                    <li>1 chữ số (0-9)</li>
+                    <li>1 ký tự đặc biệt (!@#$%^&*...)</li>
+                  </ul>
                 </div>
-              )}
+              )} */}
             </div>
 
             <div className="space-y-2">
@@ -209,19 +230,25 @@ export default function RegisterPage() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="Nhập lại mật khẩu"
-                  className={`w-full p-4 pl-12 pr-12 border-2 ${errors.confirmPassword ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300`}
+                  autoComplete="new-password"
+                  className={`w-full p-4 pl-12 pr-12 border-3 ${errors.confirmPassword ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300`}
                 />
                 <svg className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <button
                   type="button"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500"
-                  tabIndex={-1}
-                  onClick={() => setShowConfirmPassword(v => !v)}
+                  className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-200 
+                    ${formData.confirmPassword
+                      ? 'text-gray-400 hover:text-blue-500 cursor-pointer opacity-100'
+                      : 'text-gray-200 cursor-default opacity-50 pointer-events-none'}
+                  `}
+                  tabIndex={formData.confirmPassword ? 0 : -1}
+                  onClick={formData.confirmPassword ? () => setShowConfirmPassword(v => !v) : undefined}
                   aria-label={showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  aria-disabled={!formData.confirmPassword}
                 >
-                  <i className={`fa-solid ${showConfirmPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                  <i className={`fa-solid ${formData.confirmPassword ? 'cursor-pointer' : 'cursor-default'} ${showConfirmPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
                 </button>
               </div>
               {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
@@ -236,13 +263,13 @@ export default function RegisterPage() {
                     setAgreeTerms(e.target.checked);
                     if (errors.terms) setErrors(prev => ({ ...prev, terms: "" }));
                   }}
-                  className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                  className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" 
                 />
-                <label className="text-sm text-gray-600">
+                <label className="text-sm text-gray-600 cursor-pointer">
                   Tôi đồng ý với 
-                  <a href="#" className="text-blue-600 hover:text-blue-700 ml-1 mr-1">Điều khoản sử dụng</a> 
+                  <Link to="/terms" className="text-blue-600 hover:text-blue-700 ml-1 mr-1" target="_blank">Điều khoản sử dụng</Link> 
                   và 
-                  <a href="#" className="text-blue-600 hover:text-blue-700 ml-1">Chính sách bảo mật</a>
+                  <Link to="/privacy" className="text-blue-600 hover:text-blue-700 ml-1" target="_blank">Chính sách bảo mật</Link>
                 </label>
               </div>
               {errors.terms && <p className="text-red-500 text-xs">{errors.terms}</p>}
@@ -251,7 +278,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-white border-2 border-blue-600 text-blue-700 py-4 rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-200 hover:border-blue-700 hover:bg-blue-50 text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+              className="w-full bg-white border-3 border-blue-600 text-blue-700 py-4 rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-200 hover:border-blue-700 hover:bg-blue-50 text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 cursor-pointer"
               style={{ fontFamily: 'Inter, Arial, sans-serif' }}
             >
               <i className="fa-solid fa-user-plus"></i>
@@ -259,9 +286,9 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          {/* Social login options have been removed as requested */}
+          
 
-          {/* Footer */}
+          
           <p className="text-center text-sm text-gray-600 mt-6">
             Đã có tài khoản? 
             <Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold ml-1 transition-colors">
@@ -270,15 +297,6 @@ export default function RegisterPage() {
           </p>
         </div>
       </div>
-
-      {/* Modal Component */}
-      <Modal
-        isOpen={modal.isOpen}
-        onClose={() => setModal({ ...modal, isOpen: false })}
-        title={modal.title}
-        message={modal.message}
-        type={modal.type}
-      />
     </div>
   );
 }

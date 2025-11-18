@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Create connection pool for better performance
+
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT || 3306,
@@ -13,15 +13,14 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  connectTimeout: 60000,  // 60 seconds
-  acquireTimeout: 60000,
-  timeout: 60000
+  timezone: 'Z', // Use UTC timezone for consistent date handling
+  dateStrings: false // Return Date objects, not strings
 });
 
-// Get promise-based wrapper
+
 const promisePool = pool.promise();
 
-// Test database connection
+
 export const testConnection = async () => {
   try {
     const connection = await promisePool.getConnection();

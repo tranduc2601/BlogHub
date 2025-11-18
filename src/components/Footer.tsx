@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function Footer() {
   return (
     <footer className="bg-white/60 backdrop-blur-sm border-t border-white/20 py-8 mt-16">
@@ -8,8 +10,25 @@ export default function Footer() {
             BlogHub © 2025
           </span>
         </div>
+        
+        <div className="flex justify-center gap-6 mt-4">
+          <Link 
+            to="/terms" 
+            className="text-gray-600 hover:text-blue-600 transition-colors text-sm"
+          >
+            Điều khoản sử dụng
+          </Link>
+          <span className="text-gray-300">|</span>
+          <Link 
+            to="/privacy" 
+            className="text-gray-600 hover:text-blue-600 transition-colors text-sm"
+          >
+            Chính sách bảo mật
+          </Link>
+        </div>
+        
         <div className="text-center text-gray-400 mt-4 pt-4 border-t border-gray-200 text-base">
-          Made By Group 4 - Trần Hoàng Duy, Trần Minh Đức, Đoàn Nhật Cường, Nguyễn Gia Huy
+          <i className="fa-solid fa-users mr-3"></i>Made By Group 4 - Trần Hoàng Duy, Trần Minh Đức, Đoàn Nhật Cường và Nguyễn Gia Huy
         </div>
       </div>
     </footer>

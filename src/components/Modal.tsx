@@ -1,7 +1,3 @@
-/**
- * Modal Component - Reusable modal for confirmations and notifications
- */
-
 import React from 'react';
 
 interface ModalProps {
@@ -25,6 +21,24 @@ const Modal: React.FC<ModalProps> = ({
   confirmText = 'Xác nhận',
   cancelText = 'Hủy'
 }) => {
+
+  React.useEffect(() => {
+    if (isOpen) {
+
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      
+      return () => {
+
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const getIconAndColor = () => {
@@ -45,9 +59,15 @@ const Modal: React.FC<ModalProps> = ({
   const { icon, color, bg } = getIconAndColor();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}>
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-fadeIn">
-        {/* Header */}
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-none"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-fadeIn"
+        onClick={(e) => e.stopPropagation()}
+      >
+        
         <div className="p-6 pb-4">
           <div className="flex items-center gap-4">
             <div className={`${bg} ${color} w-12 h-12 rounded-full flex items-center justify-center`}>
@@ -57,29 +77,37 @@ const Modal: React.FC<ModalProps> = ({
           </div>
         </div>
 
-        {/* Body */}
+        
         <div className="px-6 pb-6">
           <p className="text-gray-600 leading-relaxed">{message}</p>
         </div>
 
-        {/* Footer */}
+        
         <div className="px-6 pb-6 flex gap-3 justify-end">
           {type === 'confirm' || onConfirm ? (
             <>
               <button
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                className="px-5 py-2.5 rounded-xl font-medium text-gray-700 bg-gray-100 border border-transparent hover:border-red-400 hover:bg-red-50 hover:text-red-600 transition-all duration-200 cursor-pointer hover:scale-105 hover:shadow-lg"
               >
-                {cancelText}
+                <i className="fa-solid fa-xmark mr-2"></i>{cancelText}
               </button>
               <button
                 onClick={() => {
                   onConfirm?.();
                   onClose();
                 }}
-                className="px-5 py-2.5 rounded-xl font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-lg"
+                className={
+                  (type === 'warning' && confirmText?.toLowerCase().includes('xóa'))
+                    ? 'px-5 py-2.5 rounded-xl font-medium text-white bg-red-600 hover:bg-red-700 hover:scale-105 hover:shadow-xl transition-all duration-200 cursor-pointer'
+                    : 'px-5 py-2.5 rounded-xl font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-lg cursor-pointer'
+                }
               >
-                {confirmText}
+                <i className={`fa-solid ${
+                  (type === 'warning' && confirmText?.toLowerCase().includes('xóa'))
+                    ? 'fa-trash-can'
+                    : 'fa-check'
+                } mr-2`}></i>{confirmText}
               </button>
             </>
           ) : (

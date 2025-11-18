@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getCommentsByPostId } from '../data/mockData';
 import type { Comment } from '../data/mockData';
 import axios from '../config/axios';
 
@@ -6,8 +7,11 @@ export interface UseCommentsReturn {
   comments: Comment[];
   loading: boolean;
   error: string | null;
-  addComment: (comment: Omit<Comment, 'id' | 'createdAt' | 'likes'>) => void;
-  likeComment: (commentId: string) => void;
+  addComment: (content: string, parentId?: string) => Promise<void>;
+  updateComment: (commentId: string, content: string) => Promise<void>;
+  deleteComment: (commentId: string) => Promise<void>;
+  likeComment: (commentId: string) => Promise<void>;
+  refreshComments: () => Promise<void>;
 }
 
 export const useComments = (postId: string): UseCommentsReturn => {
@@ -20,77 +24,94 @@ export const useComments = (postId: string): UseCommentsReturn => {
       setLoading(true);
       setError(null);
       
-      console.log('Fetching comments for post:', postId);
-      
-      // Fetch from API - no mock fallback for team data sync
       const response = await axios.get(`/posts/${postId}/comments`);
-      
-      console.log('Comments fetched:', response.data);
       
       if (response.data.success) {
         setComments(response.data.comments);
       } else {
-        setError('Không thể tải bình luận');
-        setComments([]);
+        const fetchedComments = getCommentsByPostId(postId);
+        setComments(fetchedComments);
       }
     } catch (err) {
       console.error('Error fetching comments:', err);
-      setError('Không thể tải bình luận. Vui lòng kiểm tra kết nối server.');
-      setComments([]);
+      const fetchedComments = getCommentsByPostId(postId);
+      setComments(fetchedComments);
     } finally {
       setLoading(false);
     }
   }, [postId]);
 
-  const addComment = useCallback(async (newComment: Omit<Comment, 'id' | 'createdAt' | 'likes'>) => {
+  const addComment = useCallback(async (content: string, parentId?: string) => {
     try {
-      console.log('=== useComments addComment ===');
-      console.log('API URL:', `/posts/${postId}/comments`);
-      console.log('Request data:', newComment);
       
-      // Gọi API lưu bình luận lên backend
-      const res = await axios.post(`/posts/${postId}/comments`, newComment);
-      
-      console.log('API Response:', res.data);
-      
-      const comment: Comment = res.data;
-      setComments(prev => [comment, ...prev]);
+      await axios.post(`/posts/${postId}/comments`, {
+        content,
+        parentId: parentId || null
+      });
+      await fetchComments();
     } catch (err) {
-      console.error('=== Error in useComments addComment ===');
-      console.error('Full error:', err);
-      
-      const error = err as { response?: { status?: number; data?: unknown; headers?: unknown }; config?: { url?: string; method?: string; data?: unknown } };
-      
-      if (error.response) {
-        console.error('Response status:', error.response.status);
-        console.error('Response data:', error.response.data);
-        console.error('Response headers:', error.response.headers);
-      }
-      
-      if (error.config) {
-        console.error('Request URL:', error.config.url);
-        console.error('Request method:', error.config.method);
-        console.error('Request data:', error.config.data);
-      }
-      
+      console.error('Error adding comment:', err);
       setError('Không thể gửi bình luận');
-      throw err; // Re-throw to let caller handle it
+      throw err;
     }
-  }, [postId]);
+  }, [postId, fetchComments]);
 
-  const likeComment = useCallback((commentId: string) => {
-    setComments(prev => 
-      prev.map(comment => 
-        comment.id === commentId 
-          ? { ...comment, likes: comment.likes + 1 }
-          : comment
-      )
-    );
-    
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Comment liked:', commentId);
-    }, 300);
+  const updateComment = useCallback(async (commentId: string, content: string) => {
+    try {
+      
+      await axios.put(`/posts/comments/${commentId}`, { content });
+      setComments(prev => 
+        prev.map(comment => 
+          comment.id === commentId 
+            ? { ...comment, content }
+            : comment
+        )
+      );
+    } catch (err) {
+      console.error('Error updating comment:', err);
+      setError('Không thể cập nhật bình luận');
+      throw err;
+    }
+  }, []);
+
+  const deleteComment = useCallback(async (commentId: string) => {
+    try {
+      
+      await axios.delete(`/posts/comments/${commentId}`);
+      setComments(prev => 
+        prev.filter(comment => 
+          comment.id !== commentId && comment.parentId !== commentId
+        )
+      );
+    } catch (err) {
+      console.error('Error deleting comment:', err);
+      setError('Không thể xóa bình luận');
+      throw err;
+    }
+  }, []);
+
+  const likeComment = useCallback(async (commentId: string) => {
+    try {
+      
+      const response = await axios.post(`/posts/comments/${commentId}/like`);
+      
+      if (response.data.success) {
+        setComments(prev => 
+          prev.map(comment => 
+            comment.id === commentId 
+              ? { 
+                  ...comment, 
+                  likes: response.data.likesCount,
+                  isLiked: response.data.isLiked 
+                }
+              : comment
+          )
+        );
+      }
+    } catch (err) {
+      console.error('Error liking comment:', err);
+      setError('Không thể thích bình luận');
+    }
   }, []);
 
   useEffect(() => {
@@ -102,6 +123,9 @@ export const useComments = (postId: string): UseCommentsReturn => {
     loading,
     error,
     addComment,
-    likeComment
+    updateComment,
+    deleteComment,
+    likeComment,
+    refreshComments: fetchComments
   };
 };

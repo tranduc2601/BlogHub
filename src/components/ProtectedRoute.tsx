@@ -9,17 +9,6 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, user } = useAuth();
-
-  // Debug logging
-  console.log('ProtectedRoute check:', { 
-    isAuthenticated, 
-    isLoading, 
-    requireAdmin, 
-    userRole: user?.role,
-    user 
-  });
-
-  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -30,13 +19,9 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
       </div>
     );
   }
-
-  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-
-  // Check admin access if required
   if (requireAdmin && user?.role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">

@@ -9,7 +9,10 @@ export interface User {
   status: string;
   postsCount: number;
   commentsCount: number;
+  followersCount: number;
+  totalLikes: number;
   joinedAt: string;
+  avatarUrl?: string;
 }
 
 interface UseUsersResult {

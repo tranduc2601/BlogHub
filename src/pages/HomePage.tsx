@@ -1,21 +1,23 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import PostCard from "../components/Postcard";
 import { usePosts } from "../hooks/usePosts";
 import axios from "../config/axios";
-// import { mockPosts, mockUsers } from "../data/mockData";
-
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<"recent" | "popular">("recent");
-  const { posts, loading, error, refreshPosts } = usePosts(activeTab, 3);
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
-  const [searchTag, setSearchTag] = useState("");
+  
+  // Lấy giá trị từ URL query params
+  const [activeTab, setActiveTab] = useState<"recent" | "popular">(
+    (searchParams.get("tab") as "recent" | "popular") || "recent"
+  );
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [searchTag, setSearchTag] = useState(searchParams.get("tag") || "");
+  
+  const { posts, loading, error, refreshPosts } = usePosts(activeTab, 3);
   const [totalPosts, setTotalPosts] = useState(0);
   const [totalViews, setTotalViews] = useState(0);
   const [totalAuthors, setTotalAuthors] = useState(0);
-
-  // Fetch statistics for all posts
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -34,7 +36,20 @@ export default function HomePage() {
     fetchStats();
   }, []);
 
-  // Lọc bài viết theo tiêu đề và tags
+  // Cập nhật URL khi state thay đổi
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (activeTab !== "recent") {
+      params.set("tab", activeTab);
+    }
+    if (search) {
+      params.set("search", search);
+    }
+    if (searchTag) {
+      params.set("tag", searchTag);
+    }
+    setSearchParams(params, { replace: true });
+  }, [activeTab, search, searchTag, setSearchParams]);
   const filteredPosts = posts.filter(post => {
     const matchTitle = post.title.toLowerCase().includes(search.toLowerCase());
     const matchTag = searchTag
@@ -45,10 +60,10 @@ export default function HomePage() {
 
   return (
     <div className="space-y-12 select-none">
-      {/* Hero Section */}
+      
       <section className="text-center py-16">
         <h1 className="text-5xl md:text-6xl font-extrabold text-blue-700 drop-shadow-lg mb-6 animate-fadeInUp leading-tight flex items-center justify-center gap-4">
-          <i className="fa-solid fa-blog" style={{ fontSize: '1.2em', color: '#3b82f6', textShadow: '0 2px 8px #a5b4fc' }}></i>
+          <i className="fa-solid fa-blog" style={{ fontSize: '1.2em', color: '#3b82f6', textShadow: '0 2px 8px #a5b4fc', marginRight: '10px' }}></i>
           Chào mừng đến với BlogHub
         </h1>
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed animate-fadeInUp animation-delay-200">
@@ -56,25 +71,25 @@ export default function HomePage() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeInUp animation-delay-400">
           <button
-            className="bg-white border-2 border-blue-600 text-blue-700 px-8 py-3 rounded-full font-bold shadow-md transition-all duration-300 flex items-center gap-3 text-lg cursor-pointer hover:scale-105 hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:border-blue-700"
+            className="bg-white border-3 border-blue-600 text-blue-700 px-8 py-3 rounded-full font-bold shadow-md transition-all duration-300 flex items-center gap-3 text-lg cursor-pointer hover:scale-105 hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:border-blue-700"
             onClick={() => navigate("/create")}
             style={{ fontFamily: 'Inter, Arial, sans-serif' }}
           >
             <i className="fa-solid fa-pen-nib"></i>
-            Bắt đầu viết blog
+            Bắt đầu viết Blog
           </button>
           <button
-            className="bg-white border-2 border-blue-600 text-blue-700 px-8 py-3 rounded-full font-bold shadow-md transition-all duration-300 flex items-center gap-3 text-lg cursor-pointer hover:scale-105 hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-100 hover:border-blue-700"
+            className="bg-white border-3 border-blue-600 text-blue-700 px-8 py-3 rounded-full font-bold shadow-md transition-all duration-300 flex items-center gap-3 text-lg cursor-pointer hover:scale-105 hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-100 hover:border-blue-700"
             onClick={() => navigate("/posts")}
             style={{ fontFamily: 'Inter, Arial, sans-serif' }}
           >
             <i className="fa-solid fa-compass"></i>
-            Khám phá bài viết
+            Khám phá các bài viết
           </button>
         </div>
       </section>
 
-      {/* Stats Section */}
+      
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/20 hover:bg-white/80 transition-all duration-300">
           <div className="text-3xl font-bold text-blue-600 mb-2 flex items-center justify-center gap-2">
@@ -99,16 +114,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Posts Section */}
+      
       <section>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <h2 className="text-3xl font-bold text-gray-800 mb-4 md:mb-0">
             {activeTab === "recent" ? "Bài viết mới nhất" : "Bài viết nổi bật"}
           </h2>
 
-          {/* Search Inputs */}
-          <div className="flex gap-3 items-center">
-            <div className="relative">
+          
+          <div className="flex flex-wrap gap-3 items-center">
+            <div className="relative min-w-0 flex-shrink">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                 <i className="fa-solid fa-magnifying-glass"></i>
               </span>
@@ -117,10 +132,10 @@ export default function HomePage() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Tìm kiếm theo tiêu đề..."
-                className="pl-12 pr-5 py-3 border-2 border-gray-300 focus:border-gray-600 rounded-2xl min-w-[220px] bg-white shadow focus:shadow-lg transition-all duration-300 text-lg font-medium placeholder:text-gray-400 hover:border-gray-400 outline-none"
+                className="pl-12 pr-5 py-3 border-3 border-gray-300 focus:border-blue-600 rounded-2xl w-full md:min-w-[220px] bg-white shadow focus:shadow-lg transition-all duration-300 text-lg font-medium placeholder:text-gray-400 hover:border-gray-400 outline-none"
               />
             </div>
-            <div className="relative">
+            <div className="relative min-w-0 flex-shrink">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                 <i className="fa-solid fa-hashtag"></i>
               </span>
@@ -129,16 +144,16 @@ export default function HomePage() {
                 value={searchTag}
                 onChange={e => setSearchTag(e.target.value)}
                 placeholder="Tìm theo thẻ (tags)..."
-                className="pl-12 pr-5 py-3 border-2 border-gray-300 focus:border-gray-600 rounded-2xl min-w-[180px] bg-white shadow focus:shadow-lg transition-all duration-300 text-lg font-medium placeholder:text-gray-400 hover:border-gray-400 outline-none"
+                className="pl-12 pr-5 py-3 border-3 border-gray-300 focus:border-blue-600 rounded-2xl w-full md:min-w-[180px] bg-white shadow focus:shadow-lg transition-all duration-300 text-lg font-medium placeholder:text-gray-400 hover:border-gray-400 outline-none"
               />
             </div>
           </div>
 
-          {/* Tab Switcher */}
+          
           <div className="flex bg-gray-100 rounded-xl p-1">
             <button
               onClick={() => setActiveTab("recent")}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 cursor-pointer ${
                 activeTab === "recent"
                   ? "bg-white text-blue-600 shadow-sm"
                   : "text-gray-600 hover:text-gray-800"
@@ -149,7 +164,7 @@ export default function HomePage() {
             </button>
             <button
               onClick={() => setActiveTab("popular")}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 cursor-pointer ${
                 activeTab === "popular"
                   ? "bg-white text-blue-600 shadow-sm"
                   : "text-gray-600 hover:text-gray-800"
@@ -161,7 +176,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Loading */}
+        
         {loading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -184,7 +199,7 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Error */}
+        
         {error && (
           <div className="text-center py-12">
             <div className="bg-red-50 border border-red-200 rounded-xl p-6 max-w-md mx-auto">
@@ -202,7 +217,7 @@ export default function HomePage() {
                 />
               </svg>
               <h3 className="text-lg font-semibold text-red-800 mb-2">
-                Không thể tải bài viết
+                Không thể tải bài viết...
               </h3>
               <p className="text-red-600 mb-4">{error}</p>
               <button
@@ -215,9 +230,15 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Posts */}
+        
         {!loading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className={`grid gap-8 ${
+            filteredPosts.length === 1 
+              ? 'grid-cols-1 max-w-md mx-auto' 
+              : filteredPosts.length === 2 
+              ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2'
+              : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+          }`}>
             {filteredPosts.map((post, i) => (
               <div
                 key={post.id}
@@ -230,7 +251,7 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Empty */}
+        
         {!loading && !error && filteredPosts.length === 0 && (
           <div className="text-center py-12">
             <svg
@@ -256,13 +277,13 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* CTA */}
-      <section className="text-center py-16 bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl">
+      
+      <section className="text-center py-16 bg-[white] rounded-3xl">
         <h3 className="text-3xl font-bold" style={{ color: '#2563eb' }}>
           Sẵn sàng chia sẻ câu chuyện của bạn?
         </h3>
-        <p className="text-gray-600 mb-8 mt-5 max-w-xl mx-auto">
-          Tham gia cộng đồng BlogHub và bắt đầu viết bài viết đầu tiên ngay hôm nay
+        <p className="text-gray-600 mb-8 mt-7 max-w-xl mx-auto italic">
+          Hãy tham gia cộng đồng BlogHub và bắt đầu viết bài viết đầu tiên ngay hôm nay!
         </p>
       </section>
     </div>

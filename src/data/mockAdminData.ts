@@ -8,7 +8,7 @@ export interface AdminPost {
   title: string;
   author: string;
   content: string;
-  status: 'visible' | 'hidden';
+  status: 'pending' | 'visible' | 'hidden';
   likes: number;
   createdAt: string;
   needsReview: boolean;
@@ -35,6 +35,7 @@ export interface AdminUser {
   postsCount: number;
   commentsCount: number;
   joinedAt: string;
+  avatarUrl?: string;
 }
 
 export interface MonthlyStats {
@@ -42,8 +43,6 @@ export interface MonthlyStats {
   posts: number;
   users: number;
 }
-
-// Mock Posts cần kiểm duyệt
 export const mockAdminPosts: AdminPost[] = [
   {
     id: 1,
@@ -96,8 +95,6 @@ export const mockAdminPosts: AdminPost[] = [
     needsReview: false
   }
 ];
-
-// Mock Comments cần kiểm duyệt
 export const mockAdminComments: AdminComment[] = [
   {
     id: 1,
@@ -150,8 +147,6 @@ export const mockAdminComments: AdminComment[] = [
     needsReview: false
   }
 ];
-
-// Mock Users
 export const mockAdminUsers: AdminUser[] = [
   {
     id: 1,
@@ -234,8 +229,6 @@ export const mockAdminUsers: AdminUser[] = [
     joinedAt: '2025-06-08'
   }
 ];
-
-// Thống kê theo tháng (cho biểu đồ)
 export const mockMonthlyStats: MonthlyStats[] = [
   { month: 'T5', posts: 45, users: 12 },
   { month: 'T6', posts: 52, users: 18 },

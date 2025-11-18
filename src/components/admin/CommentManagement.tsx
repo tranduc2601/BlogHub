@@ -9,7 +9,7 @@ interface CommentManagementProps {
 const CommentManagement: React.FC<CommentManagementProps> = ({ comments, onToggleStatus }) => {
   const [filter, setFilter] = useState<'all' | 'needsReview' | 'visible' | 'hidden'>('all');
 
-  // Lọc bình luận theo filter
+
   const filteredComments = comments.filter(comment => {
     if (filter === 'all') return true;
     if (filter === 'needsReview') return comment.needsReview;
@@ -26,14 +26,14 @@ const CommentManagement: React.FC<CommentManagementProps> = ({ comments, onToggl
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Quản lý bình luận</h2>
           <p className="text-gray-600 mt-1">Kiểm duyệt và quản lý nội dung bình luận</p>
         </div>
         
-        {/* Filter Buttons */}
+        
         <div className="flex gap-2">
           <button
             onClick={() => setFilter('all')}
@@ -67,7 +67,7 @@ const CommentManagement: React.FC<CommentManagementProps> = ({ comments, onToggl
           </button>
           <button
             onClick={() => setFilter('hidden')}
-            className={`px-4 py-2 rounded-xl font-medium transition-all ${
+            className={`px-4 py-2 rounded-xl font-medium transition-all cursor-pointer${
               filter === 'hidden'
                 ? 'bg-red-600 text-white shadow-lg'
                 : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
@@ -78,7 +78,7 @@ const CommentManagement: React.FC<CommentManagementProps> = ({ comments, onToggl
         </div>
       </div>
 
-      {/* Comments List */}
+      
       <div className="space-y-4">
         {filteredComments.length === 0 ? (
           <div className="bg-white rounded-[16px] p-8 text-center shadow-lg">
@@ -93,7 +93,7 @@ const CommentManagement: React.FC<CommentManagementProps> = ({ comments, onToggl
               }`}
             >
               <div className="flex justify-between items-start gap-4">
-                {/* Comment Info */}
+                
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-sm font-semibold text-gray-500">
@@ -120,12 +120,12 @@ const CommentManagement: React.FC<CommentManagementProps> = ({ comments, onToggl
                   
                   <div className="flex items-center gap-4 text-sm text-gray-500">
                     <span>👤 {comment.author}</span>
-                    <span>📅 {comment.createdAt}</span>
+                    <span><i className="fa-regular fa-calendar mr-1.5"></i> {comment.createdAt}</span>
                     <span className="text-xs text-gray-400">ID: {comment.id}</span>
                   </div>
                 </div>
 
-                {/* Action Button */}
+                
                 <button
                   onClick={() => handleToggle(comment.id)}
                   className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-lg ${

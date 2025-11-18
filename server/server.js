@@ -8,8 +8,10 @@ import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+import { likeComment } from './controllers/commentController.js';
+import { authMiddleware } from './middleware/authMiddleware.js';
 
-// Load environment variables
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -18,25 +20,19 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Serve static files from uploads directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Request logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
 
-// Routes
 app.get('/', (req, res) => {
   res.json({ 
     success: true,
@@ -54,8 +50,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/notifications', notificationRoutes);
 
-// 404 handler
+app.post('/api/comments/:commentId/like', authMiddleware, likeComment);
+
 app.use((req, res) => {
   console.error(`404 Not Found: ${req.method} ${req.originalUrl}`);
   res.status(404).json({ 
@@ -66,7 +64,6 @@ app.use((req, res) => {
   });
 });
 
-// Global error handler
 app.use((err, req, res, next) => {
   console.error('Global error:', err);
   res.status(err.status || 500).json({
@@ -75,10 +72,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
 const startServer = async () => {
   try {
-    // Test database connection
     const dbConnected = await testConnection();
     
     if (!dbConnected) {

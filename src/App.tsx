@@ -1,24 +1,31 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
+import { DropdownProvider } from "./context/DropdownContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./pages/HomePage";
 import PostDetailPage from "./pages/PostDetailPage";
 import CreatePostPage from "./pages/CreatePostPage";
+import EditPostPage from "./pages/EditPostPage";
 import UsersPage from "./pages/UsersPage";
+import UserPostsPage from "./pages/UserPostsPage";
 import AdminPage from "./pages/AdminPage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./components/forms/LoginPage";
+import RegisterPage from "./components/forms/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
 import MyPostsPage from "./pages/MyPostsPage";
 import PostsPage from "./pages/PostsPage";
+import FollowListPage from "./pages/FollowListPage";
+import ChangePasswordPage from "./pages/ChangePasswordPage";
+import NotificationsPage from "./pages/NotificationsPage";
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Toaster 
+        <DropdownProvider>
+          <Toaster 
           position="top-right"
           toastOptions={{
             duration: 3000,
@@ -49,8 +56,8 @@ export default function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/post/:id" element={<PostDetailPage />} />
             <Route path="/posts" element={<PostsPage />} />
-            
-            {/* Protected Routes - Require Authentication */}
+
+
             <Route 
               path="/create" 
               element={
@@ -60,7 +67,17 @@ export default function App() {
               } 
             />
 
-            {/* User Profile - Require Authentication */}
+
+            <Route 
+              path="/edit/:id" 
+              element={
+                <ProtectedRoute>
+                  <EditPostPage />
+                </ProtectedRoute>
+              } 
+            />
+
+
             <Route 
               path="/profile" 
               element={
@@ -70,7 +87,7 @@ export default function App() {
               } 
             />
 
-            {/* My Posts - Require Authentication */}
+
             <Route 
               path="/my-posts" 
               element={
@@ -79,32 +96,65 @@ export default function App() {
                 </ProtectedRoute>
               } 
             />
-            
-            {/* Admin Only Routes */}
+
+
             <Route 
               path="/users" 
+              element={<UsersPage />}
+            />
+
+            {/* User Posts Page */}
+            <Route 
+              path="/users/:userId/posts" 
+              element={<UserPostsPage />}
+            />
+
+            {/* Follow List Page */}
+            <Route 
+              path="/follow-list" 
               element={
-                <ProtectedRoute requireAdmin={true}>
-                  <UsersPage />
+                <ProtectedRoute>
+                  <FollowListPage />
                 </ProtectedRoute>
-              } 
+              }
+            />
+
+            {/* Change Password Page */}
+            <Route 
+              path="/change-password" 
+              element={
+                <ProtectedRoute>
+                  <ChangePasswordPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Notifications Page */}
+            <Route 
+              path="/notifications" 
+              element={
+                <ProtectedRoute>
+                  <NotificationsPage />
+                </ProtectedRoute>
+              }
             />
           </Route>
-          
-          {/* Admin Page - Separate Layout (no MainLayout) */}
+
+
           <Route 
-            path="/admin" 
+            path="/admin/*" 
             element={
               <ProtectedRoute requireAdmin={true}>
                 <AdminPage />
               </ProtectedRoute>
             } 
           />
-          
-          {/* Auth Routes - Public */}
+
+
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
         </Routes>
+        </DropdownProvider>
       </AuthProvider>
     </BrowserRouter>
   );

@@ -1,7 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useRef } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axios from "../config/axios";
+import toast from "react-hot-toast";
 
 interface ExtendedUser {
   id: number;
@@ -13,6 +14,7 @@ interface ExtendedUser {
 }
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const { user, checkAuth } = useAuth();
   const token = localStorage.getItem("token");
   const currentUser = user as ExtendedUser | null;
@@ -22,30 +24,89 @@ export default function ProfilePage() {
   const [about, setAbout] = useState("");
   const [name, setName] = useState(currentUser?.username || "");
   const [websites, setWebsites] = useState<string[]>([""]);
-  const [success, setSuccess] = useState("");
-  const [showNotif, setShowNotif] = useState(false);
-  const notifTimeout = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState(currentUser?.email || "");
-  const [newPassword, setNewPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [followerCounts, setFollowerCounts] = useState({ followers: 0, following: 0 });
+  const [originalValues, setOriginalValues] = useState({
+    name: "",
+    email: "",
+    about: "",
+    websites: [""],
+    avatar: undefined as string | undefined
+  });
+  
+  const fetchFollowerCounts = async () => {
+    if (!currentUser?.id) return;
+    
+    try {
+      const countsResponse = await axios.get(`/users/${currentUser.id}/follower-counts`);
+      if (countsResponse.data.success) {
+        setFollowerCounts({
+          followers: countsResponse.data.followers,
+          following: countsResponse.data.following
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching follower counts:', error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get('/auth/me', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (response.data.success && response.data.user) {
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          const countsResponse = await axios.get(`/users/${response.data.user.id}/follower-counts`);
+          if (countsResponse.data.success) {
+            setFollowerCounts({
+              followers: countsResponse.data.followers,
+              following: countsResponse.data.following
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    if (token && currentUser?.id) {
+      fetchUserData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Refresh follower counts when returning to this page
+  useEffect(() => {
+    fetchFollowerCounts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.id]);
 
   useEffect(() => {
     if (currentUser) {
-      setName(currentUser.username);
-      setEmail(currentUser.email || "");
-      setAbout(currentUser.about || "");
-      setWebsites(currentUser.websites || [""]);
-      if (currentUser.avatarUrl) {
-        setAvatar(
-          currentUser.avatarUrl.startsWith("http")
-            ? currentUser.avatarUrl
-            : `http://localhost:5000${currentUser.avatarUrl}`
-        );
-      } else {
-        setAvatar(undefined);
-      }
+      const userName = currentUser.username;
+      const userEmail = currentUser.email || "";
+      const userAbout = currentUser.about || "";
+      const userWebsites = currentUser.websites || [""];
+      const userAvatar = currentUser.avatarUrl || undefined;
+
+      setName(userName);
+      setEmail(userEmail);
+      setAbout(userAbout);
+      setWebsites(userWebsites);
+      setAvatar(userAvatar);
+      setOriginalValues({
+        name: userName,
+        email: userEmail,
+        about: userAbout,
+        websites: userWebsites,
+        avatar: userAvatar
+      });
     }
   }, [currentUser]);
 
@@ -59,89 +120,128 @@ export default function ProfilePage() {
     }
   };
 
+  const hasChanges = () => {
+    if (avatarFile) return true;
+    if (name !== originalValues.name) return true;
+    if (email !== originalValues.email) return true;
+    if (about !== originalValues.about) return true;
+    const websitesArray = Array.isArray(websites) ? websites : [];
+    const origWebsitesArray = Array.isArray(originalValues.websites) ? originalValues.websites : [];
+    const currentWebsites = websitesArray.filter(w => w.trim() !== "");
+    const origWebsites = origWebsitesArray.filter(w => w.trim() !== "");
+    if (currentWebsites.length !== origWebsites.length) return true;
+    for (let i = 0; i < currentWebsites.length; i++) {
+      if (currentWebsites[i] !== origWebsites[i]) return true;
+    }
+    
+    return false;
+  };
+
   const handleSave = async () => {
     setIsLoading(true);
-    setSuccess("");
     try {
       const formData = new FormData();
       formData.append("username", name);
-      formData.append("about", about);
+      formData.append("email", email);
+      formData.append("about", about || "");
       if (avatarFile) formData.append("avatar", avatarFile);
-      
-      // Đảm bảo websites là mảng trước khi filter
       const websitesArray = Array.isArray(websites) ? websites : [];
       websitesArray
         .filter((w) => w.trim() !== "")
         .forEach((w, idx) => formData.append(`websites[${idx}]`, w));
-      
-      if (newPassword.trim().length > 0) formData.append("password", newPassword);
 
-      const res = await axios.put("/auth/me", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await axios.put("/auth/me", formData);
 
       if (res.data.user) {
         localStorage.setItem("user", JSON.stringify(res.data.user));
-        await checkAuth();
+        const updatedUser = res.data.user;
+        setName(updatedUser.username);
+        setEmail(updatedUser.email || "");
+        setAbout(updatedUser.about || "");
+        setWebsites(updatedUser.websites || [""]);
+        const newAvatarUrl = updatedUser.avatarUrl || undefined;
+        setAvatar(newAvatarUrl);
+        setOriginalValues({
+          name: updatedUser.username,
+          email: updatedUser.email || "",
+          about: updatedUser.about || "",
+          websites: updatedUser.websites || [""],
+          avatar: newAvatarUrl
+        });
+        setAvatarFile(null);
+        checkAuth();
       }
 
-      setSuccess("Cập nhật hồ sơ thành công!");
-      setShowNotif(true);
-      if (notifTimeout.current) clearTimeout(notifTimeout.current);
-      notifTimeout.current = setTimeout(() => setShowNotif(false), 2000);
+      toast.success("Cập nhật hồ sơ thành công!", {
+        duration: 3000,
+        position: 'top-right',
+      });
     } catch (error: unknown) {
       console.error("Profile update error:", error);
       const errorMsg =
         error instanceof Error ? error.message : "Lỗi không xác định";
-      setSuccess("Cập nhật thất bại! " + errorMsg);
-      setShowNotif(true);
-      if (notifTimeout.current) clearTimeout(notifTimeout.current);
-      notifTimeout.current = setTimeout(() => setShowNotif(false), 2000);
+      toast.error("Cập nhật thất bại! " + errorMsg, {
+        duration: 4000,
+        position: 'top-right',
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleShowFollowers = () => {
+    if (currentUser?.id) {
+      navigate(`/follow-list?type=followers&userId=${currentUser.id}`);
+    }
+  };
+
+  const handleShowFollowing = () => {
+    if (currentUser?.id) {
+      navigate(`/follow-list?type=following&userId=${currentUser.id}`);
+    }
+  };
+
   return (
     <>
-      <div
-        className={`fixed top-25 right-8 z-50 transition-all duration-500 ${
-          showNotif ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-6"
-        } pointer-events-none`}
-        style={{ minWidth: 320 }}
-      >
-        {success && (
-          <div className="flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold text-base">
-            <span className="text-2xl">
-              <i className="fa-solid fa-circle-check"></i>
-            </span>
-            <span>{success}</span>
-          </div>
-        )}
-      </div>
-
-      <div className="max-w-2xl mx-auto mt-10 p-8 bg-white rounded-2xl shadow-xl">
-        <h2 className="text-3xl font-bold mb-2">Chỉnh sửa hồ sơ của bạn</h2>
-        <p className="mb-6 text-gray-600">
-          Hồ sơ của bạn là cách mà người dùng khác nhìn thấy bạn trên toàn bộ
-          trang web. Bạn có thể quyết định cung cấp bao nhiêu thông tin.
+      <div className="max-w-2xl mx-auto mt-10 p-8 bg-white rounded-2xl shadow-xl select-none">
+        <h2 className="text-3xl font-bold mb-2 text-center">Chỉnh sửa hồ sơ của bạn</h2>
+        <p className="mb-6 text-gray-600 text-center">
+          Hồ sơ của bạn là cách mà người dùng khác nhìn thấy bạn trên toàn bộ trang web. Bạn có thể quyết định cung cấp bao nhiêu thông tin.
         </p>
 
         <div className="flex gap-8 items-start">
           <div className="flex flex-col items-center gap-4">
-            <img
-              src={
-                avatar
-                  ? avatar
-                  : "https://ui-avatars.com/api/?name=" +
-                    encodeURIComponent(name)
-              }
-              alt="User avatar"
-              className="w-28 h-28 rounded-full object-cover border border-gray-300"
-            />
+
+            {avatar ? (
+              <img
+                src={avatar}
+                alt="User avatar"
+                className="w-28 h-28 rounded-full object-cover border-4 border-blue-500 shadow-lg"
+              />
+            ) : (
+              <div className="w-28 h-28 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-4xl border-4 border-blue-500 shadow-lg">
+                {name.trim().split(' ').slice(-1)[0].charAt(0).toUpperCase()}
+              </div>
+            )}
+            
+            
+            <div className="flex gap-4 text-center">
+              <div 
+                className="cursor-pointer hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                onClick={handleShowFollowers}
+              >
+                <div className="text-2xl font-bold text-blue-600">{followerCounts.followers}</div>
+                <div className="text-xs text-gray-500">Người theo dõi</div>
+              </div>
+              <div 
+                className="cursor-pointer hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                onClick={handleShowFollowing}
+              >
+                <div className="text-2xl font-bold text-blue-600">{followerCounts.following}</div>
+                <div className="text-xs text-gray-500">Đang theo dõi</div>
+              </div>
+            </div>
+            
             <button
               className="bg-blue-100 text-blue-700 px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-200 hover:cursor-pointer transition-all duration-200 shadow hover:shadow-lg hover:scale-105"
               onClick={() => fileInputRef.current?.click()}
@@ -170,7 +270,12 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block font-semibold mb-1">Email</label>
+              <label className="font-semibold mb-1 flex items-center gap-2">
+                <span className="inline-block w-5 h-5 align-middle">
+                  <i className="fa-light fa-envelope"></i>
+                </span>
+                Email
+              </label>
               <input
                 type="email"
                 className="w-full p-3 rounded-xl bg-gray-100 border border-gray-200 shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all duration-200 outline-none"
@@ -178,30 +283,6 @@ export default function ProfilePage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Nhập email mới..."
               />
-            </div>
-
-
-            {/* Input mật khẩu mới có icon con mắt */}
-            <div className="relative">
-              <label className="block font-semibold mb-1">Mật khẩu mới (nếu muốn đổi)</label>
-              <input
-                type={showPassword ? "text" : "password"}
-                className="w-full p-3 pr-10 rounded-xl bg-gray-50 border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-200 outline-none"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Nhập mật khẩu mới..."
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-[40px] text-gray-500 hover:text-gray-700"
-                onClick={() => setShowPassword((prev) => !prev)}
-              >
-                <i
-                  className={`fa-solid ${
-                    showPassword ? "fa-eye-slash" : "fa-eye"
-                  }`}
-                ></i>
-              </button>
             </div>
 
             <div>
@@ -216,14 +297,31 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="flex gap-3 mt-8">
-          <button
-            className="bg-blue-600 text-white px-6 py-3 rounded font-semibold hover:bg-blue-700 hover:cursor-pointer transition-all duration-200 shadow hover:shadow-xl hover:scale-105"
-            onClick={handleSave}
-            disabled={isLoading}
+        <div className="flex justify-between items-center gap-3 mt-8">
+          <Link 
+            to="/change-password"
+            className="group inline-flex items-center gap-0 hover:gap-2 px-4 py-3 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all duration-200 font-semibold border border-blue-200 hover:border-blue-300 shadow hover:shadow-lg"
+            title="Đổi mật khẩu"
           >
-            <i className="fa-solid fa-floppy-disk mr-2.5"></i>
-            {isLoading ? "Đang lưu..." : "Lưu thay đổi"}
+            <i className="fa-solid fa-key"></i>
+            <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 whitespace-nowrap">Đổi mật khẩu</span>
+          </Link>
+          <button
+            className={`inline-flex items-center gap-0 px-4 py-3 rounded-xl font-semibold transition-all duration-200 shadow ${
+              !hasChanges() || isLoading
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'group bg-blue-600 text-white hover:bg-blue-700 hover:cursor-pointer hover:shadow-xl hover:scale-105 hover:gap-2'
+            }`}
+            onClick={handleSave}
+            disabled={isLoading || !hasChanges()}
+            title={isLoading ? "Đang lưu..." : "Lưu thay đổi"}
+          >
+            <i className="fa-solid fa-floppy-disk"></i>
+            <span className={`overflow-hidden transition-all duration-300 whitespace-nowrap ml-0 ${
+              !hasChanges() || isLoading ? 'max-w-0' : 'max-w-0 group-hover:max-w-xs group-hover:ml-2'
+            }`}>
+              {isLoading ? "Đang lưu..." : "Lưu thay đổi"}
+            </span>
           </button>
         </div>
       </div>

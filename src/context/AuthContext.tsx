@@ -8,6 +8,8 @@ interface User {
   role: 'user' | 'admin';
   avatarUrl?: string;
   warningCount?: number;
+  about?: string;
+  websites?: string[];
 }
 
 interface AuthContextType {
@@ -38,32 +40,31 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Check authentication on mount
   useEffect(() => {
     checkAuth();
   }, []);
 
   const checkAuth = async () => {
     try {
-      // Check both localStorage and sessionStorage for token
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       const storedUser = localStorage.getItem('user') || sessionStorage.getItem('user');
 
       if (token && storedUser) {
-        // Set user immediately from storage to avoid flicker
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
         setIsLoading(false);
-        
-        // Verify token in background
         try {
           const response = await axios.get('/auth/me');
           
           if (response.data.success) {
-            setUser(response.data.user);
+            const updatedUser = response.data.user;
+            setUser(updatedUser);
+            if (localStorage.getItem('token')) {
+              localStorage.setItem('user', JSON.stringify(updatedUser));
+            } else if (sessionStorage.getItem('token')) {
+              sessionStorage.setItem('user', JSON.stringify(updatedUser));
+            }
           } else {
-            // Invalid token
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             sessionStorage.removeItem('token');
@@ -71,7 +72,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setUser(null);
           }
         } catch (error) {
-          // If verification fails, keep user logged in but log the error
           console.error('Auth verification failed, keeping user logged in:', error);
         }
       } else {
@@ -91,10 +91,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(userData);
         return { token, user: userData };
       } else {
-        throw new Error(response.data.message || 'Đăng nhập thất bại');
+        throw new Error(response.data.message || 'Đăng nhập thất bại!');
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Đăng nhập thất bại';
+      if (error && typeof error === 'object' && 'response' in error) {
+        throw error;
+      }
+      const errorMessage = error instanceof Error ? error.message : 'Đăng nhập thất bại!';
       throw new Error(errorMessage);
     }
   };
@@ -115,30 +118,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       if (response.data.success) {
         const { token, user: userData } = response.data;
-        
-        // Save to localStorage
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(userData));
-        
-        // Update state
         setUser(userData);
       } else {
         throw new Error(response.data.message || 'Đăng ký thất bại');
       }
     } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        throw error;
+      }
       const errorMessage = error instanceof Error ? error.message : 'Đăng ký thất bại';
       throw new Error(errorMessage);
     }
   };
 
   const logout = () => {
-    // Clear both localStorage and sessionStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
-    
-    // Clear state
     setUser(null);
   };
 

@@ -15,9 +15,7 @@ export interface Post {
   content: string;
   excerpt?: string;
   authorId: string;
-  author: User | string; // Can be User object or username string
-  authorAvatar?: string; // Avatar URL from backend
-  createdAt: string;
+  author: User | string;  authorAvatar?: string;  createdAt: string;
   updatedAt?: string;
   readTime: number;
   likes: number;
@@ -28,6 +26,7 @@ export interface Post {
   featuredImage?: string;
   published?: boolean;
   status?: string;
+  total_reactions?: number;
 }
 
 export interface Comment {
@@ -38,10 +37,10 @@ export interface Comment {
   content: string;
   createdAt: string;
   likes: number;
+  isLiked?: boolean;
+  parentId?: string | null;
   replies?: Comment[];
 }
-
-// Mock Users
 export const mockUsers: User[] = [
   {
     id: "1",
@@ -94,8 +93,6 @@ export const mockUsers: User[] = [
     followersCount: 3200
   }
 ];
-
-// Mock Posts
 export const mockPosts: Post[] = [
   {
     id: "1",
@@ -685,8 +682,6 @@ Học lập trình là một hành trình dài, cần sự kiên trì và đam m
     published: true
   }
 ];
-
-// Mock Comments
 export const mockComments: Comment[] = [
   {
     id: "1",
@@ -734,8 +729,6 @@ export const mockComments: Comment[] = [
     likes: 7
   }
 ];
-
-// Helper functions
 export const getPostById = (id: string): Post | undefined => {
   return mockPosts.find(post => post.id === id);
 };

@@ -1,14 +1,16 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import db from '../config/database.js';
+import cloudinary from '../config/cloudinary.js';
+import { Readable } from 'stream';
 
-// Register new user
+
 export const register = async (req, res) => {
   try {
     const { username, email, password, confirmPassword } = req.body;
     console.log('Register - req.body:', req.body);
 
-    // Validation
+
     if (!username || !email || !password || !confirmPassword) {
       return res.status(400).json({ 
         success: false,
@@ -16,7 +18,7 @@ export const register = async (req, res) => {
       });
     }
 
-    // Check password match
+
     if (password !== confirmPassword) {
       return res.status(400).json({ 
         success: false,
@@ -24,7 +26,7 @@ export const register = async (req, res) => {
       });
     }
 
-    // Check password length
+
     if (password.length < 6) {
       return res.status(400).json({ 
         success: false,
@@ -32,7 +34,7 @@ export const register = async (req, res) => {
       });
     }
 
-    // Validate email format
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ 
@@ -41,7 +43,7 @@ export const register = async (req, res) => {
       });
     }
 
-    // Check if user exists
+
     const [existingUsers] = await db.query(
       'SELECT * FROM users WHERE email = ? OR username = ?',
       [email, username]
@@ -52,7 +54,7 @@ export const register = async (req, res) => {
       const existingUser = existingUsers[0];
       console.log('Register - existingUser:', existingUser);
       
-      // Check if account is locked
+
       if (existingUser.email === email && existingUser.status === 'locked') {
         console.log('Register - Email đã bị khóa:', email);
         return res.status(403).json({ 
@@ -78,19 +80,19 @@ export const register = async (req, res) => {
       }
     }
 
-    // Hash password
+
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     console.log('Register - hashedPassword:', hashedPassword);
 
-    // Insert new user
+
     const [result] = await db.query(
       'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
       [username, email, hashedPassword]
     );
     console.log('Register - Insert result:', result);
 
-    // Generate JWT token
+
     const token = jwt.sign(
       { 
         id: result.insertId, 
@@ -111,7 +113,8 @@ export const register = async (req, res) => {
         id: result.insertId,
         username,
         email,
-        role: 'user'
+        role: 'user',
+        avatarUrl: null
       }
     });
 
@@ -124,13 +127,13 @@ export const register = async (req, res) => {
   }
 };
 
-// Login user
+
 export const login = async (req, res) => {
   try {
   const { email, password } = req.body;
   console.log('Login - req.body:', req.body);
 
-    // Validation
+
     if (!email || !password) {
       return res.status(400).json({ 
         success: false,
@@ -138,7 +141,7 @@ export const login = async (req, res) => {
       });
     }
 
-    // Check if user exists
+
     const [users] = await db.query(
       'SELECT * FROM users WHERE email = ?',
       [email]
@@ -156,17 +159,17 @@ export const login = async (req, res) => {
     const user = users[0];
     console.log('Login - user:', user);
 
-    // Check if account is locked
+
     if (user.status === 'locked') {
       console.log('Login - Tài khoản bị khóa:', email);
       return res.status(403).json({ 
         success: false,
-        message: 'Email đã bị khóa',
+        message: 'Bạn đã bị khóa tài khoản',
         locked: true
       });
     }
 
-    // Compare password
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     console.log('Login - isPasswordValid:', isPasswordValid);
     
@@ -178,7 +181,7 @@ export const login = async (req, res) => {
       });
     }
 
-    // Generate JWT token
+
     const token = jwt.sign(
       { 
         id: user.id, 
@@ -199,6 +202,9 @@ export const login = async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
+        avatarUrl: user.avatarUrl,
+        about: user.about,
+        websites: user.websites ? (typeof user.websites === 'string' ? JSON.parse(user.websites) : user.websites) : [],
         warningCount: user.warningCount || 0
       }
     });
@@ -212,7 +218,7 @@ export const login = async (req, res) => {
   }
 };
 
-// Get current user info
+
 export const getMe = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -229,9 +235,20 @@ export const getMe = async (req, res) => {
       });
     }
 
+
+    const user = users[0];
+    if (user.websites && typeof user.websites === 'string') {
+      try {
+        user.websites = JSON.parse(user.websites);
+      } catch (e) {
+        user.websites = [];
+      }
+    }
+
+
     res.status(200).json({
       success: true,
-      user: users[0]
+      user: user
     });
 
   } catch (error) {
@@ -243,59 +260,298 @@ export const getMe = async (req, res) => {
   }
 };
 
-// Update user profile
+
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { username, about } = req.body;
+    const { username, email, about, password } = req.body;
     
     console.log('UpdateProfile - userId:', userId);
     console.log('UpdateProfile - body:', req.body);
     console.log('UpdateProfile - file:', req.file);
     
-    // Lấy websites từ form-data
+
+    if (email) {
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ 
+          success: false,
+          message: 'Email không hợp lệ' 
+        });
+      }
+      
+
+      const [existingEmail] = await db.query(
+        'SELECT id FROM users WHERE email = ? AND id != ?',
+        [email, userId]
+      );
+      
+      if (existingEmail.length > 0) {
+        return res.status(409).json({ 
+          success: false,
+          message: 'Email đã được sử dụng bởi tài khoản khác' 
+        });
+      }
+    }
+    
+
     const websites = Object.keys(req.body)
       .filter(k => k.startsWith('websites['))
       .map(k => req.body[k]);
     
     console.log('UpdateProfile - websites:', websites);
     
-    // Lấy avatarUrl hiện tại
-    const [currentUser] = await db.query(
-      'SELECT avatarUrl FROM users WHERE id = ?',
+
+    const [currentUsers] = await db.query(
+      'SELECT password, avatarUrl FROM users WHERE id = ?',
       [userId]
     );
     
-    console.log('UpdateProfile - currentUser:', currentUser);
+    console.log('UpdateProfile - currentUser:', currentUsers);
     
-    let avatarUrl = currentUser[0]?.avatarUrl || null;
+    const currentUser = currentUsers[0];
+    let avatarUrl = currentUser?.avatarUrl || null;
     
-    // Nếu có file mới được upload
-    if (req.file) {
-      avatarUrl = `/uploads/${req.file.filename}`;
+
+    if (password && password.trim().length > 0) {
+
+      if (password.length < 6) {
+        return res.status(400).json({ 
+          success: false,
+          message: 'Mật khẩu phải có ít nhất 6 ký tự' 
+        });
+      }
+      
+
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasNumber = /[0-9]/.test(password);
+      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+      
+      if (!hasUpperCase || !hasNumber || !hasSpecialChar) {
+        return res.status(400).json({ 
+          success: false,
+          message: 'Mật khẩu phải có ít nhất 1 ký tự hoa, 1 chữ số và 1 ký tự đặc biệt' 
+        });
+      }
+      
+
+      if (currentUser && currentUser.password) {
+        const isSamePassword = await bcrypt.compare(password, currentUser.password);
+        if (isSamePassword) {
+          return res.status(400).json({ 
+            success: false,
+            message: 'Mật khẩu mới không được trùng với mật khẩu hiện tại' 
+          });
+        }
+      }
     }
     
-    // Cập nhật vào database
-    await db.query(
-      'UPDATE users SET username = ?, about = ?, avatarUrl = ?, websites = ? WHERE id = ?',
-      [username, about, avatarUrl, JSON.stringify(websites), userId]
-    );
+
+    if (req.file) {
+      try {
+
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'bloghub/avatars',
+            resource_type: 'image',
+            transformation: [
+              { width: 400, height: 400, crop: 'fill', gravity: 'face' }
+            ]
+          },
+          async (error, result) => {
+            if (error) {
+              console.error('Cloudinary upload error:', error);
+              return res.status(500).json({
+                success: false,
+                message: 'Lỗi khi upload ảnh'
+              });
+            }
+            
+            avatarUrl = result.secure_url;
+            console.log('UpdateProfile - Cloudinary URL:', avatarUrl);
+            
+
+            await updateDatabase();
+          }
+        );
+
+
+        const bufferStream = Readable.from(req.file.buffer);
+        bufferStream.pipe(uploadStream);
+        
+
+        return;
+      } catch (uploadError) {
+        console.error('Upload error:', uploadError);
+        return res.status(500).json({
+          success: false,
+          message: 'Lỗi khi upload ảnh'
+        });
+      }
+    }
     
-    // Trả về user đã cập nhật
-    const [users] = await db.query(
-      'SELECT id, username, email, role, about, avatarUrl, websites FROM users WHERE id = ?',
-      [userId]
-    );
+
+    await updateDatabase();
     
-    res.json({ 
-      success: true, 
-      user: users[0] 
-    });
+
+    async function updateDatabase() {
+      try {
+
+        if (password && password.trim().length > 0) {
+          const hashedPassword = await bcrypt.hash(password, 10);
+          console.log('UpdateProfile - Updating with password. SQL params:', [username, email, about, avatarUrl, JSON.stringify(websites), userId]);
+          await db.query(
+            'UPDATE users SET username = ?, email = ?, about = ?, avatarUrl = ?, websites = ?, password = ? WHERE id = ?',
+            [username, email, about, avatarUrl, JSON.stringify(websites), hashedPassword, userId]
+          );
+          console.log('UpdateProfile - Password updated');
+        } else {
+
+          console.log('UpdateProfile - Updating without password. SQL params:', [username, email, about, avatarUrl, JSON.stringify(websites), userId]);
+          const result = await db.query(
+            'UPDATE users SET username = ?, email = ?, about = ?, avatarUrl = ?, websites = ? WHERE id = ?',
+            [username, email, about, avatarUrl, JSON.stringify(websites), userId]
+          );
+          console.log('UpdateProfile - Update result:', result);
+        }
+        
+
+        const [users] = await db.query(
+          'SELECT id, username, email, role, about, avatarUrl, websites FROM users WHERE id = ?',
+          [userId]
+        );
+        
+
+        const updatedUser = users[0];
+        if (updatedUser.websites && typeof updatedUser.websites === 'string') {
+          try {
+            updatedUser.websites = JSON.parse(updatedUser.websites);
+          } catch (e) {
+            updatedUser.websites = [];
+          }
+        }
+
+
+        
+        console.log('UpdateProfile - Returning user:', updatedUser);
+        
+        res.json({ 
+          success: true, 
+          user: updatedUser 
+        });
+      } catch (dbError) {
+        console.error('Database update error:', dbError);
+        res.status(500).json({ 
+          success: false, 
+          message: 'Lỗi server khi cập nhật hồ sơ' 
+        });
+      }
+    }
   } catch (error) {
     console.error('UpdateProfile error:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Lỗi server khi cập nhật hồ sơ' 
+    });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    
+    console.log('ChangePassword - userId:', userId);
+
+    // Validate input
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Vui lòng điền đầy đủ thông tin' 
+      });
+    }
+
+    // Check if new password matches confirm password
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Mật khẩu xác nhận không khớp' 
+      });
+    }
+
+    // Validate new password strength
+    if (newPassword.length < 6) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Mật khẩu phải có ít nhất 6 ký tự' 
+      });
+    }
+
+    const hasUpperCase = /[A-Z]/.test(newPassword);
+    const hasNumber = /[0-9]/.test(newPassword);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
+    
+    if (!hasUpperCase || !hasNumber || !hasSpecialChar) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Mật khẩu phải có ít nhất 1 ký tự hoa, 1 chữ số và 1 ký tự đặc biệt' 
+      });
+    }
+
+    // Get current user password
+    const [users] = await db.query(
+      'SELECT password FROM users WHERE id = ?',
+      [userId]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Người dùng không tồn tại' 
+      });
+    }
+
+    const user = users[0];
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ 
+        success: false,
+        message: 'Mật khẩu hiện tại không đúng' 
+      });
+    }
+
+    // Check if new password is same as current password
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Mật khẩu mới không được trùng với mật khẩu hiện tại' 
+      });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password in database
+    await db.query(
+      'UPDATE users SET password = ? WHERE id = ?',
+      [hashedPassword, userId]
+    );
+
+    console.log('ChangePassword - Password updated successfully for userId:', userId);
+
+    res.json({ 
+      success: true,
+      message: 'Đổi mật khẩu thành công' 
+    });
+  } catch (error) {
+    console.error('ChangePassword error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi server khi đổi mật khẩu' 
     });
   }
 };
