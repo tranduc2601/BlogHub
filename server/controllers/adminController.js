@@ -39,7 +39,7 @@ export const getPosts = async (req, res) => {
     console.error('Get posts error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi lấy danh sách bài viết' 
+      message: 'Lỗi khi lấy danh sách bài viết!' 
     });
   }
 };
@@ -60,14 +60,14 @@ export const createPost = async (req, res) => {
 
     res.status(201).json({ 
       success: true, 
-      message: 'Tạo bài viết thành công',
+      message: 'Tạo bài viết thành công!',
       post: newPost[0]
     });
   } catch (error) {
     console.error('Create post error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi tạo bài viết' 
+      message: 'Lỗi khi tạo bài viết!' 
     });
   }
 };
@@ -83,7 +83,7 @@ export const togglePostStatus = async (req, res) => {
     if (posts.length === 0) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Bài viết không tồn tại' 
+        message: 'Bài viết không tồn tại!' 
       });
     }
 
@@ -98,12 +98,11 @@ export const togglePostStatus = async (req, res) => {
       [postId]
     );
 
-    // Create notification for post author
     if (adminId) {
       try {
         const message = newStatus === 'visible' 
-          ? `đã hiển thị lại bài viết "${post.title}" của bạn`
-          : `đã ẩn bài viết "${post.title}" của bạn`;
+          ? `đã hiển thị lại bài viết "${post.title}" của bạn!`
+          : `đã ẩn bài viết "${post.title}" của bạn!`;
         
         await createNotification(
           post.authorId,
@@ -156,7 +155,6 @@ export const approvePost = async (req, res) => {
       [postId]
     );
 
-    // Create notification for post author
     if (adminId) {
       try {
         await createNotification(
@@ -216,7 +214,7 @@ export const rejectPost = async (req, res) => {
 
     res.json({ 
       success: true, 
-      message: reason || 'Đã từ chối bài viết. Bài viết sẽ không hiển thị công khai.',
+      message: reason || 'Đã từ chối bài viết này. Bài viết sẽ không hiển thị công khai!',
       post: {
         ...updated[0],
         needsReview: false,
@@ -227,7 +225,7 @@ export const rejectPost = async (req, res) => {
     console.error('Reject post error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi từ chối bài viết' 
+      message: 'Lỗi khi từ chối bài viết!' 
     });
   }
 };
@@ -250,14 +248,13 @@ export const deletePost = async (req, res) => {
 
     const post = posts[0];
 
-    // Create notification for post author before deleting
     if (adminId) {
       try {
         await createNotification(
           post.authorId,
           'post_reported',
           adminId,
-          `đã xóa bài viết "${post.title}" của bạn`,
+          `đã xóa bài viết "${post.title}" của bạn!`,
           null
         );
       } catch (notifError) {
@@ -265,7 +262,6 @@ export const deletePost = async (req, res) => {
       }
     }
 
-    // Delete comments first
     await db.query('DELETE FROM comments WHERE postId = ?', [postId]);
 
     // Delete the post
@@ -273,13 +269,13 @@ export const deletePost = async (req, res) => {
 
     res.json({ 
       success: true, 
-      message: 'Đã xóa bài viết thành công'
+      message: 'Đã xóa bài viết thành công!'
     });
   } catch (error) {
     console.error('Delete post error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi xóa bài viết' 
+      message: 'Lỗi khi xóa bài viết!' 
     });
   }
 };
@@ -317,7 +313,7 @@ export const getComments = async (req, res) => {
     console.error('Get comments error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi lấy danh sách bình luận' 
+      message: 'Lỗi khi lấy danh sách bình luận!' 
     });
   }
 };
@@ -343,14 +339,14 @@ export const createComment = async (req, res) => {
 
     res.status(201).json({ 
       success: true, 
-      message: 'Tạo bình luận thành công',
+      message: 'Tạo bình luận thành công!',
       comment: newComment[0]
     });
   } catch (error) {
     console.error('Create comment error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi tạo bình luận' 
+      message: 'Lỗi khi tạo bình luận!' 
     });
   }
 };
@@ -367,7 +363,7 @@ export const toggleCommentStatus = async (req, res) => {
     if (comments.length === 0) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Bình luận không tồn tại' 
+        message: 'Bình luận không tồn tại!' 
       });
     }
 
@@ -396,7 +392,7 @@ export const toggleCommentStatus = async (req, res) => {
     console.error('Toggle comment status error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi cập nhật trạng thái bình luận' 
+      message: 'Lỗi khi cập nhật trạng thái bình luận!' 
     });
   }
 };
@@ -436,7 +432,7 @@ export const getUsers = async (req, res) => {
     console.error('Get users error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi lấy danh sách người dùng' 
+      message: 'Lỗi khi lấy danh sách người dùng!' 
     });
   }
 };
@@ -453,7 +449,7 @@ export const toggleUserStatus = async (req, res) => {
     if (users.length === 0) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Người dùng không tồn tại' 
+        message: 'Người dùng không tồn tại!' 
       });
     }
 
@@ -461,7 +457,7 @@ export const toggleUserStatus = async (req, res) => {
     if (users[0].role === 'admin') {
       return res.status(403).json({ 
         success: false, 
-        message: 'Không thể khóa tài khoản admin' 
+        message: 'Không thể khóa tài khoản Admin!' 
       });
     }
 
@@ -503,7 +499,7 @@ export const toggleUserStatus = async (req, res) => {
     console.error('Toggle user status error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi cập nhật trạng thái người dùng' 
+      message: 'Lỗi khi cập nhật trạng thái người dùng!' 
     });
   }
 };
@@ -519,7 +515,7 @@ export const deleteUser = async (req, res) => {
     if (users.length === 0) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Người dùng không tồn tại' 
+        message: 'Người dùng không tồn tại!' 
       });
     }
 
@@ -549,19 +545,16 @@ export const deleteUser = async (req, res) => {
 
     res.json({ 
       success: true, 
-      message: 'Đã xóa người dùng và tất cả dữ liệu liên quan thành công. Email này có thể đăng ký lại.'
+      message: 'Đã xóa người dùng và tất cả dữ liệu liên quan thành công. Email này có thể đăng ký lại!'
     });
   } catch (error) {
     console.error('Delete user error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi xóa người dùng' 
+      message: 'Lỗi khi xóa người dùng!' 
     });
   }
 };
-
-
-
 
 export const getStats = async (req, res) => {
   try {
@@ -628,7 +621,7 @@ export const getStats = async (req, res) => {
     console.error('Get stats error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi lấy thống kê',
+      message: 'Lỗi khi lấy thống kê!',
       monthlyStats: [] 
     });
   }
@@ -672,7 +665,7 @@ export const getReports = async (req, res) => {
     console.error('Get reports error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi lấy danh sách báo cáo' 
+      message: 'Lỗi khi lấy danh sách báo cáo!' 
     });
   }
 };
@@ -694,7 +687,7 @@ export const approveReport = async (req, res) => {
     if (reports.length === 0) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Báo cáo không tồn tại' 
+        message: 'Báo cáo không tồn tại!' 
       });
     }
 
@@ -723,17 +716,15 @@ export const approveReport = async (req, res) => {
     const [users] = await db.query('SELECT warningCount, status FROM users WHERE id = ?', [postAuthorId]);
     const warningCount = users[0].warningCount || 0;
 
-    // Get post title for notification
     const [postData] = await db.query('SELECT title FROM posts WHERE id = ?', [report.postId]);
     const postTitle = postData.length > 0 ? postData[0].title : 'bài viết của bạn';
 
-    // Create notification for post author
     try {
       await createNotification(
         postAuthorId,
         'post_reported',
         adminId,
-        `đã xử lý báo cáo về "${postTitle}". Bạn đã nhận cảnh cáo (${warningCount}/3)`,
+        `đã xử lý báo cáo về "${postTitle}". Bạn đã nhận cảnh báo (${warningCount}/3)!`,
         report.postId
       );
     } catch (notifError) {
@@ -746,7 +737,7 @@ export const approveReport = async (req, res) => {
         report.reportedBy,
         'post_approved',
         adminId,
-        `đã duyệt báo cáo của bạn về "${postTitle}". Người dùng đã nhận cảnh cáo`,
+        `đã duyệt báo cáo của bạn về "${postTitle}". Người dùng đã nhận cảnh báo!`,
         report.postId
       );
     } catch (notifError) {
@@ -770,7 +761,7 @@ export const approveReport = async (req, res) => {
     console.error('Approve report error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi duyệt báo cáo' 
+      message: 'Lỗi khi duyệt báo cáo!' 
     });
   }
 };
@@ -792,7 +783,7 @@ export const rejectReport = async (req, res) => {
     if (reports.length === 0) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Báo cáo không tồn tại' 
+        message: 'Báo cáo không tồn tại!' 
       });
     }
 
@@ -811,7 +802,7 @@ export const rejectReport = async (req, res) => {
         report.reportedBy,
         'post_approved',
         adminId,
-        `đã từ chối báo cáo của bạn về "${postTitle}". Bài viết không vi phạm`,
+        `đã từ chối báo cáo của bạn về "${postTitle}". Bài viết không vi phạm!`,
         report.postId
       );
     } catch (notifError) {
@@ -820,13 +811,179 @@ export const rejectReport = async (req, res) => {
 
     res.json({ 
       success: true, 
-      message: 'Đã từ chối báo cáo. Bài viết không vi phạm.'
+      message: 'Đã từ chối báo cáo. Bài viết không vi phạm!'
     });
   } catch (error) {
     console.error('Reject report error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi từ chối báo cáo' 
+      message: 'Lỗi khi từ chối báo cáo!' 
+    });
+  }
+};
+
+// Get all comment reports for admin
+export const getCommentReports = async (req, res) => {
+  try {
+    const [reports] = await db.query(`
+      SELECT 
+        cr.id,
+        cr.commentId,
+        cr.reporterId,
+        cr.reason,
+        cr.status,
+        cr.adminResponse,
+        cr.reviewedBy,
+        cr.reviewedAt,
+        cr.createdAt,
+        c.content as commentContent,
+        c.postId,
+        c.userId as commentAuthorId,
+        cu.username as commentAuthor,
+        ru.username as reporterUsername,
+        p.title as postTitle,
+        ra.username as reviewerUsername
+      FROM comment_reports cr
+      JOIN comments c ON cr.commentId = c.id
+      JOIN users cu ON c.userId = cu.id
+      JOIN users ru ON cr.reporterId = ru.id
+      LEFT JOIN posts p ON c.postId = p.id
+      LEFT JOIN users ra ON cr.reviewedBy = ra.id
+      ORDER BY 
+        CASE 
+          WHEN cr.status = 'pending' THEN 1
+          WHEN cr.status = 'reviewed' THEN 2
+          ELSE 3
+        END,
+        cr.createdAt DESC
+    `);
+
+    res.json({
+      success: true,
+      reports: reports.map(r => ({
+        ...r,
+        createdAt: r.createdAt?.toISOString() || '',
+        reviewedAt: r.reviewedAt?.toISOString() || null
+      }))
+    });
+  } catch (error) {
+    console.error('Get comment reports error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi khi lấy danh sách báo cáo bình luận!'
+    });
+  }
+};
+
+// Handle comment report - Hide comment and notify users
+export const handleCommentReport = async (req, res) => {
+  try {
+    const reportId = parseInt(req.params.id);
+    const { action, adminResponse } = req.body; // action: 'hide' | 'reject'
+    const adminId = req.user?.id;
+
+    // Get report details
+    const [reports] = await db.query(`
+      SELECT 
+        cr.*,
+        c.content as commentContent,
+        c.userId as commentAuthorId,
+        c.postId,
+        cu.username as commentAuthor,
+        ru.username as reporterUsername,
+        p.title as postTitle
+      FROM comment_reports cr
+      JOIN comments c ON cr.commentId = c.id
+      JOIN users cu ON c.userId = cu.id
+      JOIN users ru ON cr.reporterId = ru.id
+      LEFT JOIN posts p ON c.postId = p.id
+      WHERE cr.id = ?
+    `, [reportId]);
+
+    if (reports.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Báo cáo không tồn tại!'
+      });
+    }
+
+    const report = reports[0];
+
+    if (action === 'hide') {
+      // Hide the comment
+      await db.query('UPDATE comments SET status = ? WHERE id = ?', ['hidden', report.commentId]);
+
+      // Update report status
+      await db.query(
+        'UPDATE comment_reports SET status = ?, adminResponse = ?, reviewedBy = ?, reviewedAt = NOW() WHERE id = ?',
+        ['action_taken', adminResponse || 'Bình luận đã bị ẩn do vi phạm quy định', adminId, reportId]
+      );
+
+      // Notify comment author
+      try {
+        await createNotification({
+          userId: report.commentAuthorId,
+          type: 'comment_reported',
+          postId: report.postId,
+          senderId: adminId,
+          message: `Bình luận của bạn đã bị ẩn do vi phạm quy định. Lý do: ${adminResponse || 'Vi phạm chính sách cộng đồng'}`
+        });
+      } catch (notifError) {
+        console.error('Error creating comment author notification:', notifError);
+      }
+
+      // Notify reporter
+      try {
+        await createNotification({
+          userId: report.reporterId,
+          type: 'post_approved',
+          postId: report.postId,
+          senderId: adminId,
+          message: `Cảm ơn báo cáo của bạn! Bình luận vi phạm từ "${report.commentAuthor}" đã được xử lý.`
+        });
+      } catch (notifError) {
+        console.error('Error creating reporter notification:', notifError);
+      }
+
+      res.json({
+        success: true,
+        message: 'Đã ẩn bình luận và thông báo cho người dùng!'
+      });
+    } else if (action === 'reject') {
+      // Reject the report
+      await db.query(
+        'UPDATE comment_reports SET status = ?, adminResponse = ?, reviewedBy = ?, reviewedAt = NOW() WHERE id = ?',
+        ['rejected', adminResponse || 'Bình luận không vi phạm quy định', adminId, reportId]
+      );
+
+      // Notify reporter
+      try {
+        await createNotification({
+          userId: report.reporterId,
+          type: 'post_approved',
+          postId: report.postId,
+          senderId: adminId,
+          message: `Báo cáo của bạn về bình luận từ "${report.commentAuthor}" đã được xem xét. Bình luận không vi phạm quy định.`
+        });
+      } catch (notifError) {
+        console.error('Error creating reporter notification:', notifError);
+      }
+
+      res.json({
+        success: true,
+        message: 'Đã từ chối báo cáo. Bình luận không vi phạm!'
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Action không hợp lệ!'
+      });
+    }
+  } catch (error) {
+    console.error('Handle comment report error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi khi xử lý báo cáo bình luận!'
     });
   }
 };

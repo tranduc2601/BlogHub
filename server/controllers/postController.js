@@ -15,14 +15,14 @@ export const deletePost = async (req, res) => {
     }
     const post = posts[0];
     if (post.authorId !== userId) {
-      return res.status(403).json({ success: false, message: 'Bạn không có quyền xoá bài viết này' });
+      return res.status(403).json({ success: false, message: 'Bạn không có quyền xoá bài viết này!' });
     }
 
     await db.query('DELETE FROM posts WHERE id = ?', [postId]);
-    res.json({ success: true, message: 'Đã xoá bài viết thành công' });
+    res.json({ success: true, message: 'Đã xoá bài viết thành công!' });
   } catch (error) {
     console.error('Delete post error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi xoá bài viết' });
+    res.status(500).json({ success: false, message: 'Lỗi khi xoá bài viết!' });
   }
 };
 
@@ -178,7 +178,7 @@ export const getPostById = async (req, res) => {
     if (!isVisible && !isAuthor && !isAdmin) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Bài viết không tồn tại hoặc đã bị ẩn' 
+        message: 'Bài viết không tồn tại hoặc đã bị ẩn!' 
       });
     }
 
@@ -186,7 +186,7 @@ export const getPostById = async (req, res) => {
     if (post.privacy === 'private' && !isAuthor && !isAdmin) {
       return res.status(403).json({
         success: false,
-        message: 'Bài viết này là riêng tư'
+        message: 'Bài viết này là riêng tư!'
       });
     }
 
@@ -195,7 +195,7 @@ export const getPostById = async (req, res) => {
       if (!userId) {
         return res.status(403).json({
           success: false,
-          message: 'Chỉ người theo dõi mới có thể xem bài viết này'
+          message: 'Chỉ người theo dõi mới có thể xem bài viết này!'
         });
       }
 
@@ -207,7 +207,7 @@ export const getPostById = async (req, res) => {
       if (followCheck.length === 0) {
         return res.status(403).json({
           success: false,
-          message: 'Chỉ người theo dõi mới có thể xem bài viết này'
+          message: 'Chỉ người theo dõi mới có thể xem bài viết này!'
         });
       }
     }
@@ -539,6 +539,63 @@ export const getReactionStats = async (req, res) => {
   } catch (error) {
     console.error('Get reaction stats error:', error);
     res.status(500).json({ success: false, message: 'Lỗi khi lấy thống kê cảm xúc' });
+  }
+};
+
+export const getReactionUsers = async (req, res) => {
+  try {
+    const postId = parseInt(req.params.id);
+    const { reactionType } = req.query;
+
+    let query = `
+      SELECT 
+        u.id,
+        u.username,
+        u.username as fullName,
+        u.avatarUrl as avatar,
+        r.reactionType
+      FROM reactions r
+      JOIN users u ON r.userId = u.id
+      WHERE r.postId = ?
+    `;
+    
+    const params = [postId];
+
+    if (reactionType && reactionType !== 'all') {
+      query += ' AND r.reactionType = ?';
+      params.push(reactionType);
+    }
+
+    query += ' ORDER BY r.createdAt DESC';
+
+    const [users] = await db.query(query, params);
+
+    // Get reaction counts
+    const [counts] = await db.query(`
+      SELECT 
+        SUM(CASE WHEN reactionType = 'like' THEN 1 ELSE 0 END) as \`like\`,
+        SUM(CASE WHEN reactionType = 'love' THEN 1 ELSE 0 END) as love,
+        SUM(CASE WHEN reactionType = 'haha' THEN 1 ELSE 0 END) as haha,
+        SUM(CASE WHEN reactionType = 'wow' THEN 1 ELSE 0 END) as wow,
+        SUM(CASE WHEN reactionType = 'sad' THEN 1 ELSE 0 END) as sad,
+        SUM(CASE WHEN reactionType = 'angry' THEN 1 ELSE 0 END) as angry
+      FROM reactions
+      WHERE postId = ?
+    `, [postId]);
+
+    const reactionCounts = counts[0] || {};
+
+    res.json({ 
+      success: true, 
+      users: users.map(user => ({
+        ...user,
+        avatar: getFullAvatarUrl(user.avatar)
+      })),
+      counts: reactionCounts
+    });
+  } catch (error) {
+    console.error('Get reaction users error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi khi lấy danh sách người dùng' });
   }
 };
 

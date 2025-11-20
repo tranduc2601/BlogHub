@@ -18,6 +18,7 @@ export const getCommentsByPostId = async (req, res) => {
         c.createdAt,
         c.likes,
         c.parentId,
+        c.status,
         u.id as userId,
         u.username,
         u.email,
@@ -25,7 +26,7 @@ export const getCommentsByPostId = async (req, res) => {
         u.role
       FROM comments c
       JOIN users u ON c.userId = u.id
-      WHERE c.postId = ?
+      WHERE c.postId = ? AND c.status = 'visible'
       ORDER BY c.createdAt ASC`,
       [postId]
     );
@@ -642,6 +643,92 @@ export const deleteReply = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Không thể xóa phản hồi'
+    });
+  }
+};
+
+// Report a comment
+export const reportComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const { reason } = req.body;
+    const reporterId = req.user.id;
+
+    // Check if comment exists
+    const [comments] = await db.query(
+      'SELECT c.*, u.username as authorUsername FROM comments c JOIN users u ON c.userId = u.id WHERE c.id = ?',
+      [commentId]
+    );
+
+    if (comments.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Bình luận không tồn tại'
+      });
+    }
+
+    const comment = comments[0];
+
+    // Check if user is trying to report their own comment
+    if (comment.userId === reporterId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Bạn không thể báo cáo bình luận của chính mình'
+      });
+    }
+
+    // Check if user has already reported this comment
+    const [existingReports] = await db.query(
+      'SELECT id FROM comment_reports WHERE commentId = ? AND reporterId = ?',
+      [commentId, reporterId]
+    );
+
+    if (existingReports.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Bạn đã báo cáo bình luận này rồi'
+      });
+    }
+
+    // Create report
+    await db.query(
+      'INSERT INTO comment_reports (commentId, reporterId, reason) VALUES (?, ?, ?)',
+      [commentId, reporterId, reason]
+    );
+
+    // Update report count
+    await db.query(
+      'UPDATE comments SET reportCount = reportCount + 1 WHERE id = ?',
+      [commentId]
+    );
+
+    // Get all admins
+    const [admins] = await db.query(
+      "SELECT id FROM users WHERE role = 'admin'"
+    );
+
+    // Send notification to all admins
+    const notificationPromises = admins.map(admin => 
+      createNotification(
+        admin.id,
+        'comment_reported',
+        reporterId,
+        `Bình luận từ "${comment.authorUsername}" đã bị báo cáo vi phạm. Lý do: ${reason}`,
+        comment.postId
+      )
+    );
+
+    await Promise.all(notificationPromises);
+
+    res.json({
+      success: true,
+      message: 'Đã gửi báo cáo thành công. Admin sẽ xem xét và phản hồi sớm.'
+    });
+  } catch (error) {
+    console.error('Error reporting comment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Không thể gửi báo cáo'
     });
   }
 };

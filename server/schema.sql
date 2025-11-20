@@ -134,5 +134,48 @@ CREATE TABLE IF NOT EXISTS notifications (
   INDEX idx_type (type)
 );
 
+-- User sessions table for single device login enforcement
+CREATE TABLE IF NOT EXISTS user_sessions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  userId INT NOT NULL,
+  sessionToken VARCHAR(500) NOT NULL UNIQUE,
+  deviceInfo TEXT,
+  ipAddress VARCHAR(45),
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  expiresAt TIMESTAMP NOT NULL,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user (userId),
+  INDEX idx_token (sessionToken),
+  INDEX idx_expires (expiresAt)
+);
+
+-- Comment reports table
+CREATE TABLE IF NOT EXISTS comment_reports (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  commentId INT NOT NULL,
+  reporterId INT NOT NULL,
+  reason TEXT NOT NULL,
+  status ENUM('pending', 'reviewed', 'rejected', 'action_taken') DEFAULT 'pending',
+  adminResponse TEXT DEFAULT NULL,
+  reviewedBy INT DEFAULT NULL,
+  reviewedAt TIMESTAMP DEFAULT NULL,
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (commentId) REFERENCES comments(id) ON DELETE CASCADE,
+  FOREIGN KEY (reporterId) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (reviewedBy) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_comment (commentId),
+  INDEX idx_reporter (reporterId),
+  INDEX idx_status (status),
+  INDEX idx_created (createdAt)
+);
+
+-- Add reportCount to comments table
+ALTER TABLE comments ADD COLUMN reportCount INT DEFAULT 0;
+ALTER TABLE comments ADD INDEX idx_report_count (reportCount);
+
+
+
+
 
 

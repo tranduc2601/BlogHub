@@ -1,71 +1,135 @@
 # BlogHub Project
 
-BlogHub là một nền tảng blog hiện đại, cho phép người dùng đăng bài, bình luận, tương tác và quản trị nội dung. Dự án gồm hai phần: frontend (React + Vite + TailwindCSS) và backend (Node.js + Express).
+Nền tảng blog hiện đại với đầy đủ tính năng quản lý nội dung, tương tác người dùng và hệ thống quản trị.
 
-## Chức năng đã hoàn thiện
+## Giới thiệu
 
-- Đăng ký, đăng nhập, xác thực người dùng
-- Quản lý bài viết: tạo, sửa, xóa, xem chi tiết
-- Quản lý bình luận, phản hồi lồng nhau, ghim bình luận
-- Hệ thống phân quyền: Quản trị viên, Tác giả, Người dùng thường
-- Trang quản trị: quản lý user, bài viết, bình luận, báo cáo
-- Tương tác: thả cảm xúc, trả lời, chỉnh sửa, xóa bình luận
-- Responsive UI cho desktop, tablet, mobile
-- Tìm kiếm, lọc bài viết, phân trang
-- Đăng xuất, đổi mật khẩu, cập nhật thông tin cá nhân
-- Hỗ trợ upload ảnh bài viết qua Cloudinary
-- Chính sách bảo mật, điều khoản sử dụng
+**BlogHub** là ứng dụng blog được xây dựng với React + TypeScript (frontend) và Node.js + Express (backend). Dự án hỗ trợ đăng bài, bình luận, phản hồi, quản lý người dùng và trang quản trị dành cho admin.
 
-## Cách chạy dự án
+## Tính năng chính
 
-### 1. Cài đặt
+- 🔐 Đăng ký, đăng nhập với JWT authentication
+- 📝 Tạo, sửa, xóa bài viết với Rich Text Editor
+- 💬 Bình luận đa cấp, thả cảm xúc, ghim bình luận
+- 👥 Quản lý hồ sơ cá nhân, theo dõi người dùng
+- 🛡️ Trang quản trị: quản lý users, posts, comments, reports
+- 📷 Upload ảnh qua Cloudinary
+- 🔔 Hệ thống thông báo
+- 📱 Responsive design với TailwindCSS
+
+## Công nghệ sử dụng
+
+**Frontend:** React 18, TypeScript, Vite, TailwindCSS, Axios, React Router
+
+**Backend:** Node.js, Express, SQLite3, JWT, bcryptjs, Cloudinary
+
+## Cài đặt và chạy
+
+### 1. Cài đặt dependencies
 
 ```bash
+# Frontend
 npm install
-cd server && npm install
-```
 
-### 2. Khởi động backend
-
-```bash
+# Backend
 cd server
-node server.js
+npm install
 ```
 
-### 3. Khởi động frontend
+### 2. Cấu hình môi trường
 
-```bash
-npm run dev
+Tạo file `server/.env`:
+
+```env
+PORT=3000
+JWT_SECRET=your_secret_key
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+CORS_ORIGIN=http://localhost:5173
 ```
 
-- Truy cập giao diện: <http://localhost:5173>
-- API backend mặc định: <http://localhost:3000>
-
-### 4. Thiết lập tài khoản admin (tùy chọn)
+### 3. Khởi tạo database và admin
 
 ```bash
 cd server
 node setup-admin.js
 ```
 
-## Cấu trúc thư mục chính
+**Tài khoản admin mặc định:**
 
-- `/src`: mã nguồn frontend (React)
-- `/server`: mã nguồn backend (Node.js/Express)
-- `public/`, `index.html`, `vite.config.ts`: cấu hình frontend
+- Username: `admin`
+- Password: `admin123`
 
-## Công nghệ sử dụng
+### 4. Chạy ứng dụng
 
-- React, TypeScript, Vite, TailwindCSS
-- Node.js, Express, SQLite
-- Cloudinary (upload ảnh)
-- JWT, bcrypt (xác thực, bảo mật)
+**Backend:**
 
-## Đóng góp & phát triển
+```bash
+cd server
+npm start
+```
 
-- Fork repo, tạo branch mới, gửi pull request
-- Báo lỗi hoặc đề xuất chức năng qua Issues
+**Frontend:**
+
+```bash
+npm run dev
+```
+
+**Truy cập:**
+
+- Frontend: <http://localhost:5173>
+- Backend API: <http://localhost:3000>
+- Admin: <http://localhost:5173/admin>
+
+## Cấu trúc thư mục
+
+```text
+bloghub-project/
+├── src/                    # Frontend
+│   ├── core/              # Core (auth, config, routing)
+│   ├── modules/           # Feature modules
+│   ├── layout/            # Layout components
+│   └── shared/            # Shared components & utils
+├── server/                # Backend
+│   ├── config/           # Configuration
+│   ├── controllers/      # Request handlers
+│   ├── middleware/       # Middleware
+│   ├── routes/           # API routes
+│   └── server.js         # Entry point
+└── README.md
+```
+
+## API Endpoints chính
+
+```text
+POST   /api/auth/register          - Đăng ký
+POST   /api/auth/login             - Đăng nhập
+GET    /api/posts                  - Lấy danh sách bài viết
+POST   /api/posts                  - Tạo bài viết (Auth)
+GET    /api/posts/:id              - Chi tiết bài viết
+POST   /api/posts/:postId/comments - Tạo bình luận (Auth)
+GET    /api/admin/stats            - Thống kê (Admin)
+```
+
+## Build
+
+```bash
+# Frontend
+npm run build
+
+# Backend
+cd server
+npm install --production
+```
+
+## Nhóm phát triển
+
+- **Trần Hoàng Duy** - Full-stack Developer
+- **Trần Minh Đức** - Backend Developer
+- **Đoàn Nhật Cường** - Frontend Developer
+- **Nguyễn Gia Huy** - UI/UX Designer
 
 ---
 
-© 2025 BlogHub Made By Group 4 - Trần Hoàng Duy, Trần Minh Đức, Đoàn Nhật Cường và Nguyễ Gia Huy
+© 2025 BlogHub - Made by Group 4

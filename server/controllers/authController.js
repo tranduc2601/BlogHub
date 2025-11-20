@@ -152,7 +152,7 @@ export const login = async (req, res) => {
       console.log('Login - Không tìm thấy user với email:', email);
       return res.status(401).json({ 
         success: false,
-        message: 'Email hoặc mật khẩu không đúng' 
+        message: 'Email hoặc mật khẩu không đúng!' 
       });
     }
 
@@ -164,7 +164,7 @@ export const login = async (req, res) => {
       console.log('Login - Tài khoản bị khóa:', email);
       return res.status(403).json({ 
         success: false,
-        message: 'Bạn đã bị khóa tài khoản',
+        message: 'Bạn đã bị khóa tài khoản!',
         locked: true
       });
     }
@@ -177,9 +177,17 @@ export const login = async (req, res) => {
       console.log('Login - Mật khẩu không đúng cho email:', email);
       return res.status(401).json({ 
         success: false,
-        message: 'Email hoặc mật khẩu không đúng' 
+        message: 'Email hoặc mật khẩu không đúng!' 
       });
     }
+
+    // Delete all existing sessions for this user (force logout from other devices)
+    await db.query(
+      'DELETE FROM user_sessions WHERE userId = ?',
+      [user.id]
+    );
+
+    console.log('Login - Cleared all existing sessions for userId:', user.id);
 
 
     const token = jwt.sign(
@@ -192,6 +200,20 @@ export const login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
+
+    // Store session in database
+    const deviceInfo = req.headers['user-agent'] || 'Unknown Device';
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
+    const expiresInMs = expiresIn.includes('h') ? parseInt(expiresIn) * 60 * 60 * 1000 : parseInt(expiresIn) * 1000;
+    const expiresAt = new Date(Date.now() + expiresInMs);
+
+    await db.query(
+      'INSERT INTO user_sessions (userId, sessionToken, deviceInfo, ipAddress, expiresAt) VALUES (?, ?, ?, ?, ?)',
+      [user.id, token, deviceInfo, ipAddress, expiresAt]
+    );
+
+    console.log('Login - Session created for userId:', user.id);
 
     res.status(200).json({
       success: true,
@@ -457,6 +479,50 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+// Verify current password only
+export const verifyCurrentPassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { currentPassword } = req.body;
+
+    if (!currentPassword) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Vui lòng nhập mật khẩu hiện tại' 
+      });
+    }
+
+    // Get current user password
+    const [users] = await db.query(
+      'SELECT password FROM users WHERE id = ?',
+      [userId]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Người dùng không tồn tại' 
+      });
+    }
+
+    const user = users[0];
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    
+    res.json({ 
+      success: true,
+      isValid: isPasswordValid
+    });
+  } catch (error) {
+    console.error('VerifyCurrentPassword error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi server khi xác thực mật khẩu' 
+    });
+  }
+};
+
 export const changePassword = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -552,6 +618,40 @@ export const changePassword = async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: 'Lỗi server khi đổi mật khẩu' 
+    });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    const userId = req.user?.id;
+
+    if (!token || !userId) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Token không hợp lệ' 
+      });
+    }
+
+    // Delete session from database
+    await db.query(
+      'DELETE FROM user_sessions WHERE userId = ? AND sessionToken = ?',
+      [userId, token]
+    );
+
+    console.log('Logout - Session deleted for userId:', userId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Đăng xuất thành công'
+    });
+
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Lỗi server khi đăng xuất' 
     });
   }
 };

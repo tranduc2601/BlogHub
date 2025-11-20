@@ -15,7 +15,9 @@ import {
   getStats,
   getReports,
   approveReport,
-  rejectReport
+  rejectReport,
+  getCommentReports,
+  handleCommentReport
 } from '../controllers/adminController.js';
 import { authMiddleware, adminMiddleware } from '../middleware/authMiddleware.js';
 
@@ -50,5 +52,9 @@ router.get('/stats', getStats);
 router.get('/reports', getReports);
 router.put('/reports/:id/approve', approveReport);
 router.put('/reports/:id/reject', rejectReport);
+
+// Comment Reports
+router.get('/comment-reports', getCommentReports);
+router.put('/comment-reports/:id/handle', handleCommentReport);
 
 export default router;

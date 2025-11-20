@@ -153,6 +153,14 @@ body {
   animation: fadeIn 0.6s ease-out;
 }
 
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.animate-fade-in-delay {
+  animation: fadeIn 0.8s ease-out 0.3s both;
+}
+
 .animate-fadeInUp {
   animation: fadeInUp 0.8s ease-out;
 }
@@ -165,8 +173,16 @@ body {
   animation: slideInRight 0.6s ease-out;
 }
 
+.animate-slide-in-right {
+  animation: slideInRight 0.6s ease-out 0.2s both;
+}
+
 .animate-scaleIn {
   animation: scaleIn 0.5s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s ease-out 0.1s both;
 }
 
 .animate-slideUp {
@@ -380,6 +396,57 @@ body {
   }
 }
 
+@keyframes rgbShadowRotate {
+  0% {
+    box-shadow: 
+      0 0 20px rgba(255, 0, 0, 0.6),
+      0 0 40px rgba(255, 0, 0, 0.4),
+      0 0 60px rgba(255, 0, 0, 0.2);
+  }
+  14.28% {
+    box-shadow: 
+      0 0 20px rgba(255, 127, 0, 0.6),
+      0 0 40px rgba(255, 127, 0, 0.4),
+      0 0 60px rgba(255, 127, 0, 0.2);
+  }
+  28.56% {
+    box-shadow: 
+      0 0 20px rgba(255, 255, 0, 0.6),
+      0 0 40px rgba(255, 255, 0, 0.4),
+      0 0 60px rgba(255, 255, 0, 0.2);
+  }
+  42.84% {
+    box-shadow: 
+      0 0 20px rgba(0, 255, 0, 0.6),
+      0 0 40px rgba(0, 255, 0, 0.4),
+      0 0 60px rgba(0, 255, 0, 0.2);
+  }
+  57.12% {
+    box-shadow: 
+      0 0 20px rgba(0, 255, 255, 0.6),
+      0 0 40px rgba(0, 255, 255, 0.4),
+      0 0 60px rgba(0, 255, 255, 0.2);
+  }
+  71.4% {
+    box-shadow: 
+      0 0 20px rgba(0, 0, 255, 0.6),
+      0 0 40px rgba(0, 0, 255, 0.4),
+      0 0 60px rgba(0, 0, 255, 0.2);
+  }
+  85.68% {
+    box-shadow: 
+      0 0 20px rgba(255, 0, 255, 0.6),
+      0 0 40px rgba(255, 0, 255, 0.4),
+      0 0 60px rgba(255, 0, 255, 0.2);
+  }
+  100% {
+    box-shadow: 
+      0 0 20px rgba(255, 0, 0, 0.6),
+      0 0 40px rgba(255, 0, 0, 0.4),
+      0 0 60px rgba(255, 0, 0, 0.2);
+  }
+}
+
 @property --angle {
   syntax: '<angle>';
   initial-value: 0deg;
@@ -392,6 +459,7 @@ body {
   border-radius: 9999px;
   background: white;
   background-clip: padding-box;
+  transition: all 0.3s ease;
 }
 
 .rgb-border::before {
@@ -415,6 +483,17 @@ body {
   -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
-  animation: rgbRotate 3s linear infinite;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Hover state - activate border animation and RGB shadow */
+.rgb-border:hover::before {
+  opacity: 1;
+  animation: rgbRotate 2.5s linear infinite;
+}
+
+.rgb-border:hover {
+  animation: rgbShadowRotate 2.5s linear infinite;
 }

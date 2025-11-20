@@ -43,6 +43,20 @@ export const authMiddleware = async (req, res, next) => {
         accountLocked: true
       });
     }
+
+    // Check if session exists and is valid
+    const [sessions] = await db.query(
+      'SELECT * FROM user_sessions WHERE userId = ? AND sessionToken = ? AND expiresAt > NOW()',
+      [user.id, token]
+    );
+
+    if (sessions.length === 0) {
+      return res.status(401).json({ 
+        success: false,
+        message: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại!',
+        sessionExpired: true
+      });
+    }
     
 
     req.user = {

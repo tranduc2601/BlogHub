@@ -1,6 +1,6 @@
 import express from 'express';
-import { reportPost, createPost, getPosts, getPostById, deletePost, likePost, isPostLiked, updatePost, trackPostView, reactPost, getUserReaction, getReactionStats, pinComment, unpinComment, getPinnedComment, sharePost } from '../controllers/postController.js';
-import { getCommentsByPostId, createComment, updateComment, likeComment, deleteComment, getRepliesByCommentId, createReply, deleteReply, reactComment, getUserCommentReaction, getCommentReactions } from '../controllers/commentController.js';
+import { reportPost, createPost, getPosts, getPostById, deletePost, likePost, isPostLiked, updatePost, trackPostView, reactPost, getUserReaction, getReactionStats, getReactionUsers, pinComment, unpinComment, getPinnedComment, sharePost } from '../controllers/postController.js';
+import { getCommentsByPostId, createComment, updateComment, likeComment, deleteComment, getRepliesByCommentId, createReply, deleteReply, reactComment, getUserCommentReaction, getCommentReactions, reportComment } from '../controllers/commentController.js';
 import { authMiddleware, optionalAuthMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -13,6 +13,8 @@ router.post('/:postId/pin-comment', authMiddleware, pinComment);
 router.delete('/:postId/pin-comment', authMiddleware, unpinComment);
 router.get('/:postId/pinned-comment', getPinnedComment);
 
+// Report comment
+router.post('/comments/:commentId/report', authMiddleware, reportComment);
 
 router.put('/comments/:commentId', authMiddleware, updateComment);
 
@@ -48,6 +50,9 @@ router.get('/:id/user-reaction', optionalAuthMiddleware, getUserReaction);
 
 
 router.get('/:id/reaction-stats', getReactionStats);
+
+
+router.get('/:id/reactions/users', optionalAuthMiddleware, getReactionUsers);
 
 
 router.get('/:postId/comments', optionalAuthMiddleware, getCommentsByPostId);
