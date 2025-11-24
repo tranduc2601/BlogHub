@@ -31,6 +31,7 @@ export default function ReactionModal({ isOpen, onClose, postId, totalReactions 
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("all");
   const [reactionCounts, setReactionCounts] = useState<{ [key: string]: number }>({});
+  const [isClosing, setIsClosing] = useState(false);
 
   const fetchReactionUsers = async () => {
     try {
@@ -58,13 +59,21 @@ export default function ReactionModal({ isOpen, onClose, postId, totalReactions 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, postId, activeTab]);
 
+  // Hiệu ứng ẩn modal mượt mà
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 300);
+  };
+
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add("overflow-hidden");
     } else {
       document.body.classList.remove("overflow-hidden");
     }
-
     return () => {
       document.body.classList.remove("overflow-hidden");
     };
@@ -85,15 +94,15 @@ export default function ReactionModal({ isOpen, onClose, postId, totalReactions 
       .slice(0, 2);
   };
 
-  if (!isOpen) return null;
+  if (!isOpen && !isClosing) return null;
 
   const availableReactions = Object.entries(reactionCounts)
     .filter(([, count]) => count > 0)
     .map(([type]) => type);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[600px] flex flex-col animate-fadeIn">
+    <div className={`fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4 transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}>
+      <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[600px] flex flex-col transition-all duration-300 ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100 animate-fadeIn'}`}>
         {/* Header with Tabs */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
           <div className="flex items-center gap-2 overflow-x-auto flex-1 mr-2">
@@ -124,7 +133,7 @@ export default function ReactionModal({ isOpen, onClose, postId, totalReactions 
             ))}
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer flex-shrink-0"
             aria-label="Đóng"
           >

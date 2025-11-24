@@ -6,7 +6,7 @@ import { authMiddleware, optionalAuthMiddleware } from '../middleware/authMiddle
 const router = express.Router();
 
 
-router.get('/', getPosts);
+router.get('/', optionalAuthMiddleware, getPosts);
 
 // Pin/Unpin comment routes
 router.post('/:postId/pin-comment', authMiddleware, pinComment);

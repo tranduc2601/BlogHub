@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 
 interface ModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ const Modal: React.FC<ModalProps> = ({
   confirmText = 'Xác nhận',
   cancelText = 'Hủy'
 }) => {
+  const [isClosing, setIsClosing] = React.useState(false);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -35,7 +37,15 @@ const Modal: React.FC<ModalProps> = ({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 300);
+  };
+
+  if (!isOpen && !isClosing) return null;
 
   const getIconAndColor = () => {
     switch (type) {
@@ -54,13 +64,17 @@ const Modal: React.FC<ModalProps> = ({
 
   const { icon, color, bg } = getIconAndColor();
 
-  return (
+  const modalContent = (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-none"
-      onClick={onClose}
+      className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 transition-all duration-300 ${
+        isClosing ? 'opacity-0 backdrop-blur-none' : 'opacity-100'
+      }`}
+      onClick={handleClose}
     >
       <div 
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-fadeIn"
+        className={`bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transition-all duration-300 ${
+          isClosing ? 'scale-95 opacity-0 translate-y-4' : 'scale-100 opacity-100 translate-y-0 animate-fadeIn'
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6 pb-4">
@@ -80,7 +94,7 @@ const Modal: React.FC<ModalProps> = ({
           {type === 'confirm' || onConfirm ? (
             <>
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="px-5 py-2.5 rounded-xl font-medium text-gray-700 bg-gray-100 border border-transparent hover:border-red-400 hover:bg-red-50 hover:text-red-600 transition-all duration-200 cursor-pointer hover:scale-105 hover:shadow-lg"
               >
                 <i className="fa-solid fa-xmark mr-2"></i>{cancelText}
@@ -88,7 +102,7 @@ const Modal: React.FC<ModalProps> = ({
               <button
                 onClick={() => {
                   onConfirm?.();
-                  onClose();
+                  handleClose();
                 }}
                 className={
                   (type === 'warning' && confirmText?.toLowerCase().includes('xóa'))
@@ -105,7 +119,7 @@ const Modal: React.FC<ModalProps> = ({
             </>
           ) : (
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="px-5 py-2.5 rounded-xl font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-lg"
             >
               Đóng
@@ -115,6 +129,8 @@ const Modal: React.FC<ModalProps> = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default Modal;

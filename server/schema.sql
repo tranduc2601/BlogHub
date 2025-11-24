@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS posts (
   id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
-  content TEXT NOT NULL,
+  content LONGTEXT NOT NULL,
   authorId INT NOT NULL,
   status ENUM('pending', 'visible', 'hidden') DEFAULT 'pending',
   likes INT DEFAULT 0,
@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS comments (
   parentId INT DEFAULT NULL,
   status ENUM('visible', 'hidden') DEFAULT 'visible',
   likes INT DEFAULT 0,
+  isAnonymous BOOLEAN DEFAULT FALSE,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
@@ -48,7 +49,8 @@ CREATE TABLE IF NOT EXISTS comments (
   INDEX idx_post (postId),
   INDEX idx_user (userId),
   INDEX idx_parent (parentId),
-  INDEX idx_status (status)
+  INDEX idx_status (status),
+  INDEX idx_anonymous (isAnonymous)
 );
 
 -- Reactions table with multiple reaction types (like Facebook)
@@ -173,6 +175,20 @@ CREATE TABLE IF NOT EXISTS comment_reports (
 -- Add reportCount to comments table
 ALTER TABLE comments ADD COLUMN reportCount INT DEFAULT 0;
 ALTER TABLE comments ADD INDEX idx_report_count (reportCount);
+
+-- Bookmarks table for saved posts
+CREATE TABLE IF NOT EXISTS bookmarks (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  userId INT NOT NULL,
+  postId INT NOT NULL,
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_user_post_bookmark (userId, postId),
+  INDEX idx_user (userId),
+  INDEX idx_post (postId),
+  INDEX idx_created (createdAt)
+);
 
 
 

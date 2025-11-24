@@ -17,6 +17,7 @@ export const getNotifications = async (req, res) => {
         n.message,
         n.isRead,
         n.createdAt,
+        n.anonymousId,
         u.username as senderName,
         u.avatarUrl as senderAvatar,
         p.title as postTitle
@@ -28,12 +29,22 @@ export const getNotifications = async (req, res) => {
       LIMIT ? OFFSET ?
     `, [userId, parseInt(limit), parseInt(offset)]);
 
-    // Convert avatar URLs
-    const formattedNotifications = notifications.map(notif => ({
-      ...notif,
-      senderAvatar: getFullAvatarUrl(notif.senderAvatar),
-      isRead: Boolean(notif.isRead)
-    }));
+    // Convert avatar URLs and format anonymous comments
+    const formattedNotifications = notifications.map(notif => {
+      let senderName = notif.senderName;
+      
+      // If senderId is null and it's a comment notification, it's anonymous
+      if (notif.senderId === null && notif.type === 'comment' && notif.anonymousId) {
+        senderName = `Người dùng ẩn danh ${notif.anonymousId}`;
+      }
+      
+      return {
+        ...notif,
+        senderName,
+        senderAvatar: getFullAvatarUrl(notif.senderAvatar),
+        isRead: Boolean(notif.isRead)
+      };
+    });
 
     res.json({
       success: true,
@@ -133,17 +144,17 @@ export const markAllAsRead = async (req, res) => {
 };
 
 // Create notification (helper function)
-export const createNotification = async (userId, type, senderId, message, postId = null) => {
+export const createNotification = async (userId, type, senderId, message, postId = null, anonymousId = null) => {
   try {
-    // Don't create notification if user is notifying themselves
-    if (userId === senderId) {
+    // Don't create notification if user is notifying themselves (skip check if anonymous)
+    if (senderId !== null && userId === senderId) {
       return true;
     }
     
     await db.query(`
-      INSERT INTO notifications (userId, type, senderId, message, postId)
-      VALUES (?, ?, ?, ?, ?)
-    `, [userId, type, senderId, message, postId]);
+      INSERT INTO notifications (userId, type, senderId, message, postId, anonymousId)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [userId, type, senderId, message, postId, anonymousId]);
     
     return true;
   } catch (error) {

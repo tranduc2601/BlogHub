@@ -6,7 +6,7 @@ export interface UseCommentsReturn {
   comments: Comment[];
   loading: boolean;
   error: string | null;
-  addComment: (content: string, parentId?: string) => Promise<void>;
+  addComment: (content: string, parentId?: string, isAnonymous?: boolean) => Promise<void>;
   updateComment: (commentId: string, content: string) => Promise<void>;
   deleteComment: (commentId: string) => Promise<void>;
   likeComment: (commentId: string) => Promise<void>;
@@ -38,12 +38,13 @@ export const useComments = (postId: string | number): UseCommentsReturn => {
     }
   }, [postId]);
 
-  const addComment = useCallback(async (content: string, parentId?: string) => {
+  const addComment = useCallback(async (content: string, parentId?: string, isAnonymous?: boolean) => {
     try {
       
       await axios.post(`/posts/${postId}/comments`, {
         content,
-        parentId: parentId || null
+        parentId: parentId || null,
+        isAnonymous: isAnonymous || false
       });
       await fetchComments();
     } catch (err) {

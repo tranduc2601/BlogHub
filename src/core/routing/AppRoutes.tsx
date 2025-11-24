@@ -1,8 +1,10 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ErrorBoundary } from '@/core/errors';
 import { ProtectedRoute } from '@/modules/auth';
 import { MainLayout } from '@/layout';
+import { LoadingSpinner } from '@/shared/ui';
+import { preloadCommonRoutes } from './routePreloader';
 
 // Lazy load pages for code splitting
 const HomePage = lazy(() => import('@/modules/posts/pages/HomePage'));
@@ -11,6 +13,7 @@ const PostsPage = lazy(() => import('@/modules/posts/pages/PostsPage'));
 const CreatePostPage = lazy(() => import('@/modules/posts/pages/CreatePostPage'));
 const EditPostPage = lazy(() => import('@/modules/posts/pages/EditPostPage'));
 const MyPostsPage = lazy(() => import('@/modules/posts/pages/MyPostsPage'));
+const SavedPostsPage = lazy(() => import('@/modules/posts/pages/SavedPostsPage'));
 
 const UsersPage = lazy(() => import('@/modules/users/pages/UsersPage'));
 const UserDetailPage = lazy(() => import('@/modules/users/pages/UserDetailPage'));
@@ -28,17 +31,15 @@ const RegisterPage = lazy(() => import('@/modules/auth/pages/RegisterPage'));
 const PrivacyPolicyPage = lazy(() => import('@/modules/posts/pages/PrivacyPolicyPage'));
 const TermsOfServicePage = lazy(() => import('@/modules/posts/pages/TermsOfServicePage'));
 
-// Loading fallback
-const LoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-      <p className="mt-4 text-gray-600">Đang tải...</p>
-    </div>
-  </div>
-);
+// Loading fallback component
+const LoadingFallback = () => <LoadingSpinner fullScreen size="lg" message="Đang tải trang..." />;
 
 export function AppRoutes() {
+  // Preload common routes after initial render
+  useEffect(() => {
+    preloadCommonRoutes();
+  }, []);
+
   return (
     <ErrorBoundary>
       <Suspense fallback={<LoadingFallback />}>
@@ -79,10 +80,26 @@ export function AppRoutes() {
               }
             />
             <Route
+              path="/profile/:userId"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/my-posts"
               element={
                 <ProtectedRoute>
                   <MyPostsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/saved-posts"
+              element={
+                <ProtectedRoute>
+                  <SavedPostsPage />
                 </ProtectedRoute>
               }
             />

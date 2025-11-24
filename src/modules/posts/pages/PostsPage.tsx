@@ -9,18 +9,21 @@ export default function PostsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [posts, setPosts] = useState<Post[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
+  const [displayedPosts, setDisplayedPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all");
   const [sortBy, setSortBy] = useState(searchParams.get("sort") || "hot");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [reactionModalState, setReactionModalState] = useState<{
     isOpen: boolean;
     postId: number;
     totalReactions: number;
   }>({ isOpen: false, postId: 0, totalReactions: 0 });
 
-  // Danh sách danh mục
-  const categories = ["all", "Công nghệ", "Lifestyle", "Du lịch", "Ẩm thực", "Giáo dục"];
+  const POSTS_PER_PAGE = 9;
 
   // Fetch posts từ server
   useEffect(() => {
@@ -104,7 +107,43 @@ export default function PostsPage() {
     });
 
     setFilteredPosts(result);
+    setPage(1); // Reset về trang 1 khi filter thay đổi
   }, [posts, searchQuery, selectedCategory, sortBy]);
+
+  // Cập nhật displayed posts khi filteredPosts hoặc page thay đổi
+  useEffect(() => {
+    const startIndex = 0;
+    const endIndex = page * POSTS_PER_PAGE;
+    const postsToDisplay = filteredPosts.slice(startIndex, endIndex);
+    
+    setDisplayedPosts(postsToDisplay);
+    setHasMore(endIndex < filteredPosts.length);
+  }, [filteredPosts, page]);
+
+  // Infinite scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loadingMore || !hasMore) return;
+
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = document.documentElement.clientHeight;
+
+      // Khi scroll gần đến cuối trang (còn 300px)
+      if (scrollTop + clientHeight >= scrollHeight - 300) {
+        setLoadingMore(true);
+        
+        // Simulate loading delay
+        setTimeout(() => {
+          setPage(prev => prev + 1);
+          setLoadingMore(false);
+        }, 500);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loadingMore, hasMore]);
 
   // Cập nhật URL params khi filter thay đổi
   useEffect(() => {
@@ -211,11 +250,12 @@ export default function PostsPage() {
                   onChange={(e) => handleCategoryChange(e.target.value)}
                   className="w-full px-4 py-3 pr-10 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 bg-white appearance-none cursor-pointer text-gray-700 font-medium shadow-sm hover:shadow-md hover:border-cyan-300"
                 >
-                  {categories.map(cat => (
-                    <option key={cat} value={cat}>
-                      {cat === "all" ? "Tất cả danh mục" : cat}
-                    </option>
-                  ))}
+                  <option value="all">Tất cả danh mục</option>
+                  <option value="Công nghệ">Công nghệ</option>
+                  <option value="Lifestyle">Lifestyle</option>
+                  <option value="Du lịch">Du lịch</option>
+                  <option value="Ẩm thực">Ẩm thực</option>
+                  <option value="Giáo dục">Giáo dục</option>
                 </select>
                 <i className="fa-solid fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-cyan-500 transition-colors"></i>
               </div>
@@ -233,11 +273,11 @@ export default function PostsPage() {
                   onChange={(e) => handleSortChange(e.target.value)}
                   className="w-full px-4 py-3 pr-10 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 bg-white appearance-none cursor-pointer text-gray-700 font-medium shadow-sm hover:shadow-md hover:border-cyan-300"
                 >
-                  <option value="hot">🔥 Hot nhất</option>
-                  <option value="newest">🕐 Mới nhất</option>
-                  <option value="oldest">📅 Cũ nhất</option>
-                  <option value="views">👁️ Xem nhiều</option>
-                  <option value="comments">💬 Nhiều bình luận</option>
+                  <option value="hot">Hot nhất</option>
+                  <option value="newest">Mới nhất</option>
+                  <option value="oldest">Cũ nhất</option>
+                  <option value="views">Xem nhiều</option>
+                  <option value="comments">Nhiều bình luận</option>
                 </select>
                 <i className="fa-solid fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-cyan-500 transition-colors"></i>
               </div>
@@ -290,17 +330,41 @@ export default function PostsPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredPosts.map((post, i) => (
-            <div
-              key={post.id}
-              className="animate-fadeInUp"
-              style={{ animationDelay: `${i * 100}ms` }}
-            >
-              <PostCard post={post} hideShare={true} onOpenReactionModal={handleOpenReactionModal} />
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {displayedPosts.map((post, i) => (
+              <div
+                key={post.id}
+                className="animate-fadeInUp"
+                style={{ animationDelay: `${i * 100}ms` }}
+              >
+                <PostCard post={post} hideShare={true} onOpenReactionModal={handleOpenReactionModal} />
+              </div>
+            ))}
+          </div>
+
+          {/* Loading More Indicator */}
+          {loadingMore && (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-3 text-gray-600 text-sm">Đang tải thêm bài viết...</p>
+              </div>
             </div>
-          ))}
-        </div>
+          )}
+
+          {/* End of List Indicator */}
+          {!hasMore && displayedPosts.length > 0 && (
+            <div className="flex items-center justify-center py-8 mt-4">
+              <div className="flex items-center gap-2 text-gray-500">
+                <div className="h-px w-16 bg-gray-300"></div>
+                <i className="fa-solid fa-check-circle text-green-500"></i>
+                <span className="text-sm font-medium">Đã hiển thị tất cả bài viết</span>
+                <div className="h-px w-16 bg-gray-300"></div>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <ReactionModal

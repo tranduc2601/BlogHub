@@ -6,6 +6,7 @@ import ReactionPicker, { ReactionStats, type ReactionType } from "./ReactionPick
 import ShareModal from "./ShareModal";
 import axios from "@/core/config/axios";
 import toast from "react-hot-toast";
+import { bookmarkService } from "../services/bookmarkService";
 
 interface PostCardProps {
   post: Post;
@@ -32,6 +33,8 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
   const [isReacting, setIsReacting] = useState(false);
   const [commentsCount, setCommentsCount] = useState(0);
   const reactionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isBookmarking, setIsBookmarking] = useState(false);
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -108,6 +111,58 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
     
     return () => clearInterval(interval);
   }, [post.id]);
+
+  // Check if post is bookmarked
+  useEffect(() => {
+    const checkBookmarkStatus = async () => {
+      try {
+        const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+        if (!userStr) return;
+
+        const response = await bookmarkService.checkBookmark(typeof post.id === 'string' ? parseInt(post.id) : post.id);
+        if (response.success) {
+          setIsBookmarked(response.isBookmarked);
+        }
+      } catch (error) {
+        console.error('Error checking bookmark status:', error);
+      }
+    };
+
+    checkBookmarkStatus();
+  }, [post.id]);
+
+  const handleBookmark = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isBookmarking) return;
+
+    const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+    if (!userStr) {
+      toast.error('Vui lòng đăng nhập để lưu bài viết!');
+      return;
+    }
+
+    setIsBookmarking(true);
+    const postId = typeof post.id === 'string' ? parseInt(post.id) : post.id;
+
+    try {
+      if (isBookmarked) {
+        await bookmarkService.removeBookmark(postId);
+        setIsBookmarked(false);
+        toast.success('Đã xóa bài viết khỏi danh sách lưu!');
+      } else {
+        await bookmarkService.addBookmark(postId);
+        setIsBookmarked(true);
+        toast.success('Đã lưu bài viết!');
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      toast.error('Có lỗi xảy ra, vui lòng thử lại!');
+    } finally {
+      setIsBookmarking(false);
+    }
+  };
 
   const handleReaction = async (reactionType: ReactionType) => {
     // Ngăn chặn spam - chỉ cho phép 1 action trong 500ms
@@ -235,9 +290,23 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
       'Marketing': 'bg-green-500',
       'Ẩm thực': 'bg-orange-500',
       'Du lịch': 'bg-indigo-500',
-      'Giáo dục': 'bg-teal-500'
+      'Giáo dục': 'bg-teal-500',
+      'Lifestyle': 'bg-pink-500'
     };
     return colors[category] || 'bg-gray-500';
+  };
+
+  const getCategoryIcon = (category: string) => {
+    const icons: { [key: string]: string } = {
+      'Công nghệ': 'fa-solid fa-microchip',
+      'Design': 'fa-solid fa-palette',
+      'Marketing': 'fa-solid fa-bullhorn',
+      'Lifestyle': 'fa-solid fa-heart',
+      'Du lịch': 'fa-solid fa-plane-departure',
+      'Ẩm thực': 'fa-solid fa-utensils',
+      'Giáo dục': 'fa-solid fa-graduation-cap'
+    };
+    return icons[category] || 'fa-solid fa-folder';
   };
 
   const getAvatarColor = (category: string) => {
@@ -298,6 +367,19 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
         {showMenu && (
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 animate-fadeIn">
             <button
+              onClick={handleBookmark}
+              disabled={isBookmarking}
+              className={`w-full px-4 py-2 text-left text-sm transition-colors duration-200 flex items-center gap-2 cursor-pointer ${
+                isBookmarked 
+                  ? 'text-yellow-600 hover:bg-yellow-50' 
+                  : 'text-gray-700 hover:bg-yellow-50 hover:text-yellow-600'
+              } ${isBookmarking ? 'opacity-50 cursor-wait' : ''}`}
+            >
+              <i className={`${isBookmarked ? 'fa-solid' : 'fa-regular'} fa-bookmark`}></i>
+              <span>{isBookmarked ? 'Bỏ lưu bài viết' : 'Lưu bài viết'}</span>
+            </button>
+            <div className="my-1 border-t border-gray-200"></div>
+            <button
               onClick={handleExportMarkdown}
               className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 flex items-center gap-2 cursor-pointer"
             >
@@ -355,8 +437,9 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
         </div>
       
       
-      <div className="mb-3 flex items-center gap-2">
-        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(post.category)} text-white`}>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(post.category)} text-white`}>
+          <i className={getCategoryIcon(post.category)}></i>
           {post.category}
         </span>
         {isHotPost() && (
@@ -364,6 +447,15 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
             <i className="fa-solid fa-fire"></i>
             <span>Hot</span>
           </div>
+        )}
+        {/* Privacy Badge */}
+        {post.privacy && post.privacy !== 'public' && (
+          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
+            post.privacy === 'private' ? 'bg-gray-600' : 'bg-indigo-600'
+          } text-white`} title={post.privacy === 'private' ? 'Chỉ bạn có thể xem' : 'Chỉ người theo dõi có thể xem'}>
+            <i className={`fa-solid ${post.privacy === 'private' ? 'fa-lock' : 'fa-user-group'} text-[10px]`}></i>
+            {post.privacy === 'private' ? 'Riêng tư' : 'Người theo dõi'}
+          </span>
         )}
       </div>
       
@@ -385,12 +477,14 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-4">
             {post.tags.slice(0, 3).map((tag, index) => (
-              <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
-                #{tag}
+              <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md flex items-center gap-1">
+                <i className="fa-solid fa-tag text-[10px] mr-1"></i>
+                {tag}
               </span>
             ))}
             {post.tags.length > 3 && (
-              <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
+              <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md flex items-center gap-1">
+                <i className="fa-solid fa-tags text-[10px] mr-1"></i>
                 +{post.tags.length - 3}
               </span>
             )}
@@ -406,52 +500,19 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
               currentReaction={currentReaction}
             />
           </div>
-          {/* {reactionStats && reactionStats.total_reactions > 0 && (
-            <div className="flex items-center gap-2">
-              {reactionStats.like_count > 0 && (
-                <span className="flex items-center gap-0.5" title="Thích">
-                  <span className="text-base">👍</span>
-                  <span className="text-xs font-medium">{reactionStats.like_count}</span>
-                </span>
-              )}
-              {reactionStats.love_count > 0 && (
-                <span className="flex items-center gap-0.5" title="Yêu thích">
-                  <span className="text-base">❤️</span>
-                  <span className="text-xs font-medium">{reactionStats.love_count}</span>
-                </span>
-              )}
-              {reactionStats.haha_count > 0 && (
-                <span className="flex items-center gap-0.5" title="Haha">
-                  <span className="text-base">😂</span>
-                  <span className="text-xs font-medium">{reactionStats.haha_count}</span>
-                </span>
-              )}
-              {reactionStats.wow_count > 0 && (
-                <span className="flex items-center gap-0.5" title="Wow">
-                  <span className="text-base">😮</span>
-                  <span className="text-xs font-medium">{reactionStats.wow_count}</span>
-                </span>
-              )}
-              {reactionStats.sad_count > 0 && (
-                <span className="flex items-center gap-0.5" title="Buồn">
-                  <span className="text-base">😢</span>
-                  <span className="text-xs font-medium">{reactionStats.sad_count}</span>
-                </span>
-              )}
-              {reactionStats.angry_count > 0 && (
-                <span className="flex items-center gap-0.5" title="Phẫn nộ">
-                  <span className="text-base">😠</span>
-                  <span className="text-xs font-medium">{reactionStats.angry_count}</span>
-                </span>
-              )}
-            </div>
-          )} */}
-          <span className="flex items-center gap-1 hover:text-gray-700 transition-colors" title="Số lượng comments">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/post/${post.id}`, { state: { scrollToComments: true } });
+            }}
+            className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer"
+            title="Xem bình luận"
+          >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
             </svg>
             {commentsCount}
-          </span>
+          </button>
           {!hideShare && location.pathname !== '/' && (
             <button 
               onClick={() => setIsShareModalOpen(true)}

@@ -85,7 +85,7 @@ export default function HomePage() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeInUp animation-delay-400">
           <button
-            className="bg-white border-3 border-blue-600 text-blue-700 px-8 py-3 rounded-full font-bold shadow-md transition-all duration-300 flex items-center gap-3 text-lg cursor-pointer hover:scale-105 hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:border-blue-700"
+            className="bg-white border-3 border-blue-600 text-blue-700 px-8 py-3 rounded-full font-bold shadow-md transition-all duration-300 flex items-center justify-center gap-3 text-lg cursor-pointer hover:scale-105 hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:border-blue-700"
             onClick={() => navigate("/create")}
             style={{ fontFamily: 'Inter, Arial, sans-serif' }}
           >
@@ -93,7 +93,7 @@ export default function HomePage() {
             Bắt đầu viết Blog
           </button>
           <button
-            className="bg-white border-3 border-blue-600 text-blue-700 px-8 py-3 rounded-full font-bold shadow-md transition-all duration-300 flex items-center gap-3 text-lg cursor-pointer hover:scale-105 hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-100 hover:border-blue-700"
+            className="bg-white border-3 border-blue-600 text-blue-700 px-8 py-3 rounded-full font-bold shadow-md transition-all duration-300 flex items-center justify-center gap-3 text-lg cursor-pointer hover:scale-105 hover:shadow-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-100 hover:border-blue-700"
             onClick={() => navigate("/posts")}
             style={{ fontFamily: 'Inter, Arial, sans-serif' }}
           >
@@ -146,7 +146,7 @@ export default function HomePage() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Tìm kiếm theo tiêu đề..."
-                className="pl-12 pr-5 py-3 border-3 border-gray-300 focus:border-blue-600 rounded-2xl w-full md:min-w-[220px] bg-white shadow focus:shadow-lg transition-all duration-300 text-lg font-medium placeholder:text-gray-400 hover:border-gray-400 outline-none"
+                className="pl-12 pr-5 py-3 border-3 border-gray-300 focus:border-blue-600 rounded-2xl w-full md:min-w-[220px] bg-white shadow focus:shadow-lg transition-all duration-300 text-lg font-medium placeholder:text-gray-400 hover:border-gray-400 outline-none text-center md:text-left"
               />
             </div>
             <div className="relative w-full md:w-auto">
@@ -158,7 +158,7 @@ export default function HomePage() {
                 value={searchTag}
                 onChange={e => setSearchTag(e.target.value)}
                 placeholder="Tìm theo thẻ (tags)..."
-                className="pl-12 pr-5 py-3 border-3 border-gray-300 focus:border-blue-600 rounded-2xl w-full md:min-w-[180px] bg-white shadow focus:shadow-lg transition-all duration-300 text-lg font-medium placeholder:text-gray-400 hover:border-gray-400 outline-none"
+                className="pl-12 pr-5 py-3 border-3 border-gray-300 focus:border-blue-600 rounded-2xl w-full md:min-w-[180px] bg-white shadow focus:shadow-lg transition-all duration-300 text-lg font-medium placeholder:text-gray-400 hover:border-gray-400 outline-none text-center md:text-left"
               />
             </div>
           </div>

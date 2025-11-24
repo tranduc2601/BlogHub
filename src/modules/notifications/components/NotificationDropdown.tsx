@@ -9,11 +9,11 @@ interface Notification {
   userId: number;
   type: string;
   postId: number | null;
-  senderId: number;
+  senderId: number | null;
   message: string;
   isRead: boolean;
   createdAt: string;
-  senderName: string;
+  senderName: string | null;
   senderAvatar: string | null;
   postTitle: string | null;
 }
@@ -30,7 +30,18 @@ export default function NotificationDropdown() {
   useEffect(() => {
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
+    
+    // Listen for notification deletion events
+    const handleNotificationDeleted = () => {
+      fetchUnreadCount();
+    };
+    
+    window.addEventListener('notification-deleted', handleNotificationDeleted);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('notification-deleted', handleNotificationDeleted);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -184,12 +195,16 @@ export default function NotificationDropdown() {
         className="group relative cursor-pointer"
         title="Thông báo"
       >
-        <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:bg-cyan-500 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3">
+        <div 
+          className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3"
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2664eb'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
+        >
           <div className="relative">
             <i className={`fa-solid fa-bell text-gray-700 group-hover:text-white text-lg transition-all duration-300 ${shouldAnimate ? 'animate-swing' : ''}`}></i>
             {unreadCount > 0 && (
               <span 
-                className={`absolute -top-2 -right-2 bg-gradient-to-br from-red-500 to-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg ${
+                className={`absolute -top-4 -right-4 bg-gradient-to-br from-red-500 to-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg ${
                   shouldAnimate ? 'animate-bounce-scale' : 'animate-pulse-subtle'
                 }`}
                 style={{
@@ -212,7 +227,7 @@ export default function NotificationDropdown() {
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllAsRead}
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
                 >
                   Đánh dấu tất cả đã đọc
                 </button>
@@ -228,7 +243,7 @@ export default function NotificationDropdown() {
               </div>
             ) : notifications.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
-                <i className="fa-light fa-bell-slash text-4xl mb-3 text-gray-300"></i>
+                <i className="fa-solid fa-bell-slash text-4xl mb-3 text-gray-300"></i>
                 <p className="font-medium">Chưa có thông báo nào</p>
               </div>
             ) : (
@@ -248,23 +263,23 @@ export default function NotificationDropdown() {
                         {notification.senderAvatar ? (
                           <img
                             src={notification.senderAvatar}
-                            alt={notification.senderName}
+                            alt={notification.senderName || 'Người dùng ẩn danh'}
                             className="w-10 h-10 rounded-full object-cover"
                           />
                         ) : (
                           <div className={`w-10 h-10 bg-gradient-to-br ${getNotificationColor(notification.type)} rounded-full flex items-center justify-center text-white font-bold text-sm`}>
-                            {getAuthorInitial(notification.senderName)}
+                            {notification.senderName ? getAuthorInitial(notification.senderName) : <i className="fa-solid fa-user-secret"></i>}
                           </div>
                         )}
 
-                        <div className={`absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-br ${getNotificationColor(notification.type)} rounded-full flex items-center justify-center border-2 border-white`}>
-                          <i className={`fa-solid ${getNotificationIcon(notification.type)} text-white text-[10px]`}></i>
+                        <div className={`absolute -bottom-0 -right-1 w-5 h-5 bg-gradient-to-br ${getNotificationColor(notification.type)} rounded-full flex items-center justify-center border-2 border-white`}>
+                          <i className={`fa-solid ${getNotificationIcon(notification.type)} text-white text-[10px] mb-0.5`}></i>
                         </div>
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm ${!notification.isRead ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>
-                          <span className="font-bold">{notification.senderName}</span> {notification.message}
+                          <span className="font-bold">{notification.senderName || 'Người dùng ẩn danh'}</span> {notification.message}
                         </p>
                         <p className="text-xs text-blue-600 mt-1">
                           {getTimeAgo(notification.createdAt)}

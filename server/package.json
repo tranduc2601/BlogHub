@@ -12,7 +12,8 @@
     "setup-db": "mysql -u root -p bloghub_db < schema.sql && npm run setup-admin",
     "reset-db": "node reset-database.js",
     "update-schema": "node update-schema.js",
-    "clean-db": "node clean-database.js"
+    "clean-db": "node clean-database.js",
+    "migrate:anonymous": "node migrations/add-anonymous-comments.js"
   },
   "keywords": [
     "blog",

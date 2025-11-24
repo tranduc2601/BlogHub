@@ -13,6 +13,7 @@ export const getPosts = async (req, res) => {
         p.likes,
         p.createdAt,
         p.category,
+        p.tags,
         u.username as author
       FROM posts p
       LEFT JOIN users u ON p.authorId = u.id
@@ -293,8 +294,7 @@ export const getComments = async (req, res) => {
         c.status,
         c.createdAt,
         u.username as author,
-        p.title as postTitle,
-        CASE WHEN c.status = 'hidden' THEN true ELSE false END as needsReview
+        p.title as postTitle
       FROM comments c
       LEFT JOIN users u ON c.userId = u.id
       LEFT JOIN posts p ON c.postId = p.id
@@ -306,7 +306,7 @@ export const getComments = async (req, res) => {
       comments: comments.map(c => ({
         ...c,
         createdAt: c.createdAt?.toISOString().slice(0, 10) || '',
-        needsReview: c.needsReview === 1 || c.status === 'hidden'
+        needsReview: false // Comments không có cơ chế kiểm duyệt
       }))
     });
   } catch (error) {
@@ -623,6 +623,150 @@ export const getStats = async (req, res) => {
       success: false, 
       message: 'Lỗi khi lấy thống kê!',
       monthlyStats: [] 
+    });
+  }
+};
+
+export const getTopPosts = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+
+    const [topPosts] = await db.query(`
+      SELECT 
+        p.id,
+        p.title,
+        p.likes,
+        p.createdAt,
+        u.username as author,
+        u.avatarUrl as authorAvatar,
+        COUNT(DISTINCT c.id) as commentCount
+      FROM posts p
+      LEFT JOIN users u ON p.authorId = u.id
+      LEFT JOIN comments c ON p.id = c.postId
+      WHERE p.status = 'visible'
+      GROUP BY p.id, p.title, p.likes, p.createdAt, u.username, u.avatarUrl
+      ORDER BY p.likes DESC, commentCount DESC
+      LIMIT ?
+    `, [limit]);
+
+    res.json({ 
+      success: true, 
+      topPosts: topPosts.map(post => ({
+        ...post,
+        authorAvatar: getFullAvatarUrl(post.authorAvatar),
+        createdAt: post.createdAt?.toISOString().slice(0, 10) || ''
+      }))
+    });
+  } catch (error) {
+    console.error('Get top posts error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi khi lấy top bài viết!' 
+    });
+  }
+};
+
+export const getTopUsers = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+
+    const [topUsers] = await db.query(`
+      SELECT 
+        u.id,
+        u.username as name,
+        u.avatarUrl,
+        u.email,
+        COUNT(DISTINCT p.id) as postsCount,
+        SUM(p.likes) as totalLikes,
+        COUNT(DISTINCT c.id) as commentsCount
+      FROM users u
+      LEFT JOIN posts p ON u.id = p.authorId AND p.status = 'visible'
+      LEFT JOIN comments c ON u.id = c.userId
+      WHERE u.role != 'admin'
+      GROUP BY u.id, u.username, u.avatarUrl, u.email
+      ORDER BY postsCount DESC, totalLikes DESC
+      LIMIT ?
+    `, [limit]);
+
+    res.json({ 
+      success: true, 
+      topUsers: topUsers.map(user => ({
+        ...user,
+        avatarUrl: getFullAvatarUrl(user.avatarUrl),
+        totalLikes: user.totalLikes || 0
+      }))
+    });
+  } catch (error) {
+    console.error('Get top users error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi khi lấy top người dùng!' 
+    });
+  }
+};
+
+export const getActivityHistory = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 20;
+
+    const [activities] = await db.query(`
+      (
+        SELECT 
+          'post' as type,
+          p.id,
+          p.title as content,
+          u.username as userName,
+          u.avatarUrl as userAvatar,
+          p.createdAt as timestamp,
+          p.id as postId
+        FROM posts p
+        LEFT JOIN users u ON p.authorId = u.id
+        WHERE p.status = 'visible'
+      )
+      UNION ALL
+      (
+        SELECT 
+          'comment' as type,
+          c.id,
+          c.content,
+          u.username as userName,
+          u.avatarUrl as userAvatar,
+          c.createdAt as timestamp,
+          c.postId
+        FROM comments c
+        LEFT JOIN users u ON c.userId = u.id
+        WHERE c.status = 'visible'
+      )
+      UNION ALL
+      (
+        SELECT 
+          'report' as type,
+          r.id,
+          r.reason as content,
+          u.username as userName,
+          u.avatarUrl as userAvatar,
+          r.createdAt as timestamp,
+          r.postId
+        FROM reports r
+        LEFT JOIN users u ON r.reportedBy = u.id
+      )
+      ORDER BY timestamp DESC
+      LIMIT ?
+    `, [limit]);
+
+    res.json({ 
+      success: true, 
+      activities: activities.map(activity => ({
+        ...activity,
+        userAvatar: getFullAvatarUrl(activity.userAvatar),
+        timestamp: activity.timestamp?.toISOString() || ''
+      }))
+    });
+  } catch (error) {
+    console.error('Get activity history error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi khi lấy lịch sử hoạt động!' 
     });
   }
 };

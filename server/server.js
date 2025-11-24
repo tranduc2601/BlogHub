@@ -9,6 +9,8 @@ import adminRoutes from './routes/adminRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
+import bookmarkRoutes from './routes/bookmarkRoutes.js';
 import { likeComment } from './controllers/commentController.js';
 import { authMiddleware } from './middleware/authMiddleware.js';
 
@@ -51,6 +53,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/bookmarks', bookmarkRoutes);
 
 app.post('/api/comments/:commentId/like', authMiddleware, likeComment);
 

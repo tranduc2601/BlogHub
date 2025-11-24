@@ -13,6 +13,9 @@ import {
   toggleUserStatus,
   deleteUser,
   getStats,
+  getTopPosts,
+  getTopUsers,
+  getActivityHistory,
   getReports,
   approveReport,
   rejectReport,
@@ -47,6 +50,9 @@ router.delete('/users/:id', deleteUser);
 
 
 router.get('/stats', getStats);
+router.get('/stats/top-posts', getTopPosts);
+router.get('/stats/top-users', getTopUsers);
+router.get('/stats/activity-history', getActivityHistory);
 
 
 router.get('/reports', getReports);

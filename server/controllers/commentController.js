@@ -19,6 +19,8 @@ export const getCommentsByPostId = async (req, res) => {
         c.likes,
         c.parentId,
         c.status,
+        c.isAnonymous,
+        c.anonymousId,
         u.id as userId,
         u.username,
         u.email,
@@ -34,53 +36,97 @@ export const getCommentsByPostId = async (req, res) => {
 
     let likedCommentIds = [];
     let commentReactions = {};
-    if (userId && comments.length > 0) {
+    let reactionCounts = {}; // Store reaction counts for each comment
+    
+    if (comments.length > 0) {
       const commentIds = comments.map(c => c.id);
       
-
-      const [reactions] = await db.query(
-        'SELECT commentId, reactionType FROM comment_reactions WHERE userId = ? AND commentId IN (?)',
-        [userId, commentIds]
+      // Get all reactions for statistics
+      const [allReactions] = await db.query(
+        'SELECT commentId, reactionType FROM comment_reactions WHERE commentId IN (?)',
+        [commentIds]
       );
       
-      reactions.forEach(r => {
-        commentReactions[r.commentId] = r.reactionType;
-        likedCommentIds.push(r.commentId);
+      // Calculate reaction counts for each comment
+      allReactions.forEach(r => {
+        if (!reactionCounts[r.commentId]) {
+          reactionCounts[r.commentId] = {
+            like: 0,
+            love: 0,
+            haha: 0,
+            wow: 0,
+            sad: 0,
+            angry: 0,
+            total: 0
+          };
+        }
+        reactionCounts[r.commentId][r.reactionType]++;
+        reactionCounts[r.commentId].total++;
       });
       
+      // Get current user's reactions
+      if (userId) {
+        const [reactions] = await db.query(
+          'SELECT commentId, reactionType FROM comment_reactions WHERE userId = ? AND commentId IN (?)',
+          [userId, commentIds]
+        );
+        
+        reactions.forEach(r => {
+          commentReactions[r.commentId] = r.reactionType;
+          likedCommentIds.push(r.commentId);
+        });
+        
 
-      if (likedCommentIds.length === 0) {
-        try {
-          const [likes] = await db.query(
-            'SELECT commentId FROM comment_likes WHERE userId = ? AND commentId IN (?)',
-            [userId, commentIds]
-          );
-          likedCommentIds = likes.map(like => like.commentId);
-        } catch (err) {
+        if (likedCommentIds.length === 0) {
+          try {
+            const [likes] = await db.query(
+              'SELECT commentId FROM comment_likes WHERE userId = ? AND commentId IN (?)',
+              [userId, commentIds]
+            );
+            likedCommentIds = likes.map(like => like.commentId);
+          } catch (err) {
 
+          }
         }
       }
     }
     
 
-    const formattedComments = comments.map(comment => ({
-      id: String(comment.id),
-      postId: String(comment.postId),
-      authorId: String(comment.authorId),
-      author: {
-        id: comment.userId,
-        username: comment.username,
-        email: comment.email,
-        avatarUrl: getFullAvatarUrl(comment.avatarUrl),
-        role: comment.role
-      },
-      content: comment.content,
-      createdAt: comment.createdAt instanceof Date ? comment.createdAt.toISOString() : new Date(comment.createdAt).toISOString(),
-      likes: comment.likes || 0,
-      isLiked: likedCommentIds.includes(comment.id),
-      reactionType: commentReactions[comment.id] || null,
-      parentId: comment.parentId ? String(comment.parentId) : null
-    }));
+    const formattedComments = comments.map(comment => {
+      const isAnonymous = comment.isAnonymous === 1 || comment.isAnonymous === true;
+      const isOwner = userId && String(userId) === String(comment.authorId);
+      
+      return {
+        id: String(comment.id),
+        postId: String(comment.postId),
+        authorId: String(comment.authorId),
+        author: {
+          id: isAnonymous && !isOwner ? null : comment.userId,
+          username: isAnonymous && !isOwner ? `Người dùng ẩn danh ${comment.anonymousId || Math.floor(Math.random() * 900) + 100}` : comment.username,
+          email: isAnonymous && !isOwner ? null : comment.email,
+          avatarUrl: isAnonymous && !isOwner ? null : getFullAvatarUrl(comment.avatarUrl),
+          role: isAnonymous && !isOwner ? null : comment.role
+        },
+        content: comment.content,
+        createdAt: comment.createdAt instanceof Date ? comment.createdAt.toISOString() : new Date(comment.createdAt).toISOString(),
+        likes: comment.likes || 0,
+        isLiked: likedCommentIds.includes(comment.id),
+        reactionType: commentReactions[comment.id] || null,
+        reactionCounts: reactionCounts[comment.id] || {
+          like: 0,
+          love: 0,
+          haha: 0,
+          wow: 0,
+          sad: 0,
+          angry: 0,
+          total: 0
+        },
+        parentId: comment.parentId ? String(comment.parentId) : null,
+        isAnonymous: isAnonymous,
+        anonymousId: comment.anonymousId,
+        isOwner: isOwner
+      };
+    });
     
     res.json({
       success: true,
@@ -100,7 +146,7 @@ export const getCommentsByPostId = async (req, res) => {
 export const createComment = async (req, res) => {
   try {
     const { postId } = req.params;
-    const { content, parentId } = req.body;
+    const { content, parentId, isAnonymous } = req.body;
     const userId = req.user.id;
     
 
@@ -133,9 +179,12 @@ export const createComment = async (req, res) => {
     }
     
 
+    // Generate anonymousId if comment is anonymous
+    const anonymousId = isAnonymous ? Math.floor(Math.random() * 900) + 100 : null;
+    
     const [result] = await db.query(
-      'INSERT INTO comments (postId, userId, content, parentId, createdAt) VALUES (?, ?, ?, ?, NOW())',
-      [postId, userId, content.trim(), parentId || null]
+      'INSERT INTO comments (postId, userId, content, parentId, isAnonymous, anonymousId, createdAt) VALUES (?, ?, ?, ?, ?, ?, NOW())',
+      [postId, userId, content.trim(), parentId || null, isAnonymous || false, anonymousId]
     );
     
 
@@ -148,6 +197,8 @@ export const createComment = async (req, res) => {
         c.createdAt,
         c.likes,
         c.parentId,
+        c.isAnonymous,
+        c.anonymousId,
         u.id as userId,
         u.username,
         u.email,
@@ -164,24 +215,27 @@ export const createComment = async (req, res) => {
     }
     
     const comment = newComment[0];
-    
+    const isAnon = comment.isAnonymous === 1 || comment.isAnonymous === true;
 
     const formattedComment = {
       id: String(comment.id),
       postId: String(comment.postId),
       authorId: String(comment.authorId),
       author: {
-        id: comment.userId,
-        username: comment.username,
-        email: comment.email,
-        avatarUrl: getFullAvatarUrl(comment.avatarUrl),
-        role: comment.role
+        id: isAnon ? null : comment.userId,
+        username: isAnon ? `Người dùng ẩn danh ${comment.anonymousId || Math.floor(Math.random() * 900) + 100}` : comment.username,
+        email: isAnon ? null : comment.email,
+        avatarUrl: isAnon ? null : getFullAvatarUrl(comment.avatarUrl),
+        role: isAnon ? null : comment.role
       },
       content: comment.content,
       createdAt: comment.createdAt instanceof Date ? comment.createdAt.toISOString() : new Date(comment.createdAt).toISOString(),
       likes: comment.likes || 0,
       isLiked: false,
-      parentId: comment.parentId ? String(comment.parentId) : null
+      parentId: comment.parentId ? String(comment.parentId) : null,
+      isAnonymous: isAnon,
+      anonymousId: comment.anonymousId,
+      isOwner: true
     };
     
     // Create notification for post author
@@ -190,13 +244,19 @@ export const createComment = async (req, res) => {
       if (post.length > 0) {
         const postAuthorId = post[0].authorId;
         const postTitle = post[0].title;
-        await createNotification(
-          postAuthorId,
-          'comment',
-          userId,
-          `đã bình luận vào bài viết "${postTitle}"`,
-          postId
-        );
+        
+        // Don't create notification if user is commenting on their own post
+        if (postAuthorId !== userId) {
+          // If comment is anonymous, use null as senderId and pass anonymousId
+          await createNotification(
+            postAuthorId,
+            'comment',
+            isAnonymous ? null : userId,
+            `đã bình luận vào bài viết "${postTitle}"`,
+            postId,
+            isAnonymous ? anonymousId : null
+          );
+        }
       }
     } catch (notifError) {
       console.error('Error creating comment notification:', notifError);

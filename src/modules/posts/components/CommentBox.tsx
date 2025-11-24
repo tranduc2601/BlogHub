@@ -4,7 +4,7 @@ import { useAuth } from "@/core/auth";
 import toast from 'react-hot-toast';
 import type { Comment } from '@/shared/types';
 import { Modal } from '@/shared/ui';
-import ReactionPicker, { type ReactionType } from './ReactionPicker';
+import ReactionPicker, { type ReactionType, ReactionStats } from './ReactionPicker';
 import axios from '@/core/config/axios';
 
 interface CommentBoxProps {
@@ -42,14 +42,17 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
   const { comments, loading, error, addComment, updateComment, deleteComment, likeComment } = useComments(postId);
   const { user } = useAuth();
   const [newComment, setNewComment] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
   const [pinnedCommentId, setPinnedCommentId] = useState<string | null>(null);
+  
+  const MIN_COMMENT_LENGTH = 2; 
+  const MAX_COMMENT_LENGTH = 500; 
 
-  // Fetch pinned comment khi component mount
   useEffect(() => {
     const fetchPinnedComment = async () => {
       try {
@@ -64,6 +67,23 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
 
     fetchPinnedComment();
   }, [postId]);
+  
+  // Simple validation
+  const validateComment = (content: string): { valid: boolean; message?: string } => {
+    const trimmedContent = content.trim();
+    
+    // Check độ dài tối thiểu
+    if (trimmedContent.length < MIN_COMMENT_LENGTH) {
+      return { valid: false, message: `Bình luận phải có ít nhất ${MIN_COMMENT_LENGTH} ký tự!` };
+    }
+    
+    // Check độ dài tối đa
+    if (trimmedContent.length > MAX_COMMENT_LENGTH) {
+      return { valid: false, message: `Bình luận không được vượt quá ${MAX_COMMENT_LENGTH} ký tự!` };
+    }
+    
+    return { valid: true };
+  };
 
   const commentTree = useMemo(() => {
     const tree: Comment[] = [];
@@ -145,11 +165,21 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
     e.preventDefault();
     if (!newComment.trim() || !user) return;
 
+    // Validate anti-spam
+    const validation = validateComment(newComment);
+    if (!validation.valid) {
+      toast.error(validation.message || 'Bình luận không hợp lệ!');
+      return;
+    }
+
     setSubmitting(true);
     try {
-      await addComment(newComment.trim());
+      const trimmedComment = newComment.trim();
+      await addComment(trimmedComment, undefined, isAnonymous);
+      
       setNewComment("");
-      toast.success('Đã bình luận thành công!');
+      setIsAnonymous(false);
+      toast.success(isAnonymous ? 'Đã bình luận ẩn danh!' : 'Đã bình luận thành công!');
       if (onCommentAdded) onCommentAdded();
     } catch (error) {
       console.error('Error submitting comment:', error);
@@ -269,7 +299,33 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
                 rows={4}
                 placeholder="Hãy chia sẻ suy nghĩ của bạn về bài viết này..."
                 disabled={submitting}
+                maxLength={MAX_COMMENT_LENGTH}
               />
+              <div className="flex justify-between items-center mt-2">
+                <div className="flex items-center gap-4">
+                  <span className={`text-sm font-medium ${newComment.length > MAX_COMMENT_LENGTH * 0.9 ? 'text-orange-500' : 'text-gray-500'}`}>
+                    {newComment.length}/{MAX_COMMENT_LENGTH}
+                  </span>
+                  
+                  {/* Anonymous Comment Toggle */}
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={isAnonymous}
+                      onChange={(e) => setIsAnonymous(e.target.checked)}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                    />
+                    <span className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors flex items-center gap-1">
+                      <i className="fa-solid fa-user-secret mr-1"></i>
+                      Bình luận ẩn danh
+                    </span>
+                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                      Tên và avatar của bạn sẽ được ẩn
+                    </span>
+                  </label>
+                </div>
+              </div>
+
               <div className="flex justify-end gap-2 mt-3">
                 {newComment.trim() && (
                   <button 
@@ -285,7 +341,8 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
                   disabled={!newComment.trim() || submitting}
                   className="bg-blue-600 text-white px-6 py-2 rounded-xl font-semibold transition-all duration-200 shadow-lg cursor-pointer border border-blue-600 hover:bg-blue-700 hover:border-blue-700 hover:scale-105 hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <i className="fa-solid fa-paper-plane mr-2"></i>{submitting ? 'Đang gửi...' : 'Gửi bình luận'}
+                  <i className="fa-solid fa-paper-plane mr-2"></i>
+                  {submitting ? 'Đang gửi...' : 'Gửi bình luận'}
                 </button>
               </div>
             </div>
@@ -559,11 +616,26 @@ const CommentItem = ({
 
               {editingId !== comment.id && (
                 <div className="flex items-center gap-3 sm:gap-6 text-xs sm:text-sm mt-3 sm:mt-4">
-                  <CommentReactionButton commentId={comment.id} />
+                  <CommentReactionButton 
+                    commentId={comment.id} 
+                    initialReaction={comment.reactionType}
+                    reactionCounts={comment.reactionCounts}
+                  />
 
                   <button 
-                    onClick={() => setShowReplyForm(!showReplyForm)}
-                    className="text-gray-500 hover:text-blue-600 transition-all flex items-center gap-1 sm:gap-2 cursor-pointer"
+                    onClick={() => {
+                      if (!user) {
+                        return;
+                      }
+                      setShowReplyForm(!showReplyForm);
+                    }}
+                    disabled={!user}
+                    className={`flex items-center gap-1 sm:gap-2 transition-all ${
+                      !user 
+                        ? 'text-gray-400 opacity-50 cursor-not-allowed' 
+                        : 'text-gray-500 hover:text-blue-600 cursor-pointer'
+                    }`}
+                    title={!user ? 'Đăng nhập để trả lời' : 'Trả lời bình luận'}
                   >
                     <i className="fa-solid fa-reply text-xs sm:text-sm"></i>
                     <span className="font-medium">Trả lời</span>
@@ -661,33 +733,75 @@ const CommentItem = ({
 };
 
 
-const CommentReactionButton = ({ commentId }: { commentId: string }) => {
-  const [currentReaction, setCurrentReaction] = useState<ReactionType>(null);
-  const [loading, setLoading] = useState(true);
-
+const CommentReactionButton = ({ 
+  commentId, 
+  initialReaction,
+  reactionCounts 
+}: { 
+  commentId: string; 
+  initialReaction?: ReactionType;
+  reactionCounts?: {
+    like: number;
+    love: number;
+    haha: number;
+    wow: number;
+    sad: number;
+    angry: number;
+    total: number;
+  };
+}) => {
+  const { user } = useAuth();
+  const [currentReaction, setCurrentReaction] = useState<ReactionType>(initialReaction || null);
+  const [counts, setCounts] = useState(reactionCounts || {
+    like: 0,
+    love: 0,
+    haha: 0,
+    wow: 0,
+    sad: 0,
+    angry: 0,
+    total: 0
+  });
 
   useEffect(() => {
-    const fetchReaction = async () => {
-      try {
-        const response = await axios.get(`/posts/comments/${commentId}/user-reaction`);
-        if (response.data.success) {
-          setCurrentReaction(response.data.reactionType);
-        }
-      } catch (error) {
-        console.error('Error fetching comment reaction:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchReaction();
-  }, [commentId]);
+    // Use initial reaction from props, no need to fetch again
+    setCurrentReaction(initialReaction || null);
+  }, [initialReaction]);
+
+  useEffect(() => {
+    if (reactionCounts) {
+      setCounts(reactionCounts);
+    }
+  }, [reactionCounts]);
 
   const handleReaction = async (reactionType: ReactionType) => {
+    if (!user) {
+      toast.error('Vui lòng đăng nhập để thả biểu cảm!');
+      return;
+    }
+
+    const oldReaction = currentReaction;
+
     try {
       const typeToSend = reactionType !== null ? reactionType : currentReaction;
       
       await axios.post(`/posts/comments/${commentId}/react`, { reactionType: typeToSend });
       
+      // Update local state immediately for better UX
+      const newCounts = { ...counts };
+      
+      // Remove old reaction count
+      if (oldReaction) {
+        newCounts[oldReaction] = Math.max(0, newCounts[oldReaction] - 1);
+        newCounts.total = Math.max(0, newCounts.total - 1);
+      }
+      
+      // Add new reaction count
+      if (reactionType) {
+        newCounts[reactionType] = newCounts[reactionType] + 1;
+        newCounts.total = newCounts.total + 1;
+      }
+      
+      setCounts(newCounts);
       setCurrentReaction(reactionType);
       
       if (reactionType === null) {
@@ -697,19 +811,32 @@ const CommentReactionButton = ({ commentId }: { commentId: string }) => {
       }
     } catch (error) {
       console.error('Error reacting to comment:', error);
-      toast.error('Vui lòng đăng nhập để thả biểu cảm!');
+      toast.error('Không thể thả biểu cảm!');
+      // Revert state on error
+      setCurrentReaction(oldReaction);
     }
   };
 
-  if (loading) {
-    return <div className="text-gray-400 text-sm">...</div>;
-  }
-
   return (
-    <ReactionPicker 
-      onReact={handleReaction}
-      currentReaction={currentReaction}
-      disabled={false}
-    />
+    <div className="flex items-center gap-2">
+      <ReactionPicker 
+        onReact={handleReaction}
+        currentReaction={currentReaction}
+        disabled={false}
+      />
+      {counts.total > 0 && (
+        <ReactionStats 
+          stats={{
+            like_count: counts.like,
+            love_count: counts.love,
+            haha_count: counts.haha,
+            wow_count: counts.wow,
+            sad_count: counts.sad,
+            angry_count: counts.angry,
+            total_reactions: counts.total
+          }}
+        />
+      )}
+    </div>
   );
 };

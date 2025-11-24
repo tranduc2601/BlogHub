@@ -655,3 +655,163 @@ export const logout = async (req, res) => {
     });
   }
 };
+
+export const deleteAccount = async (req, res) => {
+  const connection = await db.getConnection();
+  
+  try {
+    const userId = req.user.id;
+    const { password } = req.body;
+    
+    console.log('DeleteAccount - userId:', userId);
+
+    // Validate password input
+    if (!password) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Vui lòng nhập mật khẩu để xác nhận' 
+      });
+    }
+
+    // Start transaction for data integrity
+    await connection.beginTransaction();
+
+    // Get user data
+    const [users] = await connection.query(
+      'SELECT * FROM users WHERE id = ? AND (status = "active" OR status IS NULL)',
+      [userId]
+    );
+
+    if (users.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ 
+        success: false,
+        message: 'Tài khoản không tồn tại hoặc đã bị xóa' 
+      });
+    }
+
+    const user = users[0];
+
+    // Prevent admin from deleting their account
+    if (user.role === 'admin') {
+      await connection.rollback();
+      return res.status(403).json({ 
+        success: false,
+        message: 'Tài khoản quản trị viên không thể bị xóa' 
+      });
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      await connection.rollback();
+      return res.status(401).json({ 
+        success: false,
+        message: 'Mật khẩu không đúng' 
+      });
+    }
+
+    // Soft delete user account - mark as deleted instead of removing
+    const deletedEmail = `deleted_${userId}_${user.email}`;
+    const deletedUsername = `deleted_user_${userId}`;
+    
+    await connection.query(
+      `UPDATE users 
+       SET status = 'deleted',
+           email = ?,
+           username = ?,
+           password = '',
+           avatarUrl = NULL,
+           about = NULL,
+           websites = NULL,
+           deletedAt = NOW()
+       WHERE id = ?`,
+      [deletedEmail, deletedUsername, userId]
+    );
+
+    // Delete all user sessions (force logout from all devices)
+    await connection.query(
+      'DELETE FROM user_sessions WHERE userId = ?',
+      [userId]
+    );
+
+    // Hide all user's posts
+    await connection.query(
+      'UPDATE posts SET status = "hidden" WHERE authorId = ?',
+      [userId]
+    );
+
+    // Anonymize user's comments (keep content but remove user association)
+    // Set userId to NULL (will be handled by foreign key ON DELETE SET NULL)
+    await connection.query(
+      `UPDATE comments 
+       SET userId = NULL, 
+           isAnonymous = TRUE 
+       WHERE userId = ?`,
+      [userId]
+    );
+
+    // Delete user's reactions
+    await connection.query(
+      'DELETE FROM reactions WHERE userId = ?',
+      [userId]
+    );
+
+    // Delete comment reactions
+    await connection.query(
+      'DELETE FROM comment_reactions WHERE userId = ?',
+      [userId]
+    );
+
+    // Delete bookmarks
+    await connection.query(
+      'DELETE FROM bookmarks WHERE userId = ?',
+      [userId]
+    );
+
+    // Delete follows (both as follower and following)
+    await connection.query(
+      'DELETE FROM follows WHERE followerId = ? OR followingId = ?',
+      [userId, userId]
+    );
+
+    // Delete notifications (where user is receiver or sender)
+    await connection.query(
+      'DELETE FROM notifications WHERE userId = ? OR senderId = ?',
+      [userId, userId]
+    );
+
+    // Delete comment reports made by user (if table exists)
+    try {
+      await connection.query(
+        'DELETE FROM comment_reports WHERE reporterId = ?',
+        [userId]
+      );
+    } catch (error) {
+      // Ignore if table doesn't exist
+      if (error.code !== 'ER_NO_SUCH_TABLE') {
+        throw error;
+      }
+    }
+
+    // Commit transaction
+    await connection.commit();
+
+    console.log('DeleteAccount - Account successfully deleted for userId:', userId);
+
+    res.json({ 
+      success: true,
+      message: 'Tài khoản đã được xóa thành công' 
+    });
+  } catch (error) {
+    // Rollback on error
+    await connection.rollback();
+    console.error('DeleteAccount error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi server khi xóa tài khoản' 
+    });
+  } finally {
+    connection.release();
+  }
+};

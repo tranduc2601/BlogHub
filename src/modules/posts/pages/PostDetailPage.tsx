@@ -1,4 +1,4 @@
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import CommentBox from "../components/CommentBox";
 import { ReportModal, Modal } from "@/shared/ui";
@@ -9,8 +9,10 @@ import toast from 'react-hot-toast';
 import type { Post } from "@/shared/types";
 import { exportToPDF, exportToMarkdown } from '@/shared/utils';
 import ReactionPicker, { type ReactionType } from "../components/ReactionPicker";
+import { bookmarkService } from "../services/bookmarkService";
 
 export default function PostDetailPage() {
+  const location = useLocation();
   const [currentReaction, setCurrentReaction] = useState<ReactionType>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -24,6 +26,8 @@ export default function PostDetailPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isBookmarking, setIsBookmarking] = useState(false);
   const [reactionStats, setReactionStats] = useState({
     like_count: 0,
     love_count: 0,
@@ -41,9 +45,23 @@ export default function PostDetailPage() {
       'Marketing': 'bg-green-500',
       'Ẩm thực': 'bg-orange-500',
       'Du lịch': 'bg-indigo-500',
-      'Giáo dục': 'bg-teal-500'
+      'Giáo dục': 'bg-teal-500',
+      'Lifestyle': 'bg-pink-500'
     };
     return colors[category] || 'bg-gray-500';
+  };
+
+  const getCategoryIcon = (category: string) => {
+    const icons: { [key: string]: string } = {
+      'Công nghệ': 'fa-solid fa-microchip',
+      'Design': 'fa-solid fa-palette',
+      'Marketing': 'fa-solid fa-bullhorn',
+      'Lifestyle': 'fa-solid fa-heart',
+      'Du lịch': 'fa-solid fa-plane-departure',
+      'Ẩm thực': 'fa-solid fa-utensils',
+      'Giáo dục': 'fa-solid fa-graduation-cap'
+    };
+    return icons[category] || 'fa-solid fa-folder';
   };
 
   async function handleReaction(reactionType: ReactionType) {
@@ -126,6 +144,21 @@ export default function PostDetailPage() {
     fetchPost();
   }, [id]);
 
+  // Scroll to comments section if coming from PostCard comment click
+  useEffect(() => {
+    if (location.state?.scrollToComments && !loading && post) {
+      // Small delay to ensure DOM is fully rendered
+      setTimeout(() => {
+        const commentsSection = document.getElementById('comments-section');
+        if (commentsSection) {
+          commentsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Clear the state after scrolling
+          window.history.replaceState({}, document.title);
+        }
+      }, 300);
+    }
+  }, [location.state, loading, post]);
+
   useEffect(() => {
     const checkIfLiked = async () => {
       try {
@@ -187,11 +220,27 @@ export default function PostDetailPage() {
       }
     };
 
+    const checkBookmarkStatus = async () => {
+      if (!post) return;
+      try {
+        const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+        if (!userStr) return;
+
+        const response = await bookmarkService.checkBookmark(typeof post.id === 'string' ? parseInt(post.id) : post.id);
+        if (response.success) {
+          setIsBookmarked(response.isBookmarked);
+        }
+      } catch (error) {
+        console.error('Error checking bookmark status:', error);
+      }
+    };
+
     if (post) {
       checkIfLiked();
       fetchCommentsCount();
       fetchReactionStats();
       checkFollowStatus();
+      checkBookmarkStatus();
     }
   }, [post]);
   useEffect(() => {
@@ -245,6 +294,36 @@ export default function PostDetailPage() {
       });
     } finally {
       setFollowLoading(false);
+    }
+  };
+
+  const handleBookmarkToggle = async () => {
+    if (!post || isBookmarking) return;
+
+    const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+    if (!userStr) {
+      toast.error('Vui lòng đăng nhập để lưu bài viết!');
+      return;
+    }
+
+    setIsBookmarking(true);
+    const postId = typeof post.id === 'string' ? parseInt(post.id) : post.id;
+
+    try {
+      if (isBookmarked) {
+        await bookmarkService.removeBookmark(postId);
+        setIsBookmarked(false);
+        toast.success('Đã xóa bài viết khỏi danh sách lưu!');
+      } else {
+        await bookmarkService.addBookmark(postId);
+        setIsBookmarked(true);
+        toast.success('Đã lưu bài viết!');
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      toast.error('Có lỗi xảy ra, vui lòng thử lại!');
+    } finally {
+      setIsBookmarking(false);
     }
   };
   useEffect(() => {
@@ -447,18 +526,18 @@ export default function PostDetailPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto select-none">
-      <article className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 overflow-hidden relative">
+    <div className="max-w-5xl mx-auto select-none px-4 md:px-0">
+      <article className="bg-white/80 backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-xl border border-white/20 overflow-hidden relative">
         
         {post.status !== 'pending' && (
-          <div className="absolute top-6 right-6 z-20" ref={menuRef}>
+          <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20" ref={menuRef}>
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-lg hover:shadow-xl transition-all duration-200 text-gray-700 hover:text-blue-600 border border-gray-200 cursor-pointer"
+              className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-lg hover:shadow-xl transition-all duration-200 text-gray-700 hover:text-blue-600 border border-gray-200 cursor-pointer"
               aria-label="Menu tùy chọn"
               title="Menu tùy chọn"
             >
-              <i className="fa-solid fa-ellipsis-vertical text-lg"></i>
+              <i className="fa-solid fa-ellipsis-vertical text-base md:text-lg"></i>
             </button>
 
           
@@ -522,7 +601,7 @@ export default function PostDetailPage() {
 
         
         {post.featuredImage && (
-          <div className="relative h-64 md:h-80 overflow-hidden border-b border-gray-500">
+          <div className="relative h-48 md:h-64 lg:h-80 overflow-hidden border-b border-gray-500">
             <img 
               src={post.featuredImage} 
               alt={post.title}
@@ -533,31 +612,62 @@ export default function PostDetailPage() {
         )}
 
         
-        <div className="bg-blue-700 p-8 text-white">
+        <div className="bg-blue-700 p-4 md:p-8 text-white">
           
+          {/* Back Button */}
+          <button
+            onClick={() => window.location.href = '/posts'}
+            className="group mb-4 md:mb-6 flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 cursor-pointer border-2 border-white/40 hover:border-white/60 hover:shadow-2xl hover:shadow-white/20 hover:scale-110 active:scale-95"
+            title="Quay lại danh sách bài viết"
+          >
+            <i className="fa-solid fa-arrow-left text-white text-base md:text-lg transition-transform duration-300 group-hover:-translate-x-1"></i>
+          </button>
+
           {post.status === 'pending' && (
-            <div className="mb-6 bg-orange-500 text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3">
-              <i className="fa-solid fa-hourglass-half text-2xl"></i>
+            <div className="mb-4 md:mb-6 bg-orange-500 text-white px-4 md:px-6 py-3 md:py-4 rounded-xl shadow-lg flex items-center gap-2 md:gap-3">
+              <i className="fa-solid fa-hourglass-half text-xl md:text-2xl"></i>
               <div>
-                <p className="font-bold text-lg">Bài viết đang chờ duyệt</p>
-                <p className="text-sm text-orange-100">Bài viết này đang được admin xem xét. Các tính năng tương tác sẽ được kích hoạt sau khi bài viết được duyệt. Đây là bản xem trước</p>
+                <p className="font-bold text-base md:text-lg">Bài viết đang chờ duyệt</p>
+                <p className="text-xs md:text-sm text-orange-100">Bài viết này đang được Admin xem xét. Các tính năng tương tác sẽ được kích hoạt sau khi bài viết được duyệt. Đây là bản xem trước!</p>
               </div>
             </div>
           )}
-          <div className="flex items-center gap-4 mb-4">
+          
+          {/* Privacy Notice */}
+          {post.privacy === 'followers' && (
+            <div className="mb-4 md:mb-6 bg-indigo-500 text-white px-4 md:px-6 py-3 md:py-4 rounded-xl shadow-lg flex items-center gap-2 md:gap-3">
+              <i className="fa-solid fa-user-group text-xl md:text-2xl"></i>
+              <div>
+                <p className="font-bold text-base md:text-lg">Bài viết dành cho người theo dõi</p>
+                <p className="text-xs md:text-sm text-indigo-100">Chỉ những người theo dõi tác giả mới có thể xem bài viết này.</p>
+              </div>
+            </div>
+          )}
+          
+          {post.privacy === 'private' && (
+            <div className="mb-4 md:mb-6 bg-gray-600 text-white px-4 md:px-6 py-3 md:py-4 rounded-xl shadow-lg flex items-center gap-2 md:gap-3">
+              <i className="fa-solid fa-lock text-xl md:text-2xl"></i>
+              <div>
+                <p className="font-bold text-base md:text-lg">Bài viết riêng tư</p>
+                <p className="text-xs md:text-sm text-gray-200">Chỉ bạn có thể xem bài viết này.</p>
+              </div>
+            </div>
+          )}
+          
+          <div className="flex items-center gap-3 md:gap-4 mb-4">
             {post.authorAvatar && post.authorAvatar !== '' ? (
               <img 
                 src={post.authorAvatar}
                 alt={typeof post.author === 'string' ? post.author : (post.author?.name || 'User')} 
-                className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-lg" 
+                className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-white shadow-lg" 
               />
             ) : (
-              <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-700 rounded-full flex items-center justify-center text-white font-bold text-base md:text-lg shadow-lg">
                 {getAuthorInitial(typeof post.author === 'string' ? post.author : (post.author?.name || 'User'))}
               </div>
             )}
             <div>
-              <p className="font-semibold flex items-center gap-2">
+              <p className="font-semibold flex flex-wrap items-center gap-2 text-sm md:text-base">
                   {typeof post.author === 'string' ? post.author : (post.author?.name || 'User')}
                 {(() => {
                   const currentUser = JSON.parse(localStorage.getItem("user") || sessionStorage.getItem("user") || "null");
@@ -566,7 +676,7 @@ export default function PostDetailPage() {
                     <button 
                       onClick={handleFollowToggle}
                       disabled={followLoading}
-                      className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-300 cursor-pointer border-2 
+                      className={`px-2 md:px-3 py-1 rounded-full text-[10px] md:text-xs font-semibold transition-all duration-300 cursor-pointer border-2 whitespace-nowrap
                         ${followLoading
                           ? 'bg-gray-400 text-white cursor-wait border-gray-400'
                           : isFollowing
@@ -586,32 +696,43 @@ export default function PostDetailPage() {
                   );
                 })()}
               </p>
-              <p className="text-blue-200 text-sm">
+              <p className="text-blue-200 text-xs md:text-sm">
                 {formatDate(post.createdAt)} • {formatReadTime(post.content)}
               </p>
             </div>
           </div>
           
           
-          <div className="mb-4">
-            <span className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${getCategoryColor(post.category)} text-white`}>
+          <div className="mb-3 md:mb-4 flex flex-wrap items-center gap-2">
+            <span className={`inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium ${getCategoryColor(post.category)} text-white`}>
+              <i className={getCategoryIcon(post.category)}></i>
               {post.category}
             </span>
+            
+            {/* Privacy Badge */}
+            {post.privacy && post.privacy !== 'public' && (
+              <span className={`inline-flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium ${
+                post.privacy === 'private' ? 'bg-gray-600' : 'bg-indigo-600'
+              } text-white`}>
+                <i className={`fa-solid ${post.privacy === 'private' ? 'fa-lock' : 'fa-user-group'}`}></i>
+                {post.privacy === 'private' ? 'Riêng tư' : 'Người theo dõi'}
+              </span>
+            )}
           </div>
           
-          <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-tight">
             {post.title}
           </h1>
         </div>
 
         
-        <div className="p-8 md:p-12">
-          <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed" dangerouslySetInnerHTML={{ __html: post.content }}></div>
+        <div className="p-4 md:p-8 lg:p-12">
+          <div className="prose prose-sm md:prose-lg max-w-none text-gray-800 leading-relaxed" dangerouslySetInnerHTML={{ __html: post.content }}></div>
 
           
-          <div className="flex flex-wrap gap-2 mb-8 mt-8">
+          <div className="flex flex-wrap gap-2 mb-6 md:mb-8 mt-6 md:mt-8">
             {post.tags.map((tag: string, index: number) => (
-              <span key={index} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+              <span key={index} className="bg-gray-100 text-gray-700 px-2.5 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium">
                 #{tag}
               </span>
             ))}
@@ -619,9 +740,9 @@ export default function PostDetailPage() {
 
           
           {post.status !== 'pending' && (
-            <div className="flex flex-col gap-4 py-6 border-t border-gray-200">
+            <div className="flex flex-col gap-3 md:gap-4 py-4 md:py-6 border-t border-gray-200">
               
-              <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2 md:gap-4 flex-wrap text-sm md:text-base">
                 <div className="flex items-center gap-2">
                   <ReactionPicker 
                   onReact={handleReaction}
@@ -635,11 +756,11 @@ export default function PostDetailPage() {
                 )}
                 </div>
               {reactionStats && reactionStats.total_reactions > 0 && (
-                <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-full border border-gray-200">
+                <div className="flex items-center gap-1.5 md:gap-2 bg-gray-50 px-2 md:px-3 py-1.5 md:py-2 rounded-full border border-gray-200">
                   {reactionStats.like_count > 0 && (
-                    <span className="flex items-center gap-1" title="Thích">
-                      <span className="text-lg">👍</span>
-                      <span className="text-sm font-medium text-gray-700">{reactionStats.like_count}</span>
+                    <span className="flex items-center gap-0.5 md:gap-1" title="Thích">
+                      <span className="text-base md:text-lg">👍</span>
+                      <span className="text-xs md:text-sm font-medium text-gray-700">{reactionStats.like_count}</span>
                     </span>
                   )}
                   {reactionStats.love_count > 0 && (
@@ -690,14 +811,69 @@ export default function PostDetailPage() {
 
               
               <button
-                onClick={() => setIsShareModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200 rounded-full text-green-600 font-medium text-sm hover:from-green-100 hover:to-blue-100 hover:border-green-300 hover:shadow-md transition-all duration-300 cursor-pointer group"
-                title="Chia sẻ bài viết"
+                onClick={() => {
+                  const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+                  if (!userStr) {
+                    toast.error('Vui lòng đăng nhập để chia sẻ bài viết!');
+                    return;
+                  }
+                  setIsShareModalOpen(true);
+                }}
+                disabled={!(() => {
+                  const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+                  return userStr !== null;
+                })()}
+                className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full font-medium text-xs md:text-sm transition-all duration-300 group border-2 ${
+                  !(() => {
+                    const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+                    return userStr !== null;
+                  })()
+                    ? 'bg-gray-100 border-gray-300 text-gray-400 opacity-50 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-green-50 to-blue-50 border-green-200 text-green-600 hover:from-green-100 hover:to-blue-100 hover:border-green-300 hover:shadow-md cursor-pointer'
+                }`}
+                title={!(() => {
+                  const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+                  return userStr !== null;
+                })() ? 'Đăng nhập để chia sẻ bài viết' : 'Chia sẻ bài viết'}
               >
-                <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-3.5 h-3.5 md:w-4 md:h-4 ${!(() => {
+                  const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+                  return userStr !== null;
+                })() ? '' : 'group-hover:scale-110'} transition-transform`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                 </svg>
                 Chia sẻ
+              </button>
+
+              <button
+                onClick={handleBookmarkToggle}
+                disabled={isBookmarking || !(() => {
+                  const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+                  return userStr !== null;
+                })()}
+                className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full font-medium text-xs md:text-sm transition-all duration-300 group border-2 ${
+                  !(() => {
+                    const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+                    return userStr !== null;
+                  })()
+                    ? 'bg-gray-100 border-gray-300 text-gray-400 opacity-50 cursor-not-allowed'
+                    : isBookmarked 
+                      ? 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-300 text-yellow-600 hover:from-yellow-100 hover:to-amber-100 hover:border-yellow-400 cursor-pointer' 
+                      : 'bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200 text-gray-600 hover:from-yellow-50 hover:to-amber-50 hover:border-yellow-300 hover:text-yellow-600 cursor-pointer'
+                } ${isBookmarking ? 'opacity-50 cursor-wait' : !(() => {
+                  const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+                  return userStr !== null;
+                })() ? '' : 'hover:shadow-md'}`}
+                title={!(() => {
+                  const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+                  return userStr !== null;
+                })() ? 'Đăng nhập để lưu bài viết' : isBookmarked ? 'Bỏ lưu bài viết' : 'Lưu bài viết'}
+              >
+                <i className={`${isBookmarked ? 'fa-solid' : 'fa-regular'} fa-bookmark ${!(() => {
+                  const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
+                  return userStr !== null;
+                })() ? '' : 'group-hover:scale-110'} transition-transform`}></i>
+                {isBookmarked ? 'Bỏ lưu' : 'Lưu bài viết'}
               </button>
               
               {(() => {
@@ -707,7 +883,7 @@ export default function PostDetailPage() {
                 return (
                   <div className="flex items-center gap-2 text-gray-600 ml-auto">
                     <button
-                      className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-full text-orange-600 font-medium text-sm transition-all duration-300 group ${
+                      className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-full text-orange-600 font-medium text-xs md:text-sm transition-all duration-300 group ${
                         currentUser 
                           ? 'hover:from-orange-100 hover:to-red-100 hover:border-orange-300 hover:shadow-md cursor-pointer' 
                           : 'opacity-50 cursor-not-allowed'
@@ -716,7 +892,7 @@ export default function PostDetailPage() {
                       onClick={() => currentUser && setIsReportModalOpen(true)}
                       disabled={!currentUser}
                     >
-                      <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                       </svg>
                       Báo cáo
@@ -733,12 +909,12 @@ export default function PostDetailPage() {
       </article>
 
       
-      <div className="mt-12">
+      <div id="comments-section" className="mt-8 md:mt-12">
         {post.status === 'pending' ? (
-          <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-8 text-center">
-            <i className="fa-solid fa-comment-slash text-4xl text-orange-400 mb-4"></i>
-            <h3 className="text-xl font-bold text-orange-800 mb-2">Bình luận đã bị khóa!</h3>
-            <p className="text-orange-600">Bài viết đang chờ duyệt. Bạn có thể bình luận sau khi bài viết được Admin duyệt!</p>
+          <div className="bg-orange-50 border-2 border-orange-200 rounded-xl md:rounded-2xl p-6 md:p-8 text-center">
+            <i className="fa-solid fa-comment-slash text-3xl md:text-4xl text-orange-400 mb-3 md:mb-4"></i>
+            <h3 className="text-lg md:text-xl font-bold text-orange-800 mb-2">Bình luận đã bị khóa!</h3>
+            <p className="text-sm md:text-base text-orange-600">Bài viết đang chờ duyệt. Bạn có thể bình luận sau khi bài viết được Admin duyệt!</p>
           </div>
         ) : (
           <CommentBox 

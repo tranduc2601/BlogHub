@@ -67,18 +67,23 @@ export const getPosts = async (req, res) => {
       query += ' WHERE p.authorId = ?';
       params.push(authorIdInt);
       
-      // If viewing other user's posts, apply privacy filter
+      
+      // If viewing other user's posts, apply privacy and status filter
       if (currentUserId && currentUserId !== authorIdInt) {
+        query += ' AND p.status = "visible"';
         query += ' AND (p.privacy = "public"';
         // Check if current user follows this author
         query += ' OR (p.privacy = "followers" AND EXISTS (SELECT 1 FROM follows WHERE followerId = ? AND followingId = ?))';
         params.push(currentUserId, authorIdInt);
         query += ')';
       } else if (!currentUserId) {
-        // Not logged in, only show public posts
+        // Not logged in, only show public visible posts
+        query += ' AND p.status = "visible"';
         query += ' AND p.privacy = "public"';
+      } else {
+
       }
-      // If viewing own posts, show all
+      // If viewing own posts (currentUserId === authorIdInt), show ALL posts regardless of status or privacy
     } else {
       query += ' WHERE p.status = "visible"';
       
@@ -635,7 +640,7 @@ export const updatePost = async (req, res) => {
   try {
     const postId = parseInt(req.params.id);
     const userId = req.user?.id;
-    const { title, content, category, tags } = req.body;
+    const { title, content, category, tags, privacy } = req.body;
 
 
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
@@ -655,9 +660,10 @@ export const updatePost = async (req, res) => {
 
 
     const tagsJson = Array.isArray(tags) ? JSON.stringify(tags) : tags;
+    const postPrivacy = privacy || post.privacy || 'public';
     await db.query(
-      'UPDATE posts SET title = ?, content = ?, category = ?, tags = ?, updatedAt = NOW() WHERE id = ?',
-      [title, content, category, tagsJson, postId]
+      'UPDATE posts SET title = ?, content = ?, category = ?, tags = ?, privacy = ?, updatedAt = NOW() WHERE id = ?',
+      [title, content, category, tagsJson, postPrivacy, postId]
     );
 
 

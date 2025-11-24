@@ -1,8 +1,3 @@
-/**
- * UserManagement - Quản lý người dùng
- * Hiển thị danh sách người dùng với chức năng tìm kiếm và khóa/mở khóa tài khoản
- */
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Modal } from '@/shared/ui';
@@ -34,6 +29,15 @@ const UserManagement: React.FC<UserManagementProps> = ({
   );
   const USERS_PER_PAGE = 5;
 
+  // Sync search query từ URL khi component mount
+  useEffect(() => {
+    const searchFromUrl = searchParams.get('search');
+    if (searchFromUrl && searchFromUrl !== searchQuery) {
+      onSearchChange(searchFromUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const filteredUsers = users
     .filter(user => user.role !== 'admin')
     .filter(user => {
@@ -56,8 +60,11 @@ const UserManagement: React.FC<UserManagementProps> = ({
     if (currentPage > 1) {
       params.set('page', currentPage.toString());
     }
+    if (searchQuery) {
+      params.set('search', searchQuery);
+    }
     setSearchParams(params, { replace: true });
-  }, [statusFilter, currentPage, setSearchParams]);
+  }, [statusFilter, currentPage, searchQuery, setSearchParams]);
 
   // Tự động chuyển về trang trước nếu trang hiện tại không còn user nào
   useEffect(() => {
@@ -134,16 +141,16 @@ const UserManagement: React.FC<UserManagementProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header - responsive */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-800">Quản lý người dùng</h2>
-        <p className="text-gray-600 mt-1">Quản lý tài khoản và trạng thái người dùng</p>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Quản lý người dùng</h2>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">Quản lý tài khoản và trạng thái người dùng</p>
       </div>
 
-      <div className="bg-white rounded-[16px] p-6 shadow-lg space-y-4">
+      <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg space-y-3 sm:space-y-4">
         <div>
-          <label htmlFor="search" className="block text-sm font-semibold text-gray-700 mb-2">
+          <label htmlFor="search" className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
             <i className="fa-solid fa-magnifying-glass mr-2"></i>Tìm kiếm người dùng
           </label>
           <input
@@ -151,8 +158,8 @@ const UserManagement: React.FC<UserManagementProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Nhập tên hoặc email để tìm kiếm..."
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors"
+            placeholder="Nhập tên hoặc email..."
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border-3 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors"
           />
           {searchQuery && (
             <p className="mt-2 text-sm text-gray-600">
@@ -162,22 +169,22 @@ const UserManagement: React.FC<UserManagementProps> = ({
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2 mt-5">
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 mt-3 sm:mt-5">
             <i className="fa-solid fa-filter mr-2"></i>Lọc theo trạng thái
           </label>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             <button
               onClick={() => {
                 setStatusFilter('all');
                 setCurrentPage(1);
               }}
-              className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all transform hover:scale-105 active:scale-95 cursor-pointer ${
+              className={`flex-1 sm:flex-none px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all transform hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap ${
                 statusFilter === 'all'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              <i className="fa-solid fa-users mr-2"></i>
+              <i className="fa-solid fa-users mr-1 sm:mr-2"></i>
               Tất cả ({users.filter(u => u.role !== 'admin').length})
             </button>
             <button
@@ -185,36 +192,36 @@ const UserManagement: React.FC<UserManagementProps> = ({
                 setStatusFilter('active');
                 setCurrentPage(1);
               }}
-              className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all transform hover:scale-105 active:scale-95 cursor-pointer ${
+              className={`flex-1 sm:flex-none px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all transform hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap ${
                 statusFilter === 'active'
                   ? 'bg-green-600 text-white shadow-lg'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              <i className="fa-solid fa-circle-check mr-2"></i>
-              Đang hoạt động ({users.filter(u => u.status === 'active' && u.role !== 'admin').length})
+              <i className="fa-solid fa-circle-check mr-1 sm:mr-2"></i>
+              Hoạt động ({users.filter(u => u.status === 'active' && u.role !== 'admin').length})
             </button>
             <button
               onClick={() => {
                 setStatusFilter('locked');
                 setCurrentPage(1);
               }}
-              className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all transform hover:scale-105 active:scale-95 cursor-pointer ${
+              className={`flex-1 sm:flex-none px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all transform hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap ${
                 statusFilter === 'locked'
                   ? 'bg-red-600 text-white shadow-lg'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              <i className="fa-solid fa-lock mr-2"></i>
-              Đã khóa ({users.filter(u => u.status === 'locked' && u.role !== 'admin').length})
+              <i className="fa-solid fa-lock mr-1 sm:mr-2"></i>
+              Khóa ({users.filter(u => u.status === 'locked' && u.role !== 'admin').length})
             </button>
           </div>
         </div>
       </div>
 
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-[16px] p-6 text-white shadow-lg">
+      {/* Stats cards - responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
           <p className="text-blue-100 text-sm font-medium">Tổng người dùng</p>
           <p className="text-3xl font-bold mt-2">{users.length}</p>
         </div>
@@ -232,10 +239,10 @@ const UserManagement: React.FC<UserManagementProps> = ({
         </div>
       </div>
 
-      
+      {/* Table - responsive with horizontal scroll */}
       <div className="bg-white rounded-[16px] shadow-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <table className="w-full min-w-[800px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">STT</th>
@@ -287,7 +294,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="text-sm text-gray-600"><i className="fa-light fa-envelope mr-2"></i>{user.email}</span>
+                      <span className="text-sm text-gray-600"><i className="fa-solid fa-envelope mr-2"></i>{user.email}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <span
@@ -324,10 +331,10 @@ const UserManagement: React.FC<UserManagementProps> = ({
                       <i className="fa-regular fa-calendar mr-2"></i>{formatDate(user.joinedAt || user.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <div className="flex gap-2 justify-center">
+                      <div className="flex gap-2 justify-center flex-wrap">
                         <button
                           onClick={() => handleToggle(user.id, user.name || user.fullName, user.status)}
-                          className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all cursor-pointer transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl ${
+                          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all cursor-pointer transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl ${
                             user.status === 'active'
                               ? 'bg-red-600 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 text-white'
                               : 'bg-green-600 hover:bg-gradient-to-br hover:from-green-600 hover:to-green-700 text-white'
@@ -336,14 +343,14 @@ const UserManagement: React.FC<UserManagementProps> = ({
                         >
                           {user.status === 'active' 
                             ? <><i className="fa-solid fa-lock mr-1"></i> Khóa</>
-                            : <><i className="fa-solid fa-lock-open mr-2"></i> Mở khóa</>}
+                            : <><i className="fa-solid fa-lock-open mr-1 sm:mr-2"></i> Mở</>}
                         </button>
                         <button
                           onClick={() => handleDelete(user.id, user.name || user.fullName)}
-                          className="px-4 py-2 rounded-xl font-semibold text-sm bg-gray-600 hover:bg-gradient-to-br hover:from-gray-600 hover:to-gray-700 text-white shadow-lg hover:shadow-xl transition-all cursor-pointer transform hover:scale-105 active:scale-95"
+                          className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl font-semibold text-xs sm:text-sm bg-gray-600 hover:bg-gradient-to-br hover:from-gray-600 hover:to-gray-700 text-white shadow-lg hover:shadow-xl transition-all cursor-pointer transform hover:scale-105 active:scale-95"
                           title="Xóa tài khoản"
                         >
-                          <i className="fa-regular fa-trash mr-2"></i>
+                          <i className="fa-regular fa-trash mr-1 sm:mr-2"></i>
                           Xoá
                         </button>
                       </div>
@@ -355,43 +362,45 @@ const UserManagement: React.FC<UserManagementProps> = ({
           </table>
         </div>
 
-        
+        {/* Pagination - responsive */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
-            <div className="text-sm text-gray-600">
+          <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-200 gap-3 sm:gap-0">
+            <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
               Hiển thị <span className="font-semibold">{startIndex + 1}</span> đến{' '}
               <span className="font-semibold">{Math.min(endIndex, filteredUsers.length)}</span> trong tổng số{' '}
               <span className="font-semibold">{filteredUsers.length}</span> người dùng
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2 w-full sm:w-auto">
               <button
                 onClick={handlePreviousPage}
                 disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all ${
+                className={`px-3 sm:px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all ${
                   currentPage === 1
                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
                 }`}
               >
-                <i className="fa-solid fa-chevron-left mr-2"></i>
-                Trang trước
+                <i className="fa-solid fa-chevron-left mr-1 sm:mr-2"></i>
+                <span className="hidden sm:inline">Trang trước</span>
+                <span className="sm:hidden">Trước</span>
               </button>
-              <div className="flex items-center gap-2 px-4">
-                <span className="text-sm font-semibold text-gray-700">
+              <div className="flex items-center gap-2 px-2 sm:px-4">
+                <span className="text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">
                   Trang {currentPage} / {totalPages}
                 </span>
               </div>
               <button
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
-                className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all ${
+                className={`px-3 sm:px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all ${
                   currentPage === totalPages
                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
                 }`}
               >
-                Trang sau
-                <i className="fa-solid fa-chevron-right ml-2"></i>
+                <span className="hidden sm:inline">Trang sau</span>
+                <span className="sm:hidden">Sau</span>
+                <i className="fa-solid fa-chevron-right ml-1 sm:ml-2"></i>
               </button>
             </div>
           </div>

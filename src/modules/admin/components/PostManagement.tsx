@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { Modal } from '@/shared/ui';
@@ -44,6 +44,7 @@ interface PostManagementProps {
 const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, onApprovePost, onRejectPost, onDeletePost, onPendingCountChange }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     if (onPendingCountChange) {
@@ -89,7 +90,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
     return avatarUrl || null;
   };
   
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
   const POSTS_PER_PAGE = 5;
 
 
@@ -102,9 +103,11 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
     return `${day}/${month}/${year}`;
   };
   
-  const [filter, setFilter] = useState<'all' | 'needsReview' | 'pending' | 'visible' | 'hidden'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchDate, setSearchDate] = useState('');
+  const [filter, setFilter] = useState<'all' | 'needsReview' | 'pending' | 'visible' | 'hidden'>(
+    (searchParams.get('filter') as 'all' | 'needsReview' | 'pending' | 'visible' | 'hidden') || 'all'
+  );
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [searchDate, setSearchDate] = useState(searchParams.get('date') || '');
   const [selectedPost, setSelectedPost] = useState<AdminPost | null>(null);
   const [postComments, setPostComments] = useState<Comment[]>([]);
   const [commentReactions, setCommentReactions] = useState<Record<number, ReactionCounts>>({});
@@ -113,6 +116,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; commentId: number } | null>(null);
   const [toggledPostId, setToggledPostId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [modal, setModal] = useState<{
     isOpen: boolean;
     type: 'info' | 'warning' | 'error' | 'success' | 'confirm';
@@ -169,6 +173,16 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
   useEffect(() => {
     setCurrentPage(1);
   }, [filter, searchQuery, searchDate]);
+
+  // Cập nhật URL khi state thay đổi
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (filter !== 'all') params.set('filter', filter);
+    if (searchQuery) params.set('search', searchQuery);
+    if (searchDate) params.set('date', searchDate);
+    if (currentPage > 1) params.set('page', currentPage.toString());
+    setSearchParams(params, { replace: true });
+  }, [filter, searchQuery, searchDate, currentPage, setSearchParams]);
 
   const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
   const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
@@ -372,9 +386,13 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
 
 
   const handleCloseModal = () => {
-    setSelectedPost(null);
-    // Quay lại URL gốc
-    navigate('/admin/post-management', { replace: false });
+    setIsClosing(true);
+    setTimeout(() => {
+      setSelectedPost(null);
+      setIsClosing(false);
+      // Quay lại URL gốc
+      navigate('/admin/post-management', { replace: false });
+    }, 300);
   };
 
   const handleToggleComment = (commentId: number) => {
@@ -543,52 +561,52 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
   }, [selectedPost]);
 
   return (
-    <div className="space-y-6">
-      
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header - responsive */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Quản lý bài viết</h2>
-          <p className="text-gray-600 mt-1">Kiểm duyệt và quản lý nội dung bài viết</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Quản lý bài viết</h2>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Kiểm duyệt và quản lý nội dung bài viết</p>
         </div>
         
-        
-        <div className="flex gap-2">
+        {/* Filter buttons - responsive */}
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-xl font-medium transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all cursor-pointer whitespace-nowrap ${
               filter === 'all'
                 ? 'bg-blue-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 active:bg-gray-100'
             }`}
           >
             Tất cả ({posts.length})
           </button>
           <button
             onClick={() => setFilter('pending')}
-            className={`px-4 py-2 rounded-xl font-medium transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all cursor-pointer whitespace-nowrap ${
               filter === 'pending'
                 ? 'bg-orange-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 active:bg-gray-100'
             }`}
           >
             Chờ duyệt ({posts.filter(p => p.status === 'pending').length})
           </button>
           <button
             onClick={() => setFilter('visible')}
-            className={`px-4 py-2 rounded-xl font-medium transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all cursor-pointer whitespace-nowrap ${
               filter === 'visible'
                 ? 'bg-green-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 active:bg-gray-100'
             }`}
           >
             Đã duyệt ({posts.filter(p => p.status === 'visible').length})
           </button>
           <button
             onClick={() => setFilter('hidden')}
-            className={`px-4 py-2 rounded-xl font-medium transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all cursor-pointer whitespace-nowrap ${
               filter === 'hidden'
                 ? 'bg-red-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 active:bg-gray-100'
             }`}
           >
             Đã ẩn ({posts.filter(p => p.status === 'hidden').length})
@@ -596,23 +614,23 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
         </div>
       </div>
 
-      
-      <div className="bg-white rounded-[16px] p-6 shadow-lg">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Search form - responsive */}
+      <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
               Tìm theo email/tên tài khoản
             </label>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Nhập email hoặc tên tài khoản..."
-              className="w-full px-4 py-2 border-3 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors"
+              placeholder="Nhập email hoặc tên..."
+              className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border-3 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
               Tìm theo ngày đăng
             </label>
             <div className="flex gap-2">
@@ -620,15 +638,15 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                 type="date"
                 value={searchDate}
                 onChange={(e) => setSearchDate(e.target.value)}
-                className="flex-1 px-4 py-2 border-3 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base border-3 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
               />
               {searchDate && (
                 <button
                   onClick={() => setSearchDate('')}
-                  className="w-10 h-10 flex items-center justify-center bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors"
+                  className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-red-500 text-white rounded-xl hover:bg-red-600 active:bg-red-700 transition-colors cursor-pointer"
                   title="Xóa lọc ngày"
                 >
-                  <i className="fa-solid fa-times"></i>
+                  <i className="fa-solid fa-times text-sm sm:text-base"></i>
                 </button>
               )}
             </div>
@@ -646,15 +664,15 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
           paginatedPosts.map(post => (
             <div
               key={post.id}
-              className={`bg-white rounded-[16px] p-6 shadow-lg transition-all hover:shadow-xl ${
+              className={`bg-white rounded-[16px] p-4 sm:p-6 shadow-lg transition-all hover:shadow-xl ${
                 post.needsReview ? 'border-2 border-orange-400' : ''
               }`}
             >
-              <div className="flex justify-between items-start gap-4">
-                
+              <div className="flex flex-col lg:flex-row justify-between items-start gap-3 sm:gap-4">
+                {/* Post content - responsive */}
                 <div className="flex-1 cursor-pointer" onClick={() => handleViewPost(post)}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-xl font-bold text-gray-800">{post.title}</h3>
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-800">{post.title}</h3>
                     {post.hasReports && (
                       <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full flex items-center gap-1">
                         <i className="fa-solid fa-triangle-exclamation"></i> Có báo cáo
@@ -683,11 +701,11 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                     </ReactMarkdown>
                   </div>
                   
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <span>👤 {post.author}</span>
-                    <span><i className="fa-regular fa-calendar mr-2"></i>{formatDate(post.createdAt)}</span>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
+                    <span className="flex items-center gap-1">👤 {post.author}</span>
+                    <span className="flex items-center gap-1"><i className="fa-regular fa-calendar"></i>{formatDate(post.createdAt)}</span>
                     {postReactions[post.id] && postReactions[post.id].total > 0 ? (
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
                         {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as const).map((reactionType) => {
                           const reactions = postReactions[post.id] as Record<string, number>;
                           const count = reactions[reactionType] || 0;
@@ -720,24 +738,25 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                   </div>
                 </div>
   
-                <div className="flex gap-3">
+                {/* Action buttons - responsive */}
+                <div className="flex flex-wrap gap-2 sm:gap-3 mt-3 lg:mt-0">
                   {post.status === 'pending' && (
                     <>
                       <button
                         onClick={() => handleApprove(post.id)}
-                        className="group relative px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 mt-8 cursor-pointer"
+                        className="group relative flex-1 sm:flex-none px-3 sm:px-4 py-2 flex items-center justify-center gap-1 sm:gap-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer text-sm sm:text-base"
                         title="Duyệt bài viết"
                       >
-                        <i className="fa-solid fa-check"></i>
+                        <i className="fa-solid fa-check text-sm sm:text-base"></i>
                         <span className="font-medium">Duyệt</span>
                         <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
                       </button>
                       <button
                         onClick={() => handleReject(post.id)}
-                        className="group relative px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 mt-8 cursor-pointer"
+                        className="group relative flex-1 sm:flex-none px-3 sm:px-4 py-2 flex items-center justify-center gap-1 sm:gap-2 rounded-xl bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer text-sm sm:text-base"
                         title="Từ chối bài viết"
                       >
-                        <i className="fa-solid fa-times"></i>
+                        <i className="fa-solid fa-times text-sm sm:text-base"></i>
                         <span className="font-medium">Từ chối</span>
                         <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
                       </button>
@@ -747,7 +766,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                   {post.status === 'visible' && (
                     <button
                       onClick={() => handleToggle(post.id, post.status)}
-                      className={`group relative px-4 py-2 flex items-center gap-2 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 mt-8 cursor-pointer ${
+                      className={`group relative flex-1 sm:flex-none px-3 sm:px-4 py-2 flex items-center justify-center gap-1 sm:gap-2 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer text-sm sm:text-base ${
                         toggledPostId === post.id
                           ? 'bg-gradient-to-br from-green-500 to-green-600 text-white'
                           : 'bg-gradient-to-br from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white'
@@ -756,12 +775,12 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                     >
                       {toggledPostId === post.id ? (
                         <>
-                          <i className="fa-solid fa-check"></i>
+                          <i className="fa-solid fa-check text-sm sm:text-base"></i>
                           <span className="font-medium">Ẩn</span>
                         </>
                       ) : (
                         <>
-                          <i className="fa-solid fa-eye-slash"></i>
+                          <i className="fa-solid fa-eye-slash text-sm sm:text-base"></i>
                           <span className="font-medium">Ẩn</span>
                         </>
                       )}
@@ -772,7 +791,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                   {post.status === 'hidden' && (
                     <button
                       onClick={() => handleToggle(post.id, post.status)}
-                      className={`group relative px-4 py-2 flex items-center gap-2 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer mt-8 ${
+                      className={`group relative flex-1 sm:flex-none px-3 sm:px-4 py-2 flex items-center justify-center gap-1 sm:gap-2 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer text-sm sm:text-base ${
                         toggledPostId === post.id
                           ? 'bg-gradient-to-br from-green-500 to-green-600 text-white'
                           : 'bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white'
@@ -780,9 +799,9 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                       title="Hiện bài viết"
                     >
                       {toggledPostId === post.id ? (
-                        <i className="fa-solid fa-check"></i>
+                        <i className="fa-solid fa-check text-sm sm:text-base"></i>
                       ) : (
-                        <i className="fa-solid fa-eye"></i>
+                        <i className="fa-solid fa-eye text-sm sm:text-base"></i>
                       )}
                       <span className="font-medium">Hiện</span>
                       <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
@@ -791,10 +810,10 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
 
                   <button
                     onClick={() => handleDelete(post.id)}
-                    className="group relative px-4 py-2 flex items-center gap-2 rounded-xl bg-gradient-to-br from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 mt-8 cursor-pointer"
+                    className="group relative flex-1 sm:flex-none px-3 sm:px-4 py-2 flex items-center justify-center gap-1 sm:gap-2 rounded-xl bg-gradient-to-br from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer text-sm sm:text-base"
                     title="Xóa bài viết"
                   >
-                    <i className="fa-solid fa-trash-can"></i>
+                    <i className="fa-solid fa-trash-can text-sm sm:text-base"></i>
                     <span className="font-medium">Xóa</span>
                     <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
                   </button>
@@ -805,42 +824,44 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
         )}
       
         {totalPages > 1 && paginatedPosts.length > 0 && (
-          <div className="bg-white rounded-[16px] shadow-lg p-6">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-600">
+          <div className="bg-white rounded-[16px] shadow-lg p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
+              <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
                 Hiển thị <span className="font-semibold">{startIndex + 1}</span> đến{' '}
                 <span className="font-semibold">{Math.min(endIndex, filteredPosts.length)}</span> trong tổng số{' '}
                 <span className="font-semibold">{filteredPosts.length}</span> bài viết
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap items-center justify-center gap-2 w-full sm:w-auto">
                 <button
                   onClick={handlePreviousPage}
                   disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all ${
+                  className={`px-3 sm:px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all ${
                     currentPage === 1
                       ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                       : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
                   }`}
                 >
-                  <i className="fa-solid fa-chevron-left mr-2"></i>
-                  Trang trước
+                  <i className="fa-solid fa-chevron-left mr-1 sm:mr-2"></i>
+                  <span className="hidden sm:inline">Trang trước</span>
+                  <span className="sm:hidden">Trước</span>
                 </button>
-                <div className="flex items-center gap-2 px-4">
-                  <span className="text-sm font-semibold text-gray-700">
+                <div className="flex items-center gap-2 px-2 sm:px-4">
+                  <span className="text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">
                     Trang {currentPage} / {totalPages}
                   </span>
                 </div>
                 <button
                   onClick={handleNextPage}
                   disabled={currentPage === totalPages}
-                  className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all ${
+                  className={`px-3 sm:px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all ${
                     currentPage === totalPages
                       ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                       : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
                   }`}
                 >
-                  Trang sau
-                  <i className="fa-solid fa-chevron-right ml-2"></i>
+                  <span className="hidden sm:inline">Trang sau</span>
+                  <span className="sm:hidden">Sau</span>
+                  <i className="fa-solid fa-chevron-right ml-1 sm:ml-2"></i>
                 </button>
               </div>
             </div>
@@ -851,12 +872,16 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
       
       {selectedPost && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fadeIn"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)', backdropFilter: 'blur(1px)' }}
+          className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
+            isClosing ? 'opacity-0' : 'opacity-100 animate-fadeIn'
+          }`}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)', backdropFilter: isClosing ? 'blur(0px)' : 'blur(1px)' }}
           onClick={handleCloseModal}
         >
           <div 
-            className="bg-white rounded-3xl shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-hidden relative animate-slideUp"
+            className={`bg-white rounded-3xl shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-hidden relative transition-all duration-300 ${
+              isClosing ? 'scale-95 opacity-0 translate-y-4' : 'scale-100 opacity-100 translate-y-0 animate-slideUp'
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             
@@ -887,6 +912,49 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                   <h3 className="text-3xl font-bold text-blue-600 mb-2">
                     {selectedPost.title}
                   </h3>
+                  
+                  {/* Tags */}
+                  {selectedPost.tags && (() => {
+                    try {
+                      let tags: string[] = [];
+                      
+                      // Check if already an array
+                      if (Array.isArray(selectedPost.tags)) {
+                        tags = selectedPost.tags;
+                      } else if (typeof selectedPost.tags === 'string') {
+                        // Try parsing as JSON first
+                        try {
+                          const parsed = JSON.parse(selectedPost.tags);
+                          if (Array.isArray(parsed)) {
+                            tags = parsed;
+                          }
+                        } catch {
+                          // If not JSON, treat as comma-separated string
+                          tags = selectedPost.tags.split(',').map((t: string) => t.trim()).filter((t: string) => t);
+                        }
+                      }
+                      
+                      if (tags.length > 0) {
+                        return (
+                          <div className="flex flex-wrap gap-2 mt-3 mb-4">
+                            {tags.map((tag: string, index: number) => (
+                              <span
+                                key={index}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-full shadow-md hover:bg-cyan-600 hover:shadow-lg hover:scale-105 transition-all duration-200"
+                              >
+                                <i className="fa-solid fa-tag text-xs"></i>
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        );
+                      }
+                    } catch (e) {
+                      console.error('Error parsing tags:', e);
+                    }
+                    return null;
+                  })()}
+                  
                   <div className="flex items-center gap-4 text-sm text-gray-600 mt-4">
                     <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full">
                       <i className="fa-solid fa-user text-blue-600"></i>

@@ -1,9 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useUsers } from "../hooks/useUsers";
 import { useAuth } from "@/core/auth";
 import axios from "@/core/config/axios";
 import toast from "react-hot-toast";
+
+interface UserInfo {
+  id: number;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+  postsCount: number;
+  commentsCount: number;
+  followersCount: number;
+  followingCount: number;
+  totalLikes: number;
+  joinedAt: string;
+}
 
 
 function FollowButton({ userId, onFollowChange }: { userId: number; onFollowChange: () => void }) {
@@ -109,9 +122,99 @@ export default function UsersPage() {
   const { users, loading, error } = useUsers();
   const { user: currentUser } = useAuth();
   const [localUsers, setLocalUsers] = useState(users);
+  const [displayedUsers, setDisplayedUsers] = useState<UserInfo[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  
+  const USERS_PER_PAGE = 9;
+  
+  // Modal state
+  const [showModal, setShowModal] = useState(false);
+  const [isClosingModal, setIsClosingModal] = useState(false);
+  const [modalType, setModalType] = useState<'followers' | 'following'>('followers');
+  const [modalUsers, setModalUsers] = useState<UserInfo[]>([]);
+  const [modalLoading, setModalLoading] = useState(false);
+  
   useEffect(() => {
     setLocalUsers(users);
   }, [users]);
+
+  // Lọc và sắp xếp users với useMemo để tránh re-render vô hạn
+  const filteredAndSortedUsers = useMemo(() => {
+    return localUsers
+      .filter(
+        (user) =>
+          user.id !== currentUser?.id &&
+          (user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email.toLowerCase().includes(searchTerm.toLowerCase()))
+      )
+      .sort((a, b) => {
+        switch (sortBy) {
+          case "name":
+            return a.name.localeCompare(b.name);
+          case "posts":
+            return b.postsCount - a.postsCount;
+          case "comments":
+            return b.commentsCount - a.commentsCount;
+          case "followers": {
+            const aFollowers = a.followersCount || 0;
+            const bFollowers = b.followersCount || 0;
+            return bFollowers - aFollowers;
+          }
+          case "likes": {
+            const aLikes = a.totalLikes || 0;
+            const bLikes = b.totalLikes || 0;
+            const aAvgLikes = a.postsCount > 0 ? aLikes / a.postsCount : 0;
+            const bAvgLikes = b.postsCount > 0 ? bLikes / b.postsCount : 0;
+            return bAvgLikes - aAvgLikes;
+          }
+          default:
+            return 0;
+        }
+      });
+  }, [localUsers, searchTerm, sortBy, currentUser?.id]);
+
+  // Reset page khi filter thay đổi
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, sortBy]);
+
+  // Cập nhật displayed users khi filteredUsers hoặc page thay đổi
+  useEffect(() => {
+    const startIndex = 0;
+    const endIndex = page * USERS_PER_PAGE;
+    const usersToDisplay = filteredAndSortedUsers.slice(startIndex, endIndex);
+    const hasMoreUsers = endIndex < filteredAndSortedUsers.length;
+    
+    setDisplayedUsers(usersToDisplay);
+    setHasMore(hasMoreUsers);
+  }, [filteredAndSortedUsers, page]);
+
+  // Infinite scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loadingMore || !hasMore) return;
+
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = document.documentElement.clientHeight;
+
+      // Khi scroll gần đến cuối trang (còn 300px)
+      if (scrollTop + clientHeight >= scrollHeight - 300) {
+        setLoadingMore(true);
+        
+        // Simulate loading delay
+        setTimeout(() => {
+          setPage(prev => prev + 1);
+          setLoadingMore(false);
+        }, 500);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loadingMore, hasMore]);
 
   // Cập nhật URL khi searchTerm hoặc sortBy thay đổi
   useEffect(() => {
@@ -125,6 +228,19 @@ export default function UsersPage() {
     setSearchParams(params, { replace: true });
   }, [searchTerm, sortBy, setSearchParams]);
 
+  // Ngăn scroll khi modal mở
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showModal]);
+
   const handleFollowChange = async () => {
     // Refetch users list to get accurate follower counts
     try {
@@ -137,37 +253,52 @@ export default function UsersPage() {
     }
   };
 
-  const filteredAndSortedUsers = localUsers
-    .filter(
-      (user) =>
-        user.id !== currentUser?.id &&
-        (user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()))
-    )
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "name":
-          return a.name.localeCompare(b.name);
-        case "posts":
-          return b.postsCount - a.postsCount;
-        case "comments":
-          return b.commentsCount - a.commentsCount;
-        case "followers": {
-          const aFollowers = a.followersCount || 0;
-          const bFollowers = b.followersCount || 0;
-          return bFollowers - aFollowers;
-        }
-        case "likes": {
-          const aLikes = a.totalLikes || 0;
-          const bLikes = b.totalLikes || 0;
-          const aAvgLikes = a.postsCount > 0 ? aLikes / a.postsCount : 0;
-          const bAvgLikes = b.postsCount > 0 ? bLikes / b.postsCount : 0;
-          return bAvgLikes - aAvgLikes;
-        }
-        default:
-          return 0;
+  const handleOpenFollowersModal = async (userId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setModalType('followers');
+    setShowModal(true);
+    setModalLoading(true);
+    
+    try {
+      const response = await axios.get(`/users/${userId}/followers`);
+      if (response.data.success) {
+        setModalUsers(response.data.users);
       }
-    });
+    } catch (error) {
+      console.error('Error fetching followers:', error);
+      toast.error("Không thể tải danh sách người theo dõi!");
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleOpenFollowingModal = async (userId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setModalType('following');
+    setShowModal(true);
+    setModalLoading(true);
+    
+    try {
+      const response = await axios.get(`/users/${userId}/following`);
+      if (response.data.success) {
+        setModalUsers(response.data.users);
+      }
+    } catch (error) {
+      console.error('Error fetching following:', error);
+      toast.error("Không thể tải danh sách đang theo dõi!");
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsClosingModal(true);
+    setTimeout(() => {
+      setShowModal(false);
+      setIsClosingModal(false);
+      setModalUsers([]);
+    }, 300);
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -181,12 +312,12 @@ export default function UsersPage() {
   return (
     <div className="max-w-6xl mx-auto select-none">
       
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-          Danh sách các tác giả
+      <div className="mb-8 text-center md:text-left">
+        <h1 className="text-3xl md:text-4xl font-bold bg-[#2664eb] bg-clip-text text-transparent mb-4">
+          Danh sách các người dùng
         </h1>
-        <p className="text-gray-600 text-lg">
-          Khám phá những tác giả tài năng trong cộng đồng BlogHub!
+        <p className="text-gray-600 text-base md:text-lg">
+          Khám phá những người dùng tài năng trong cộng đồng BlogHub!
         </p>
       </div>
 
@@ -258,18 +389,19 @@ export default function UsersPage() {
 
       
       {!loading && !error && filteredAndSortedUsers.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAndSortedUsers.map((user, index) => (
-          <div
-            key={user.id}
-            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 hover:shadow-xl transition-all duration-300 animate-fadeInUp h-full flex flex-col cursor-pointer"
-            style={{ animationDelay: `${index * 100}ms` }}
-            onClick={() => navigate(`/userdetail/${user.id}`)}
-          >
-            
-            <div className="flex-grow">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="relative w-16 h-16 flex-shrink-0">
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayedUsers.map((user, index) => (
+              <div
+                key={user.id}
+                className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 hover:shadow-xl transition-all duration-300 animate-fadeInUp h-full flex flex-col cursor-pointer"
+                style={{ animationDelay: `${index * 100}ms` }}
+                onClick={() => navigate(`/userdetail/${user.id}`)}
+              >
+              
+                <div className="flex-grow">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="relative w-16 h-16 flex-shrink-0">
                   {user.avatarUrl ? (
                     <>
                       <img 
@@ -297,54 +429,185 @@ export default function UsersPage() {
                       {user.name.trim().split(' ').slice(-1)[0].charAt(0).toUpperCase()}
                     </div>
                   )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-xl font-bold text-gray-800 truncate">
-                    {user.name}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Tham gia {formatDate(user.joinedAt)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xl font-bold text-gray-800 truncate">
+                        {user.name}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        Tham gia {formatDate(user.joinedAt)}
+                      </p>
+                    </div>
+                  </div>
+
+                  
+                  <p className="text-gray-600 text-sm mb-4 leading-relaxed text-center flex items-center justify-center gap-2 truncate">
+                    <span className="inline-block w-5 h-5 align-middle flex-shrink-0">
+                      <i className="fa-solid fa-envelope"></i>
+                    </span>
+                    <span className="truncate">{user.email}</span>
                   </p>
-                </div>
-              </div>
 
-              
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed text-center flex items-center justify-center gap-2 truncate">
-                <span className="inline-block w-5 h-5 align-middle flex-shrink-0">
-                  <i className="fa-light fa-envelope"></i>
-                </span>
-                <span className="truncate">{user.email}</span>
-              </p>
-
-              {/* Stats */}
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="text-center">
+                  {/* Stats */}
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div className="text-center mt-2">
                   <div className="text-2xl font-bold text-blue-600">
                     {user.postsCount}
                   </div>
                   <div className="text-xs text-gray-500">Bài viết</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {user.followersCount || 0}
+                    <div 
+                      className="text-center cursor-pointer hover:bg-blue-50 rounded-lg p-2 transition-colors"
+                      onClick={(e) => handleOpenFollowersModal(user.id, e)}
+                    >
+                      <div className="text-2xl font-bold text-blue-600">
+                        {user.followersCount || 0}
+                      </div>
+                      <div className="text-xs text-gray-500">Người theo dõi</div>
+                    </div>
+                    <div 
+                      className="text-center cursor-pointer hover:bg-blue-50 rounded-lg p-2 transition-colors"
+                      onClick={(e) => handleOpenFollowingModal(user.id, e)}
+                    >
+                      <div className="text-2xl font-bold text-blue-600">
+                        {user.followingCount || 0}
+                      </div>
+                      <div className="text-xs text-gray-500">Đang theo dõi</div>
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500">Người theo dõi</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {user.followingCount || 0}
-                  </div>
-                  <div className="text-xs text-gray-500">Đang theo dõi</div>
+
+                
+                <div className="flex gap-2 mt-auto" onClick={(e) => e.stopPropagation()}>
+                  <FollowButton userId={user.id} onFollowChange={handleFollowChange} />
                 </div>
               </div>
+            ))}
+          </div>
+
+          {/* Loading More Indicator */}
+          {loadingMore && (
+            <div className="flex items-center justify-center py-8 mt-6">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-3 text-gray-600 text-sm">Đang tải thêm người dùng...</p>
+              </div>
+            </div>
+          )}
+
+          {/* End of List Indicator */}
+          {!hasMore && displayedUsers.length > 0 && (
+            <div className="flex items-center justify-center py-8 mt-6">
+              <div className="flex items-center gap-2 text-gray-500">
+                <div className="h-px w-16 bg-gray-300"></div>
+                <i className="fa-solid fa-check-circle text-green-500"></i>
+                <span className="text-sm font-medium">Đã hiển thị tất cả người dùng</span>
+                <div className="h-px w-16 bg-gray-300"></div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+      
+      {/* Followers/Following Modal */}
+      {showModal && (
+        <div 
+          className={`fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4 transition-all duration-300 ${
+            isClosingModal ? 'opacity-0' : 'opacity-100'
+          }`}
+          onClick={handleCloseModal}
+        >
+          <div 
+            className={`bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden transition-all duration-300 ${
+              isClosingModal ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="bg-[#2664eb] text-white p-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold flex items-center gap-2">
+                <i className={`fa-solid ${modalType === 'followers' ? 'fa-users' : 'fa-user-check'} mr-2`}></i>
+                {modalType === 'followers' ? 'Người theo dõi' : 'Đang theo dõi'}
+              </h2>
+              <button
+                onClick={handleCloseModal}
+                className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 hover:rotate-90 transition-all duration-300 flex items-center justify-center cursor-pointer hover:scale-110 active:scale-95"
+              >
+                <i className="fa-solid fa-times text-xl"></i>
+              </button>
             </div>
 
-            
-            <div className="flex gap-2 mt-auto" onClick={(e) => e.stopPropagation()}>
-              <FollowButton userId={user.id} onFollowChange={handleFollowChange} />
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(80vh-88px)]">
+              {modalLoading ? (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                  <p className="mt-4 text-gray-600">Đang tải...</p>
+                </div>
+              ) : modalUsers.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4"><i className={`fa-solid ${modalType === 'followers' ? 'fa-users' : 'fa-user-check'}`}></i></div>
+                  <p className="text-gray-600 text-lg">
+                    {modalType === 'followers' 
+                      ? 'Chưa có người theo dõi nào!' 
+                      : 'Chưa theo dõi ai!'}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {modalUsers.map((modalUser) => (
+                    <div
+                      key={modalUser.id}
+                      className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-blue-50 transition-all duration-300 cursor-pointer group"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCloseModal();
+                        navigate(`/userdetail/${modalUser.id}`);
+                      }}
+                    >
+                      <div className="relative w-16 h-16 flex-shrink-0">
+                        {modalUser.avatarUrl ? (
+                          <>
+                            <img 
+                              src={modalUser.avatarUrl}
+                              alt={modalUser.name}
+                              className="w-16 h-16 rounded-full object-cover border-4 border-blue-500 shadow-lg group-hover:scale-110 transition-transform"
+                              draggable={false}
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                if (fallback) {
+                                  fallback.style.display = 'flex';
+                                }
+                              }}
+                            />
+                            <div 
+                              className="w-16 h-16 bg-blue-100 rounded-full items-center justify-center text-blue-700 font-bold text-xl border-4 border-blue-500 shadow-lg absolute top-0 left-0 group-hover:scale-110 transition-transform"
+                              style={{ display: 'none' }}
+                            >
+                              {modalUser.name.trim().split(' ').slice(-1)[0].charAt(0).toUpperCase()}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-xl border-4 border-blue-500 shadow-lg group-hover:scale-110 transition-transform">
+                            {modalUser.name.trim().split(' ').slice(-1)[0].charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base font-semibold text-gray-800 truncate">
+                          {modalUser.name}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          {modalUser.postsCount} bài viết
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-          ))}
         </div>
       )}
     </div>

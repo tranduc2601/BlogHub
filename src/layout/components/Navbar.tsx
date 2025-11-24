@@ -3,6 +3,8 @@ import { useAuth } from "@/core/auth";
 import { useDropdown } from "@/core/providers";
 import { useState, useEffect, useRef } from "react";
 import NotificationDropdown from "@/modules/notifications/components/NotificationDropdown";
+import { useRoutePreloader } from "@/core/routing";
+import toast from 'react-hot-toast';
 
 function BlogHubLogoSVG() {
   return (
@@ -32,6 +34,7 @@ export default function Navbar() {
   const showDropdown = activeDropdown === 'profile';
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
+  const preloader = useRoutePreloader();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -49,8 +52,25 @@ export default function Navbar() {
     };
   }, [showDropdown, setActiveDropdown]);
 
+  // Ngăn scroll khi mobile menu mở
+  useEffect(() => {
+    if (showMobileMenu) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showMobileMenu]);
+
   const handleLogout = () => {
     logout();
+    toast.success('Đã đăng xuất thành công!', {
+      icon: '👋',
+      duration: 3000,
+    });
     navigate("/login");
     setActiveDropdown(null);
     setShowMobileMenu(false);
@@ -97,7 +117,7 @@ export default function Navbar() {
         <div className="hidden lg:flex gap-6 items-center">
           {location.pathname !== "/" && (
             <Link to="/" className="relative group" title="Trang chủ">
-              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:bg-blue-500 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3">
+              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3" style={{ '--tw-bg-opacity': '1' } as React.CSSProperties} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2664eb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}>
                 <i className="fa-solid fa-house text-gray-700 group-hover:text-white text-lg transition-all duration-300"></i>
               </div>
             </Link>
@@ -109,7 +129,7 @@ export default function Navbar() {
               className="relative group"
               title="Quản lý"
             >
-              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:bg-purple-500 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3">
+              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2664eb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}>
                 <i className="fa-solid fa-shield-halved text-gray-700 group-hover:text-white text-lg transition-all duration-300"></i>
               </div>
             </Link>
@@ -119,9 +139,11 @@ export default function Navbar() {
             <Link 
               to="/users" 
               className="relative group"
-              title="Tác giả"
+              title="Người dùng"
+              onMouseEnter={preloader.onMouseEnter('users')}
+              onTouchStart={preloader.onTouchStart('users')}
             >
-              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:bg-green-500 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3">
+              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2664eb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}>
                 <i className="fa-solid fa-user-pen text-gray-700 group-hover:text-white text-lg transition-all duration-300"></i>
               </div>
             </Link>
@@ -132,9 +154,23 @@ export default function Navbar() {
               to="/create" 
               className="relative group"
               title="Tạo bài viết"
+              onMouseEnter={preloader.onMouseEnter('createPost')}
+              onTouchStart={preloader.onTouchStart('createPost')}
             >
-              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:bg-orange-500 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3">
+              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2664eb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}>
                 <i className="fa-solid fa-file-alt text-gray-700 group-hover:text-white text-lg transition-all duration-300"></i>
+              </div>
+            </Link>
+          )}
+
+          {isAuthenticated && (
+            <Link 
+              to="/saved-posts" 
+              className="relative group"
+              title="Bài viết đã lưu"
+            >
+              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2664eb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}>
+                <i className="fa-solid fa-bookmark text-gray-700 group-hover:text-white text-lg transition-all duration-300"></i>
               </div>
             </Link>
           )}
@@ -200,7 +236,7 @@ export default function Navbar() {
                           className="w-12 h-12 rounded-full object-cover border-2 border-blue-300 shadow-md"
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center border-2 border-blue-300 shadow-md">
+                        <div className="w-12 h-12 rounded-full bg-[#2664eb] flex items-center justify-center border-2 border-blue-300 shadow-md">
                           <span className="text-lg font-bold text-white">
                             {user?.username.split(' ').slice(-1)[0].charAt(0).toUpperCase()}
                           </span>
@@ -220,7 +256,7 @@ export default function Navbar() {
                         )}
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600 truncate mt-4"><i className="fa-light fa-envelope mr-2"></i>{user?.email}</p>
+                    <p className="text-sm text-gray-600 truncate mt-4"><i className="fa-solid fa-envelope mr-2"></i>{user?.email}</p>
                   </div>
                   <div className="py-2">
                     <Link
@@ -246,6 +282,16 @@ export default function Navbar() {
                         </svg>
                       </div>
                       <span className="font-medium">Bài viết của tôi</span>
+                    </Link>
+                    <Link
+                      to="/saved-posts"
+                      onClick={() => setActiveDropdown(null)}
+                      className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200 group"
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-yellow-100 flex items-center justify-center group-hover:bg-yellow-200 transition-colors">
+                        <i className="fa-solid fa-bookmark text-yellow-600 text-lg"></i>
+                      </div>
+                      <span className="font-medium">Bài viết đã lưu</span>
                     </Link>
                     <div className="my-2 border-t border-gray-200"></div>
                     <button
@@ -297,7 +343,7 @@ export default function Navbar() {
             <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
               
               {isAuthenticated && (
-                <div className="p-4 mb-2 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-lg border border-gray-200">
+                <div className="p-4 mb-2 bg-[#2664eb] rounded-lg border border-gray-200">
                   <div className="flex items-center gap-3">
                     {user?.avatarUrl ? (
                       <img
@@ -358,7 +404,7 @@ export default function Navbar() {
                   className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3"
                 >
                   <i className="fa-solid fa-user-pen text-lg"></i>
-                  Tác giả
+                  Người dùng
                 </Link>
               )}
 
@@ -408,6 +454,14 @@ export default function Navbar() {
                   >
                     <i className="fa-solid fa-file-lines text-lg"></i>
                     Bài viết của tôi
+                  </Link>
+                  <Link
+                    to="/saved-posts"
+                    onClick={closeMobileMenu}
+                    className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3"
+                  >
+                    <i className="fa-solid fa-bookmark text-lg"></i>
+                    Bài viết đã lưu
                   </Link>
                   
                   <div className="my-2 border-t border-gray-200"></div>

@@ -176,7 +176,7 @@ export default function ReportModal({ isOpen, onClose, onSubmit, postTitle }: Re
               className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors cursor-pointer flex items-center justify-center gap-2"
               disabled={isSubmitting}
             >
-              <i className="fa-solid fa-xmark mr-0.5"></i>Hủy
+              <i className="fa-solid fa-xmark"></i>Hủy
             </button>
             <button
               onClick={handleSubmit}

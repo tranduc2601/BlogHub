@@ -1,5 +1,35 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Link } from 'react-router-dom';
+
+interface TopPost {
+  id: number;
+  title: string;
+  author: string;
+  authorAvatar: string;
+  likes: number;
+  commentCount: number;
+  createdAt: string;
+}
+
+interface TopUser {
+  id: number;
+  name: string;
+  avatarUrl: string;
+  postsCount: number;
+  totalLikes: number;
+  commentsCount: number;
+}
+
+interface Activity {
+  type: 'post' | 'comment' | 'report';
+  id: number;
+  content: string;
+  userName: string;
+  userAvatar: string;
+  timestamp: string;
+  postId?: number;
+}
 
 interface AdminDashboardProps {
   stats: {
@@ -16,104 +46,145 @@ interface AdminDashboardProps {
     rejectedReports: number;
   };
   monthlyStats?: Array<{ month: string; posts: number; users: number }>;
+  topPosts?: TopPost[];
+  topUsers?: TopUser[];
+  activities?: Activity[];
 }
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats, monthlyStats = [] }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ 
+  stats, 
+  monthlyStats = [], 
+  topPosts = [], 
+  topUsers = [], 
+  activities = [] 
+}) => {
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'post': return 'fa-blog';
+      case 'comment': return 'fa-comment';
+      case 'report': return 'fa-triangle-exclamation';
+      default: return 'fa-circle';
+    }
+  };
+
+  const getActivityColor = (type: string) => {
+    switch (type) {
+      case 'post': return 'text-blue-500 bg-blue-50';
+      case 'comment': return 'text-purple-500 bg-purple-50';
+      case 'report': return 'text-red-500 bg-red-50';
+      default: return 'text-gray-500 bg-gray-50';
+    }
+  };
+
+  const formatTimeAgo = (timestamp: string) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffMs = now.getTime() - time.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Vừa xong';
+    if (diffMins < 60) return `${diffMins} phút trước`;
+    if (diffHours < 24) return `${diffHours} giờ trước`;
+    return `${diffDays} ngày trước`;
+  };
+
   return (
-    <div className="space-y-6">
-      
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Thống kê tổng quan</h2>
-        <p className="text-gray-600 mt-1">Dashboard quản trị BlogHub</p>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header - responsive text sizing */}
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Thống kê tổng quan</h2>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">Dashboard quản trị BlogHub</p>
       </div>
 
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-        
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-[16px] p-6 text-white shadow-lg">
+      {/* Stats Cards - responsive grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
+        {/* Tổng bài viết */}
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm font-medium">Tổng bài viết</p>
-              <p className="text-3xl font-bold mt-2">{stats.totalPosts}</p>
+              <p className="text-blue-100 text-xs sm:text-sm font-medium">Tổng bài viết</p>
+              <p className="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2">{stats.totalPosts}</p>
             </div>
-            <div className="text-5xl opacity-50">
+            <div className="text-3xl sm:text-5xl opacity-50">
               <i className="fa-solid fa-blog"></i>
             </div>
           </div>
-          <div className="mt-4 text-sm text-blue-100">
+          <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-blue-100">
             {stats.pendingReviewPosts} bài cần kiểm duyệt
           </div>
         </div>
 
-        
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-[16px] p-6 text-white shadow-lg">
+        {/* Tổng người dùng */}
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-green-100 text-sm font-medium">Tổng người dùng</p>
-              <p className="text-3xl font-bold mt-2">{stats.totalUsers}</p>
+              <p className="text-green-100 text-xs sm:text-sm font-medium">Tổng người dùng</p>
+              <p className="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2">{stats.totalUsers}</p>
             </div>
-            <div className="text-5xl opacity-50">
+            <div className="text-3xl sm:text-5xl opacity-50">
               <i className="fa-solid fa-user"></i>
             </div>
           </div>
-          <div className="mt-4 text-sm text-green-100">
+          <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-green-100">
             {stats.activeUsers} tài khoản bình thường
           </div>
         </div>
 
-        
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-[16px] p-6 text-white shadow-lg">
+        {/* Bài viết Hot */}
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-orange-100 text-sm font-medium">Bài viết Hot</p>
-              <p className="text-3xl font-bold mt-2">{stats.hotPosts}</p>
+              <p className="text-orange-100 text-xs sm:text-sm font-medium">Bài viết Hot</p>
+              <p className="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2">{stats.hotPosts}</p>
             </div>
-            <div className="text-5xl opacity-50">
-              <i className="fa-light fa-fire-flame-curved"></i>
+            <div className="text-3xl sm:text-5xl opacity-50">
+              <i className="fa-solid fa-fire-flame-curved"></i>
             </div>
           </div>
-          <div className="mt-4 text-sm text-orange-100">
+          <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-orange-100">
             ≥ 50 lượt thích
           </div>
         </div>
 
-        
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-[16px] p-6 text-white shadow-lg">
+        {/* Bình luận */}
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-purple-100 text-sm font-medium">Bình luận</p>
-              <p className="text-3xl font-bold mt-2">{stats.pendingReviewComments}</p>
+              <p className="text-purple-100 text-xs sm:text-sm font-medium">Bình luận</p>
+              <p className="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2">{stats.pendingReviewComments}</p>
             </div>
-            <div className="text-5xl opacity-50">
+            <div className="text-3xl sm:text-5xl opacity-50">
               <i className="fa-regular fa-comments"></i>
             </div>
           </div>
-          <div className="mt-4 text-sm text-purple-100">
+          <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-purple-100">
             Cần kiểm duyệt
           </div>
         </div>
 
-        
-        <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-[16px] p-6 text-white shadow-lg">
+        {/* Báo cáo vi phạm */}
+        <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-red-100 text-sm font-medium">Báo cáo vi phạm</p>
-              <p className="text-3xl font-bold mt-2">{stats.totalReports}</p>
+              <p className="text-red-100 text-xs sm:text-sm font-medium">Báo cáo vi phạm</p>
+              <p className="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2">{stats.totalReports}</p>
             </div>
-            <div className="text-5xl opacity-50">
+            <div className="text-3xl sm:text-5xl opacity-50">
               <i className="fa-solid fa-triangle-exclamation"></i>
             </div>
           </div>
-          <div className="mt-4 text-sm text-red-100">
+          <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-red-100">
             {stats.pendingReports} chờ xử lý
           </div>
         </div>
       </div>
 
-      
-      <div className="bg-white rounded-[16px] p-6 shadow-lg">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Chi tiết hoạt động</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Chi tiết hoạt động - responsive */}
+      <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Chi tiết hoạt động</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           <div className="p-4 bg-blue-50 rounded-xl">
             <p className="text-sm text-blue-600 font-medium">Tài khoản bình thường</p>
             <p className="text-2xl font-bold text-blue-700 mt-1">{stats.activeUsers}</p>
@@ -131,10 +202,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats, monthlyStats = [
         </div>
       </div>
 
-      
-      <div className="bg-white rounded-[16px] p-6 shadow-lg">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Thống kê báo cáo vi phạm</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Thống kê báo cáo - responsive */}
+      <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Thống kê báo cáo vi phạm</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div className="p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
             <p className="text-sm text-gray-600 font-medium">Tổng báo cáo bài viết</p>
             <p className="text-2xl font-bold text-gray-700 mt-1">{stats.totalReports}</p>
@@ -154,11 +225,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats, monthlyStats = [
         </div>
       </div>
 
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        <div className="bg-white rounded-[16px] p-6 shadow-lg">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Xu hướng bài viết theo tháng</h3>
+      {/* Charts - responsive layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* Chart bài viết */}
+        <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Xu hướng bài viết theo tháng</h3>
           {monthlyStats.length === 0 || monthlyStats.every(m => m.posts === 0) ? (
             <div className="h-[300px] flex items-center justify-center">
               <p className="text-gray-500 text-center">Chưa có bài viết nào được đăng</p>
@@ -177,9 +248,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats, monthlyStats = [
           )}
         </div>
 
-        
-        <div className="bg-white rounded-[16px] p-6 shadow-lg">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Người dùng mới theo tháng</h3>
+        {/* Chart người dùng */}
+        <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Người dùng mới theo tháng</h3>
           {monthlyStats.length === 0 || monthlyStats.every(m => m.users === 0) ? (
             <div className="h-[300px] flex items-center justify-center">
               <p className="text-gray-500 text-center">Chưa có người dùng mới</p>
@@ -197,6 +268,179 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats, monthlyStats = [
             </ResponsiveContainer>
           )}
         </div>
+      </div>
+
+      {/* Top Posts & Top Users - responsive grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* Top Posts */}
+        <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
+              <i className="fa-solid fa-fire text-orange-500"></i>
+              Top bài viết
+            </h3>
+            <span className="text-sm text-gray-500">{topPosts.length} bài</span>
+          </div>
+          
+          {topPosts.length === 0 ? (
+            <div className="py-8 text-center text-gray-500">
+              <i className="fa-regular fa-face-sad-tear text-4xl mb-2"></i>
+              <p>Chưa có bài viết nào</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {topPosts.map((post, index) => (
+                <Link 
+                  key={post.id} 
+                  to={`/post/${post.id}`}
+                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors group"
+                >
+                  <div className="flex-shrink-0 w-8 h-8 bg-[#2563eb] rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                    #{index + 1}
+                  </div>
+                  <img 
+                    src={post.authorAvatar || '/default-avatar.png'} 
+                    alt={post.author}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-800 text-sm truncate group-hover:text-blue-600 transition-colors">
+                      {post.title}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      bởi {post.author}
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0 text-right">
+                    <div className="flex items-center gap-1 text-red-500 text-sm font-semibold">
+                      <i className="fa-solid fa-heart"></i>
+                      <span>{post.likes}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-gray-500 text-xs mt-1">
+                      <i className="fa-solid fa-comment"></i>
+                      <span>{post.commentCount}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Top Users */}
+        <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
+              <i className="fa-solid fa-crown text-yellow-500"></i>
+              Top người dùng
+            </h3>
+            <span className="text-sm text-gray-500">{topUsers.length} users</span>
+          </div>
+          
+          {topUsers.length === 0 ? (
+            <div className="py-8 text-center text-gray-500">
+              <i className="fa-regular fa-face-sad-tear text-4xl mb-2"></i>
+              <p>Chưa có người dùng nào</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {topUsers.map((user, index) => (
+                <Link 
+                  key={user.id} 
+                  to={`/userdetail/${user.id}`}
+                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer group"
+                >
+                  <div className="flex-shrink-0 w-8 h-8 bg-[#2563eb] rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                    #{index + 1}
+                  </div>
+                  <img 
+                    src={user.avatarUrl || '/default-avatar.png'} 
+                    alt={user.name}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-800 text-sm truncate group-hover:text-blue-600 transition-colors">
+                      {user.name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {user.postsCount} bài viết • {user.commentsCount} bình luận
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0 text-right">
+                    <div className="flex items-center gap-1 text-red-500 text-sm font-semibold">
+                      <i className="fa-solid fa-heart"></i>
+                      <span>{user.totalLikes}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Activity History */}
+      <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
+            <i className="fa-solid fa-clock-rotate-left text-blue-500"></i>
+            Lịch sử hoạt động
+          </h3>
+          <span className="text-sm text-gray-500">Gần đây</span>
+        </div>
+        
+        {activities.length === 0 ? (
+          <div className="py-8 text-center text-gray-500">
+            <i className="fa-regular fa-face-sad-tear text-4xl mb-2"></i>
+            <p>Chưa có hoạt động nào</p>
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {activities.map((activity) => (
+              <div 
+                key={`${activity.type}-${activity.id}`}
+                className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+              >
+                <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getActivityColor(activity.type)}`}>
+                  <i className={`fa-solid ${getActivityIcon(activity.type)}`}></i>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <img 
+                      src={activity.userAvatar || '/default-avatar.png'} 
+                      alt={activity.userName}
+                      className="w-6 h-6 rounded-full object-cover"
+                    />
+                    <span className="font-semibold text-gray-800 text-sm">
+                      {activity.userName}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {activity.type === 'post' && 'đã đăng bài viết'}
+                      {activity.type === 'comment' && 'đã bình luận'}
+                      {activity.type === 'report' && 'đã báo cáo'}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 truncate">
+                    {activity.content}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs text-gray-400">
+                      {formatTimeAgo(activity.timestamp)}
+                    </span>
+                    {activity.postId && (
+                      <Link 
+                        to={`/post/${activity.postId}`}
+                        className="text-xs text-blue-500 hover:text-blue-700 hover:underline"
+                      >
+                        Xem chi tiết →
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -71,6 +71,19 @@ const updateSchema = async () => {
       await db.query('ALTER TABLE comments ADD COLUMN likes INT DEFAULT 0');
     }
 
+    // Add isAnonymous column to comments if it doesn't exist
+    const [commentsIsAnonymousColumn] = await db.query('SHOW COLUMNS FROM comments LIKE "isAnonymous"');
+    if (commentsIsAnonymousColumn.length === 0) {
+      await db.query('ALTER TABLE comments ADD COLUMN isAnonymous BOOLEAN DEFAULT FALSE');
+      await db.query('CREATE INDEX idx_anonymous ON comments(isAnonymous)');
+    }
+
+    // Add anonymousId column to comments if it doesn't exist
+    const [commentsAnonymousIdColumn] = await db.query('SHOW COLUMNS FROM comments LIKE "anonymousId"');
+    if (commentsAnonymousIdColumn.length === 0) {
+      await db.query('ALTER TABLE comments ADD COLUMN anonymousId INT DEFAULT NULL');
+      console.log('✅ Added anonymousId column to comments table');
+    }
 
     const [commentsParentIdColumn] = await db.query('SHOW COLUMNS FROM comments LIKE "parentId"');
     if (commentsParentIdColumn.length === 0) {
@@ -158,6 +171,13 @@ const updateSchema = async () => {
       }
     }
 
+
+    // Update notifications table to allow NULL senderId for anonymous comments
+    try {
+      await db.query('ALTER TABLE notifications MODIFY senderId INT DEFAULT NULL');
+    } catch (error) {
+      console.error('⚠️ Error updating notifications.senderId:', error.message);
+    }
 
     try {
       await db.query('DROP TRIGGER IF EXISTS after_user_delete');

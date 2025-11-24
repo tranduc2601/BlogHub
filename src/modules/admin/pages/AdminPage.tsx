@@ -21,6 +21,10 @@ const AdminPage: React.FC = () => {
   const [pendingReportsCount, setPendingReportsCount] = useState(0);
   const [pendingPostsCount, setPendingPostsCount] = useState(0);
   const [pendingCommentReportsCount, setPendingCommentReportsCount] = useState(0);
+  const [topPosts, setTopPosts] = useState([]);
+  const [topUsers, setTopUsers] = useState([]);
+  const [activities, setActivities] = useState([]);
+  
   const getActiveTab = (pathname: string): 'dashboard' | 'posts' | 'users' | 'reports' | 'comment-reports' => {
     if (pathname.includes('post-management')) return 'posts';
     if (pathname.includes('comment-report-management')) return 'comment-reports';
@@ -46,21 +50,18 @@ const AdminPage: React.FC = () => {
   useEffect(() => {
     const fetchPendingCounts = async () => {
       try {
-        // Fetch pending reports count
         const reportsResponse = await axios.get('/admin/reports');
         if (reportsResponse.data.success) {
           const pendingCount = reportsResponse.data.reports.filter((r: { status: string }) => r.status === 'pending').length;
           setPendingReportsCount(pendingCount);
         }
 
-        // Fetch pending posts count
         const postsResponse = await axios.get('/admin/posts');
         if (postsResponse.data.success) {
           const pendingPostsCount = postsResponse.data.posts.filter((p: { status: string }) => p.status === 'pending').length;
           setPendingPostsCount(pendingPostsCount);
         }
 
-        // Fetch pending comment reports count
         const commentReportsResponse = await axios.get('/admin/comment-reports');
         if (commentReportsResponse.data.success) {
           const pendingCount = commentReportsResponse.data.reports.filter((r: { status: string }) => r.status === 'pending').length;
@@ -71,6 +72,31 @@ const AdminPage: React.FC = () => {
       }
     };
     fetchPendingCounts();
+  }, []);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const [postsRes, usersRes, activitiesRes] = await Promise.all([
+          axios.get('/admin/stats/top-posts?limit=10'),
+          axios.get('/admin/stats/top-users?limit=10'),
+          axios.get('/admin/stats/activity-history?limit=20')
+        ]);
+
+        if (postsRes.data.success) {
+          setTopPosts(postsRes.data.topPosts);
+        }
+        if (usersRes.data.success) {
+          setTopUsers(usersRes.data.topUsers);
+        }
+        if (activitiesRes.data.success) {
+          setActivities(activitiesRes.data.activities);
+        }
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      }
+    };
+    fetchDashboardData();
   }, []);
 
   return (
@@ -105,7 +131,13 @@ const AdminPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            <AdminDashboard stats={stats} monthlyStats={monthlyStats} />
+            <AdminDashboard 
+              stats={stats} 
+              monthlyStats={monthlyStats}
+              topPosts={topPosts}
+              topUsers={topUsers}
+              activities={activities}
+            />
           )
         } />
         <Route path="post-management/*" element={

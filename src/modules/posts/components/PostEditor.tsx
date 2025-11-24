@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import axios from "@/core/config/axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -13,7 +13,9 @@ export default function PostEditor() {
   const [privacy, setPrivacy] = useState<'public' | 'private' | 'followers'>('public');
   const [showPrivacyMenu, setShowPrivacyMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const privacyMenuRef = useRef<HTMLDivElement>(null);
+  const quillRef = useRef<ReactQuill>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -30,6 +32,96 @@ export default function PostEditor() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showPrivacyMenu]);
+
+  // Image upload handler for React Quill
+  const imageHandler = () => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Kích thước ảnh không được vượt quá 5MB!');
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Chỉ chấp nhận file ảnh!');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      setIsUploadingImage(true);
+      const loadingToast = toast.loading('Đang tải ảnh lên...');
+
+      try {
+        const response = await axios.post('/upload/image', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        if (response.data.success) {
+          const imageUrl = response.data.url;
+          
+          // Insert image into Quill editor
+          const quill = quillRef.current?.getEditor();
+          if (quill) {
+            const range = quill.getSelection(true);
+            quill.insertEmbed(range.index, 'image', imageUrl);
+            quill.setSelection(range.index + 1, 0);
+          }
+
+          toast.success('Tải ảnh lên thành công!', { id: loadingToast });
+        }
+      } catch (error) {
+        console.error('Failed to upload image:', error);
+        toast.error('Tải ảnh lên thất bại!', { id: loadingToast });
+      } finally {
+        setIsUploadingImage(false);
+      }
+    };
+  };
+
+  // Quill modules configuration
+  const modules = useMemo(() => ({
+    toolbar: {
+      container: [
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        [{ font: [] }],
+        [{ size: [] }],
+        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+        [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+        ['link', 'image', 'video'],
+        [{ color: [] }, { background: [] }],
+        [{ align: [] }],
+        ['clean'],
+      ],
+      handlers: {
+        image: imageHandler,
+      },
+    },
+    clipboard: {
+      matchVisual: false,
+    },
+  }), []);
+
+  const formats = [
+    'header', 'font', 'size',
+    'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'list', 'bullet', 'indent',
+    'link', 'image', 'video',
+    'color', 'background',
+    'align',
+  ];
 
   const isFormValid = () => {
     const hasTitle = title.trim().length > 0;
@@ -102,15 +194,15 @@ export default function PostEditor() {
             <button
               type="button"
               onClick={() => setShowPrivacyMenu(!showPrivacyMenu)}
-              className="p-3 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300"
+              className="p-3 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300 cursor-pointer"
               title="Cài đặt quyền riêng tư"
             >
-              <i className="fa-regular fa-ellipsis-vertical text-xl text-gray-700"></i>
+              <i className="fa-solid fa-lock text-xl text-gray-700"></i>
             </button>
 
             {showPrivacyMenu && (
               <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50 animate-fadeIn">
-                <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500">
+                <div className="p-3 bg-[#2563eb]">
                   <h3 className="text-white font-semibold text-sm">Quyền riêng tư bài viết</h3>
                 </div>
                 
@@ -120,12 +212,15 @@ export default function PostEditor() {
                     onClick={() => {
                       setPrivacy('public');
                       setShowPrivacyMenu(false);
+                      toast.success('Đã đặt bài viết ở chế độ Công khai');
                     }}
-                    className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-start gap-3 ${
-                      privacy === 'public' ? 'bg-blue-50 border-2 border-blue-500' : 'hover:bg-gray-50 border-2 border-transparent'
+                    className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-start gap-3 cursor-pointer group ${
+                      privacy === 'public' 
+                        ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-500 shadow-md' 
+                        : 'hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 border-2 border-transparent hover:border-blue-300 hover:shadow-lg hover:scale-[1.02]'
                     }`}
                   >
-                    <i className={`fa-solid fa-globe text-lg mt-0.5 ${privacy === 'public' ? 'text-blue-600' : 'text-gray-600'}`}></i>
+                    <i className={`fa-solid fa-globe text-lg mt-0.5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12 ${privacy === 'public' ? 'text-blue-600' : 'text-gray-600 group-hover:text-blue-500'}`}></i>
                     <div className="flex-1">
                       <div className={`font-semibold ${privacy === 'public' ? 'text-blue-700' : 'text-gray-800'}`}>
                         Công khai
@@ -142,12 +237,15 @@ export default function PostEditor() {
                     onClick={() => {
                       setPrivacy('followers');
                       setShowPrivacyMenu(false);
+                      toast.success('Chỉ người theo dõi bạn mới xem được bài viết này');
                     }}
-                    className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-start gap-3 mt-2 ${
-                      privacy === 'followers' ? 'bg-blue-50 border-2 border-blue-500' : 'hover:bg-gray-50 border-2 border-transparent'
+                    className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-start gap-3 mt-2 cursor-pointer group ${
+                      privacy === 'followers' 
+                        ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-500 shadow-md' 
+                        : 'hover:bg-gradient-to-r hover:from-green-50 hover:to-blue-50 border-2 border-transparent hover:border-green-300 hover:shadow-lg hover:scale-[1.02]'
                     }`}
                   >
-                    <i className={`fa-solid fa-user-group text-lg mt-0.5 ${privacy === 'followers' ? 'text-blue-600' : 'text-gray-600'}`}></i>
+                    <i className={`fa-solid fa-user-group text-lg mt-0.5 transition-transform duration-300 group-hover:scale-110 ${privacy === 'followers' ? 'text-blue-600' : 'text-gray-600 group-hover:text-green-500'}`}></i>
                     <div className="flex-1">
                       <div className={`font-semibold ${privacy === 'followers' ? 'text-blue-700' : 'text-gray-800'}`}>
                         Người theo dõi
@@ -164,12 +262,15 @@ export default function PostEditor() {
                     onClick={() => {
                       setPrivacy('private');
                       setShowPrivacyMenu(false);
+                      toast.success('Bài viết ở chế độ Riêng tư - Chỉ bạn xem được');
                     }}
-                    className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-start gap-3 mt-2 ${
-                      privacy === 'private' ? 'bg-blue-50 border-2 border-blue-500' : 'hover:bg-gray-50 border-2 border-transparent'
+                    className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-start gap-3 mt-2 cursor-pointer group ${
+                      privacy === 'private' 
+                        ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-500 shadow-md' 
+                        : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-slate-100 border-2 border-transparent hover:border-gray-400 hover:shadow-lg hover:scale-[1.02]'
                     }`}
                   >
-                    <i className={`fa-solid fa-lock text-lg mt-0.5 ${privacy === 'private' ? 'text-blue-600' : 'text-gray-600'}`}></i>
+                    <i className={`fa-solid fa-lock text-lg mt-0.5 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6 ${privacy === 'private' ? 'text-blue-600' : 'text-gray-600 group-hover:text-gray-700'}`}></i>
                     <div className="flex-1">
                       <div className={`font-semibold ${privacy === 'private' ? 'text-blue-700' : 'text-gray-800'}`}>
                         Riêng tư
@@ -235,12 +336,24 @@ export default function PostEditor() {
 
           
           <div className="space-y-2">
-            <label className="text-base font-semibold text-gray-700">Nội dung bài viết </label>
+            <label className="text-base font-semibold text-gray-700">
+              Nội dung bài viết
+              {isUploadingImage && (
+                <span className="ml-3 text-sm text-blue-600">
+                  <i className="fa-solid fa-spinner fa-spin mr-1"></i>
+                  Đang tải ảnh lên...
+                </span>
+              )}
+            </label>
             <ReactQuill
+              ref={quillRef}
               value={content}
               onChange={setContent}
               theme="snow"
+              modules={modules}
+              formats={formats}
               className="bg-white rounded-xl"
+              placeholder="Hãy viết nội dung bài viết của bạn ở đây..."
             />
           </div>
       

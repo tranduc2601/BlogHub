@@ -42,6 +42,7 @@ export interface Post {
   published?: boolean;
   status?: string;
   total_reactions?: number;
+  privacy?: 'public' | 'private' | 'followers';
 }
 
 export interface Comment {
@@ -53,8 +54,21 @@ export interface Comment {
   createdAt: string;
   likes: number;
   isLiked?: boolean;
+  reactionType?: 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry' | null;
+  reactionCounts?: {
+    like: number;
+    love: number;
+    haha: number;
+    wow: number;
+    sad: number;
+    angry: number;
+    total: number;
+  };
   parentId?: string | null;
   replies?: Comment[];
+  isAnonymous?: boolean;
+  anonymousId?: number;
+  isOwner?: boolean;
 }
 
 export interface ApiResponse<T = unknown> {
@@ -80,6 +94,8 @@ export interface AdminPost {
   createdAt: string;
   needsReview: boolean;
   hasReports?: boolean;
+  tags?: string;
+  category?: string;
 }
 
 export interface AdminComment {

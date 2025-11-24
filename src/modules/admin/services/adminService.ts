@@ -6,6 +6,21 @@ export const adminService = {
     return response.data;
   },
 
+  async getTopPosts(limit = 10) {
+    const response = await axiosInstance.get(`/admin/stats/top-posts?limit=${limit}`);
+    return response.data;
+  },
+
+  async getTopUsers(limit = 10) {
+    const response = await axiosInstance.get(`/admin/stats/top-users?limit=${limit}`);
+    return response.data;
+  },
+
+  async getActivityHistory(limit = 20) {
+    const response = await axiosInstance.get(`/admin/stats/activity-history?limit=${limit}`);
+    return response.data;
+  },
+
   async getReports() {
     const response = await axiosInstance.get('/admin/reports');
     return response.data;

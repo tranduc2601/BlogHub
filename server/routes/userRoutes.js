@@ -21,6 +21,10 @@ router.get('/', async (req, res) => {
          FROM follows f 
          JOIN users follower ON f.followerId = follower.id 
          WHERE f.followingId = u.id AND follower.role != 'admin') as followersCount,
+        (SELECT COUNT(*) 
+         FROM follows f 
+         JOIN users following ON f.followingId = following.id 
+         WHERE f.followerId = u.id AND following.role != 'admin') as followingCount,
         COALESCE((SELECT SUM(likes) FROM posts WHERE authorId = u.id), 0) as totalLikes,
         DATE_FORMAT(u.createdAt, '%Y-%m-%d') as joinedAt
       FROM users u
@@ -68,6 +72,10 @@ router.get('/:id', async (req, res) => {
          FROM follows f 
          JOIN users follower ON f.followerId = follower.id 
          WHERE f.followingId = u.id AND follower.role != 'admin') as followersCount,
+        (SELECT COUNT(*) 
+         FROM follows f 
+         JOIN users following ON f.followingId = following.id 
+         WHERE f.followerId = u.id AND following.role != 'admin') as followingCount,
         DATE_FORMAT(u.createdAt, '%Y-%m-%d') as joinedAt
       FROM users u
       LEFT JOIN posts p ON u.id = p.authorId AND p.status = 'visible'

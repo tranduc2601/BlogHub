@@ -9,6 +9,7 @@ interface Post {
   content: string;
   category?: string;
   status?: 'pending' | 'visible' | 'hidden';
+  privacy?: 'public' | 'private' | 'followers';
   createdAt: string;
 }
 
@@ -26,9 +27,24 @@ const getCategoryColor = (category: string) => {
     'Marketing': 'bg-green-500',
     'Ẩm thực': 'bg-orange-500',
     'Du lịch': 'bg-indigo-500',
-    'Giáo dục': 'bg-teal-500'
+    'Giáo dục': 'bg-teal-500',
+    'Lifestyle': 'bg-pink-500'
   };
   return colors[category] || 'bg-gray-500';
+};
+
+// Helper function to get category icon
+const getCategoryIcon = (category: string) => {
+  const icons: { [key: string]: string } = {
+    'Công nghệ': 'fa-solid fa-microchip',
+    'Design': 'fa-solid fa-palette',
+    'Marketing': 'fa-solid fa-bullhorn',
+    'Lifestyle': 'fa-solid fa-heart',
+    'Du lịch': 'fa-solid fa-plane-departure',
+    'Ẩm thực': 'fa-solid fa-utensils',
+    'Giáo dục': 'fa-solid fa-graduation-cap'
+  };
+  return icons[category] || 'fa-solid fa-folder';
 };
 
 export default function MyPostsPage() {
@@ -121,8 +137,8 @@ export default function MyPostsPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 select-none">
         {/* Header Section */}
-        <div className="mb-8">
-          <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+        <div className="mb-8 text-center md:text-left">
+          <h2 className="text-3xl sm:text-4xl font-bold bg-[#2664eb] bg-clip-text text-transparent mb-2">
             Bài viết của tôi
           </h2>
           <p className="text-gray-600">Quản lý và theo dõi tất cả bài viết của bạn</p>
@@ -186,10 +202,20 @@ export default function MyPostsPage() {
                     </h3>
 
                     {/* Meta Info */}
-                    <div className="flex items-center gap-3 text-sm mb-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-white font-medium ${getCategoryColor(post.category || '')}`}>
+                    <div className="flex flex-wrap items-center gap-2 text-sm mb-4">
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-white font-medium ${getCategoryColor(post.category || '')}`}>
+                        <i className={getCategoryIcon(post.category || '')}></i>
                         {post.category || "Không có danh mục"}
                       </span>
+                      {/* Privacy Badge */}
+                      {post.privacy && post.privacy !== 'public' && (
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
+                          post.privacy === 'private' ? 'bg-gray-600' : 'bg-indigo-600'
+                        } text-white`} title={post.privacy === 'private' ? 'Chỉ bạn có thể xem' : 'Chỉ người theo dõi có thể xem'}>
+                          <i className={`fa-solid ${post.privacy === 'private' ? 'fa-lock' : 'fa-user-group'} text-[10px]`}></i>
+                          {post.privacy === 'private' ? 'Riêng tư' : 'Người theo dõi'}
+                        </span>
+                      )}
                       <span className="inline-flex items-center gap-1.5 text-gray-500">
                         <i className="fa-regular fa-calendar text-xs"></i>
                         {new Date(post.createdAt).toLocaleDateString("vi-VN")}
@@ -213,25 +239,25 @@ export default function MyPostsPage() {
                     </button>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-3 mt-auto pt-4 border-t border-gray-100">
+                    <div className="flex gap-2 md:gap-3 mt-auto pt-4 border-t border-gray-100">
                       <button
-                        className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 cursor-pointer transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105"
+                        className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-2 md:px-4 md:py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 cursor-pointer transition-all duration-200 flex items-center justify-center gap-1.5 md:gap-2 shadow-md hover:shadow-lg transform hover:scale-105 text-sm md:text-base"
                         onClick={(e) => {
                           e.stopPropagation();
                           window.location.href = `/edit/${post.id}`;
                         }}
                       >
-                        <i className="fa-solid fa-pen-to-square"></i>
+                        <i className="fa-solid fa-pen-to-square text-sm md:text-base"></i>
                         <span>Chỉnh sửa</span>
                       </button>
                       <button
-                        className="flex-1 bg-white text-red-600 px-4 py-3 rounded-xl font-semibold border-2 border-red-500 hover:bg-red-50 cursor-pointer transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105"
+                        className="flex-1 bg-white text-red-600 px-3 py-2 md:px-4 md:py-3 rounded-xl font-semibold border-2 border-red-500 hover:bg-red-50 cursor-pointer transition-all duration-200 flex items-center justify-center gap-1.5 md:gap-2 shadow-md hover:shadow-lg transform hover:scale-105 text-sm md:text-base"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDeleteClick(post.id, post.title);
                         }}
                       >
-                        <i className="fa-solid fa-trash"></i>
+                        <i className="fa-solid fa-trash text-sm md:text-base"></i>
                         <span>Xoá</span>
                       </button>
                     </div>
