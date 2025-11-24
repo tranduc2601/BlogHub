@@ -22,17 +22,48 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Optimized CORS for Railway deployment
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.CLIENT_URL,
+  'http://localhost:5173',
+  'http://localhost:5000'
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+// Optimized body parsing with reasonable limits for Railway
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Request logging (lightweight)
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  }
   next();
+});
+
+// Health check endpoint for Railway
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
 });
 
 app.get('/', (req, res) => {
@@ -40,10 +71,13 @@ app.get('/', (req, res) => {
     success: true,
     message: 'BlogHub API Server đang hoạt động',
     version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
     endpoints: {
+      health: '/health',
       auth: '/api/auth',
-      posts: '/api/posts (coming soon)',
-      comments: '/api/comments (coming soon)'
+      posts: '/api/posts',
+      users: '/api/users',
+      admin: '/api/admin'
     }
   });
 });

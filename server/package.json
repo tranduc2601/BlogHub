@@ -5,7 +5,8 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node update-schema.js && node server.js",
+    "start": "node --max-old-space-size=384 server.js",
+    "start:prod": "node --max-old-space-size=384 server.js",
     "dev": "node update-schema.js && nodemon server.js",
     "setup-admin": "node setup-admin.js",
     "init-db": "node init-database.js",
