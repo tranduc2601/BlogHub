@@ -262,21 +262,3 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   INDEX idx_created (createdAt)
 );
 
--- ============================================================================
--- IMPORTANT NOTES FOR PRODUCTION DEPLOYMENT:
--- ============================================================================
--- This schema file contains the complete database structure with all columns.
--- 
--- FOR NEW DATABASE (Fresh Setup):
---   Run this file directly: mysql -u user -p database < schema.sql
---
--- FOR EXISTING DATABASE (Migration):
---   Use the migration script to safely add missing columns:
---   cd server && node migrate-missing-columns.js
---
--- After any changes, restart your backend server on Railway.
--- ============================================================================
-
-
-
-
