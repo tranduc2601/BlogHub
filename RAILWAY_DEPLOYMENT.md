@@ -43,7 +43,7 @@ git push origin DeployTesting
 3. Choose your `bloghub-project` repository
 4. Select the `DeployTesting` branch
 
----
+---   
 
 ### Phase 3: Configure Backend Service
 
