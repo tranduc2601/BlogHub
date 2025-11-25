@@ -1,6 +1,7 @@
 CREATE DATABASE IF NOT EXISTS bloghub_db;
 USE bloghub_db;
 
+-- Users table
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(50) NOT NULL UNIQUE,
@@ -8,14 +9,17 @@ CREATE TABLE IF NOT EXISTS users (
   password VARCHAR(255) NOT NULL,
   role ENUM('user', 'admin') DEFAULT 'user',
   status ENUM('active', 'locked') DEFAULT 'active',
+  warningCount INT DEFAULT 0,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   about TEXT,
   avatarUrl VARCHAR(255),
   websites TEXT,
   INDEX idx_email (email),
+  
   INDEX idx_username (username),
-  INDEX idx_status (status)
+  INDEX idx_status (status),
+  INDEX idx_warning (warningCount)
 );
 
 CREATE TABLE IF NOT EXISTS posts (
@@ -32,6 +36,7 @@ CREATE TABLE IF NOT EXISTS posts (
   INDEX idx_status (status)
 );
 
+-- Comments table (includes replies via parentId)
 CREATE TABLE IF NOT EXISTS comments (
   id INT AUTO_INCREMENT PRIMARY KEY,
   content TEXT NOT NULL,
@@ -41,6 +46,15 @@ CREATE TABLE IF NOT EXISTS comments (
   status ENUM('visible', 'hidden') DEFAULT 'visible',
   likes INT DEFAULT 0,
   isAnonymous BOOLEAN DEFAULT FALSE,
+  anonymousId VARCHAR(255) DEFAULT NULL,
+  reportCount INT DEFAULT 0,
+  reaction_like INT DEFAULT 0,
+  reaction_love INT DEFAULT 0,
+  reaction_haha INT DEFAULT 0,
+  reaction_wow INT DEFAULT 0,
+  reaction_sad INT DEFAULT 0,
+  reaction_angry INT DEFAULT 0,
+  total_reactions INT DEFAULT 0,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
@@ -50,7 +64,8 @@ CREATE TABLE IF NOT EXISTS comments (
   INDEX idx_user (userId),
   INDEX idx_parent (parentId),
   INDEX idx_status (status),
-  INDEX idx_anonymous (isAnonymous)
+  INDEX idx_anonymous (isAnonymous),
+  INDEX idx_report_count (reportCount)
 );
 
 -- Reactions table with multiple reaction types (like Facebook)
@@ -124,7 +139,8 @@ CREATE TABLE IF NOT EXISTS notifications (
   userId INT NOT NULL,
   type ENUM('share', 'like', 'comment', 'follow', 'reaction', 'post_approved', 'post_reported') NOT NULL,
   postId INT DEFAULT NULL,
-  senderId INT NOT NULL,
+  senderId INT DEFAULT NULL,
+  anonymousId VARCHAR(255) DEFAULT NULL,
   message TEXT NOT NULL,
   isRead BOOLEAN DEFAULT FALSE,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -171,26 +187,66 @@ CREATE TABLE IF NOT EXISTS comment_reports (
   INDEX idx_status (status),
   INDEX idx_created (createdAt)
 );
--- Comment replies table
+-- Comment replies table (kept for backward compatibility, but consider using comments.parentId)
 CREATE TABLE IF NOT EXISTS comment_replies (
   id INT AUTO_INCREMENT PRIMARY KEY,
   content TEXT NOT NULL,
   commentId INT NOT NULL,
-  authorId INT NOT NULL,
-  replyToId INT DEFAULT NULL,
-  likes INT DEFAULT 0,
-  status ENUM('visible', 'hidden') DEFAULT 'visible',
+  userId INT NOT NULL,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (commentId) REFERENCES comments(id) ON DELETE CASCADE,
-  FOREIGN KEY (authorId) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (replyToId) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
   INDEX idx_comment (commentId),
-  INDEX idx_author (authorId)
+  INDEX idx_user (userId)
 );
--- Add reportCount to comments table
-ALTER TABLE comments ADD COLUMN reportCount INT DEFAULT 0;
-ALTER TABLE comments ADD INDEX idx_report_count (reportCount);
+
+-- Comment reactions table (like Facebook reactions for comments)
+CREATE TABLE IF NOT EXISTS comment_reactions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  commentId INT NOT NULL,
+  userId INT NOT NULL,
+  reactionType ENUM('like', 'love', 'haha', 'wow', 'sad', 'angry') NOT NULL DEFAULT 'like',
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (commentId) REFERENCES comments(id) ON DELETE CASCADE,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_user_comment_reaction (commentId, userId),
+  INDEX idx_comment_reaction (commentId, reactionType),
+  INDEX idx_user (userId)
+);
+
+-- Comment likes table (legacy, kept for backward compatibility)
+CREATE TABLE IF NOT EXISTS comment_likes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  commentId INT NOT NULL,
+  userId INT NOT NULL,
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (commentId) REFERENCES comments(id) ON DELETE CASCADE,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_comment_like (commentId, userId),
+  INDEX idx_comment (commentId),
+  INDEX idx_user (userId)
+);
+
+-- Post reports table
+CREATE TABLE IF NOT EXISTS reports (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  postId INT NOT NULL,
+  reportedBy INT NOT NULL,
+  reason TEXT NOT NULL,
+  status ENUM('pending', 'reviewed', 'resolved') DEFAULT 'pending',
+  reviewedBy INT DEFAULT NULL,
+  reviewedAt TIMESTAMP NULL DEFAULT NULL,
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE CASCADE,
+  FOREIGN KEY (reportedBy) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (reviewedBy) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_post (postId),
+  INDEX idx_reporter (reportedBy),
+  INDEX idx_status (status),
+  INDEX idx_created (createdAt)
+);
 
 -- Bookmarks table for saved posts
 CREATE TABLE IF NOT EXISTS bookmarks (
@@ -205,8 +261,6 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   INDEX idx_post (postId),
   INDEX idx_created (createdAt)
 );
-
-
 
 
 
