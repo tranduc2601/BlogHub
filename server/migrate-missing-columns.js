@@ -49,7 +49,7 @@ const migrateMissingColumns = async () => {
     ];
 
     for (const column of columnsToAdd) {
-      const [exists] = await db.query(`SHOW COLUMNS FROM comments LIKE ?`, [column.name]);
+      const [exists] = await db.query("SHOW COLUMNS FROM comments LIKE ?", [column.name]);
       
       if (exists.length === 0) {
         console.log(`  ➕ Adding ${column.name} column...`);
