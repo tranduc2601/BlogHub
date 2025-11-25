@@ -46,7 +46,7 @@ export const authMiddleware = async (req, res, next) => {
 
     // Check if session exists and is valid
     const [sessions] = await db.query(
-      'SELECT * FROM user_sessions WHERE userId = ? AND sessionToken = ? AND expiresAt > NOW()',
+      'SELECT * FROM user_sessions WHERE userId = ? AND sessionToken = ?',
       [user.id, token]
     );
 
@@ -57,6 +57,35 @@ export const authMiddleware = async (req, res, next) => {
         sessionExpired: true
       });
     }
+
+    // Check if session has expired (using JavaScript Date to avoid timezone issues)
+    const session = sessions[0];
+    const expiresAt = new Date(session.expiresAt);
+    const now = new Date();
+    
+    if (expiresAt <= now) {
+      // Delete expired session
+      await db.query('DELETE FROM user_sessions WHERE id = ?', [session.id]);
+      
+      return res.status(401).json({ 
+        success: false,
+        message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!',
+        sessionExpired: true
+      });
+    }
+
+    // Auto-extend session on each request (refresh mechanism)
+    // Extend by the original duration
+    const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
+    const expiresInMs = expiresIn.includes('d') 
+      ? parseInt(expiresIn) * 24 * 60 * 60 * 1000 
+      : (expiresIn.includes('h') ? parseInt(expiresIn) * 60 * 60 * 1000 : parseInt(expiresIn) * 1000);
+    const newExpiresAt = new Date(Date.now() + expiresInMs);
+    
+    await db.query(
+      'UPDATE user_sessions SET expiresAt = ? WHERE id = ?',
+      [newExpiresAt, session.id]
+    );
     
 
     req.user = {

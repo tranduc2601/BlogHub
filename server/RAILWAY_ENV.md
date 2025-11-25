@@ -26,6 +26,7 @@ CLIENT_URL=https://your-vercel-app.vercel.app
 ### Authentication
 ```
 JWT_SECRET=<your-secure-random-string>  # Generate: openssl rand -base64 32
+JWT_EXPIRES_IN=7d                       # Token expiration time (7 days recommended)
 SESSION_SECRET=<another-random-string>  # Generate: openssl rand -base64 32
 ```
 

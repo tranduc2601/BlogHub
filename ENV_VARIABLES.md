@@ -38,6 +38,7 @@ File này liệt kê tất cả environment variables cần thiết cho deployme
 | `DB_NAME` | `bloghub_db` | Tên database |
 | `DB_PORT` | `3306` | MySQL port |
 | `JWT_SECRET` | `your_super_secret_jwt_key_min_32_chars` | Secret key cho JWT (tự tạo) |
+| `JWT_EXPIRES_IN` | `7d` | Thời gian hết hạn token (7 days khuyến nghị) |
 | `CLOUDINARY_CLOUD_NAME` | `your_cloud_name` | Cloudinary cloud name |
 | `CLOUDINARY_API_KEY` | `123456789012345` | Cloudinary API key |
 | `CLOUDINARY_API_SECRET` | `xxxxxxxxxxxxxxx` | Cloudinary API secret |

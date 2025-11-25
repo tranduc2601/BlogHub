@@ -204,8 +204,10 @@ export const login = async (req, res) => {
     // Store session in database
     const deviceInfo = req.headers['user-agent'] || 'Unknown Device';
     const ipAddress = req.ip || req.connection.remoteAddress;
-    const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
-    const expiresInMs = expiresIn.includes('h') ? parseInt(expiresIn) * 60 * 60 * 1000 : parseInt(expiresIn) * 1000;
+    const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
+    const expiresInMs = expiresIn.includes('d') 
+      ? parseInt(expiresIn) * 24 * 60 * 60 * 1000 
+      : (expiresIn.includes('h') ? parseInt(expiresIn) * 60 * 60 * 1000 : parseInt(expiresIn) * 1000);
     const expiresAt = new Date(Date.now() + expiresInMs);
 
     await db.query(
