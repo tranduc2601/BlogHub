@@ -191,7 +191,7 @@ export default function ShareModal({ isOpen, onClose, postId, postTitle }: Share
                     >
                       {user.avatarUrl ? (
                         <img
-                          src={user.avatarUrl.startsWith('http') ? user.avatarUrl : `http://localhost:5000${user.avatarUrl}`}
+                          src={getAvatarUrl(user.avatarUrl)}
                           alt={user.name}
                           className="w-14 h-14 rounded-full object-cover border-3 border-blue-500 group-hover:border-blue-600 transition-all duration-200 group-hover:scale-110 shadow-md"
                         />

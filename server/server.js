@@ -90,8 +90,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
 
-app.post('/api/comments/:commentId/like', authMiddleware, likeComment);
-
+// 404 handler
 app.use((req, res) => {
   console.error(`404 Not Found: ${req.method} ${req.originalUrl}`);
   res.status(404).json({ 

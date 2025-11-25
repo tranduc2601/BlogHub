@@ -223,7 +223,7 @@ const CommentReportManagement: React.FC = () => {
   const getCommentAvatar = (avatar?: string) => {
     if (!avatar) return null;
     if (avatar.startsWith('http')) return avatar;
-    return `http://localhost:5000${avatar}`;
+    return getAvatarUrl(avatar);
   };
 
   const getStatusBadge = (status: string) => {
@@ -616,7 +616,7 @@ const CommentReportManagement: React.FC = () => {
                 {/* Avatar */}
                 {selectedPost.authorAvatar ? (
                   <img
-                    src={selectedPost.authorAvatar.startsWith('http') ? selectedPost.authorAvatar : `http://localhost:5000${selectedPost.authorAvatar}`}
+                    src={getAvatarUrl(selectedPost.authorAvatar)}
                     alt={selectedPost.author}
                     className="w-14 h-14 rounded-full object-cover ring-4 ring-white shadow-lg"
                   />

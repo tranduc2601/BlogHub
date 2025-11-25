@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { Modal } from '@/shared/ui';
 import type { AdminPost } from '@/shared/types';
+import { getApiUrl } from '@/shared/utils/apiHelpers';
 interface ReactionCounts {
   like: number;
   love: number;
@@ -58,7 +59,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
     const fetchPostReactions = async () => {
       const reactionsPromises = posts.map(async (post) => {
         try {
-          const response = await fetch(`http://localhost:5000/api/posts/${post.id}/reaction-stats`);
+          const response = await fetch(getApiUrl(`posts/${post.id}/reaction-stats`));
           const data = await response.json();
           if (data.success) {
             return { postId: post.id, counts: data.counts };
@@ -273,7 +274,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
     
     try {
 
-      const postResponse = await fetch(`http://localhost:5000/api/posts/${post.id}`, {
+      const postResponse = await fetch(getApiUrl(`posts/${post.id}`), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
         }
@@ -284,7 +285,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
       }
 
 
-      const response = await fetch(`http://localhost:5000/api/posts/${post.id}/comments`, {
+      const response = await fetch(getApiUrl(`posts/${post.id}/comments`), {
         headers:
          {
           'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
@@ -297,7 +298,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
         // Fetch pinned comment ID
         let pinnedCommentId: string | null = null;
         try {
-          const pinnedResponse = await fetch(`http://localhost:5000/api/posts/${post.id}/pinned-comment`);
+          const pinnedResponse = await fetch(`getApiUrl(`posts/${post.id}/pinned-comment`);
           const pinnedData = await pinnedResponse.json();
           if (pinnedData.pinnedCommentId) {
             pinnedCommentId = pinnedData.pinnedCommentId.toString();
@@ -351,7 +352,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
         
         const reactionsPromises = transformedComments.map(async (comment) => {
           try {
-            const reactionsResponse = await fetch(`http://localhost:5000/api/posts/comments/${comment.id}/reactions`);
+            const reactionsResponse = await fetch(`getApiUrl(`posts/comments/${comment.id}/reactions`);
             const reactionsData = await reactionsResponse.json();
             if (reactionsData.success) {
               return { commentId: comment.id, counts: reactionsData.counts };
@@ -430,7 +431,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
         // Fetch dữ liệu
         (async () => {
           try {
-            const postResponse = await fetch(`http://localhost:5000/api/posts/${post.id}`, {
+            const postResponse = await fetch(getApiUrl(`posts/${post.id}`), {
               headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
               }
@@ -440,7 +441,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
               setCurrentPostAuthorId(postData.post.authorId);
             }
 
-            const response = await fetch(`http://localhost:5000/api/posts/${post.id}/comments`, {
+            const response = await fetch(getApiUrl(`posts/${post.id}/comments`), {
               headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
               }
@@ -452,7 +453,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
               // Fetch pinned comment ID
               let pinnedCommentId: string | null = null;
               try {
-                const pinnedResponse = await fetch(`http://localhost:5000/api/posts/${post.id}/pinned-comment`);
+                const pinnedResponse = await fetch(getApiUrl(`posts/${post.id}/pinned-comment`));
                 const pinnedData = await pinnedResponse.json();
                 if (pinnedData.pinnedCommentId) {
                   pinnedCommentId = pinnedData.pinnedCommentId.toString();
@@ -506,7 +507,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
 
               const reactionsPromises = transformedComments.map(async (comment) => {
                 try {
-                  const reactionsResponse = await fetch(`http://localhost:5000/api/posts/comments/${comment.id}/reactions`);
+                  const reactionsResponse = await fetch(getApiUrl(`posts/comments/${comment.id}/reactions`));
                   const reactionsData = await reactionsResponse.json();
                   if (reactionsData.success) {
                     return { commentId: comment.id, counts: reactionsData.counts };
@@ -1300,3 +1301,4 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
 };
 
 export default PostManagement;
+

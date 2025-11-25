@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import axios from '@/core/config/axios';
 import toast from 'react-hot-toast';
 import { Modal } from '@/shared/ui';
+import { getAvatarUrl } from '@/shared/utils/apiHelpers';
 
 interface Report {
   id: number;
@@ -520,7 +521,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                 {/* Avatar */}
                 {selectedPost.authorAvatar ? (
                   <img
-                    src={selectedPost.authorAvatar.startsWith('http') ? selectedPost.authorAvatar : `http://localhost:5000${selectedPost.authorAvatar}`}
+                    src={getAvatarUrl(selectedPost.authorAvatar)}
                     alt={selectedPost.author}
                     className="w-14 h-14 rounded-full object-cover ring-4 ring-white shadow-lg"
                   />

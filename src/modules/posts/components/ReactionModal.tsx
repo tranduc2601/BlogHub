@@ -81,7 +81,7 @@ export default function ReactionModal({ isOpen, onClose, postId, totalReactions 
 
   const getAvatarUrl = (avatar?: string) => {
     if (!avatar) return null;
-    return avatar.startsWith('http') ? avatar : `http://localhost:5000${avatar}`;
+    return getAvatarUrl(avatar);
   };
 
   const getInitials = (name: string) => {

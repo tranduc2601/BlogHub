@@ -7,6 +7,7 @@ import ShareModal from "./ShareModal";
 import axios from "@/core/config/axios";
 import toast from "react-hot-toast";
 import { bookmarkService } from "../services/bookmarkService";
+import { getAvatarUrl } from "@/shared/utils/apiHelpers";
 
 interface PostCardProps {
   post: Post;
@@ -414,13 +415,9 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
           <div className="flex items-center gap-3">
             {(post.authorAvatar || (post.author && typeof post.author === 'object' && post.author.avatar)) ? (
               <img
-                src={
-                  post.authorAvatar 
-                    ? (post.authorAvatar.startsWith('http') ? post.authorAvatar : `http://localhost:5000${post.authorAvatar}`)
-                    : typeof post.author === 'object' && post.author.avatar.startsWith('http') 
-                      ? post.author.avatar 
-                      : `http://localhost:5000${typeof post.author === 'object' ? post.author.avatar : ''}`
-                }
+                src={getAvatarUrl(
+                  post.authorAvatar || (typeof post.author === 'object' ? post.author.avatar : undefined)
+                )}
                 alt={typeof post.author === 'string' ? post.author : post.author?.name || 'User'}
                 className={`w-10 h-10 rounded-full object-cover border border-blue-200`}
               />
