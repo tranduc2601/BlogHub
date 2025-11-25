@@ -171,7 +171,23 @@ CREATE TABLE IF NOT EXISTS comment_reports (
   INDEX idx_status (status),
   INDEX idx_created (createdAt)
 );
-
+-- Comment replies table
+CREATE TABLE IF NOT EXISTS comment_replies (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  content TEXT NOT NULL,
+  commentId INT NOT NULL,
+  authorId INT NOT NULL,
+  replyToId INT DEFAULT NULL,
+  likes INT DEFAULT 0,
+  status ENUM('visible', 'hidden') DEFAULT 'visible',
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (commentId) REFERENCES comments(id) ON DELETE CASCADE,
+  FOREIGN KEY (authorId) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (replyToId) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_comment (commentId),
+  INDEX idx_author (authorId)
+);
 -- Add reportCount to comments table
 ALTER TABLE comments ADD COLUMN reportCount INT DEFAULT 0;
 ALTER TABLE comments ADD INDEX idx_report_count (reportCount);
