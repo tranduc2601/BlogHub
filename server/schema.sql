@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
   avatarUrl VARCHAR(255),
   websites TEXT,
   INDEX idx_email (email),
-  
+
   INDEX idx_username (username),
   INDEX idx_status (status),
   INDEX idx_warning (warningCount)
@@ -261,6 +261,49 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   INDEX idx_post (postId),
   INDEX idx_created (createdAt)
 );
+
+-- ============================================================================
+-- ALTER TABLE STATEMENTS FOR EXISTING TABLES
+-- These will update tables if they already exist in the database
+-- Errors are expected if columns already exist - safe to ignore
+-- ============================================================================
+
+-- Add missing columns to users table
+ALTER TABLE users ADD COLUMN IF NOT EXISTS warningCount INT DEFAULT 0;
+ALTER TABLE users ADD INDEX IF NOT EXISTS idx_warning (warningCount);
+
+-- Add missing columns to comments table (for reaction system)
+ALTER TABLE comments ADD COLUMN IF NOT EXISTS isAnonymous BOOLEAN DEFAULT FALSE;
+ALTER TABLE comments ADD COLUMN IF NOT EXISTS anonymousId VARCHAR(255) DEFAULT NULL;
+ALTER TABLE comments ADD COLUMN IF NOT EXISTS reportCount INT DEFAULT 0;
+ALTER TABLE comments ADD COLUMN IF NOT EXISTS reaction_like INT DEFAULT 0;
+ALTER TABLE comments ADD COLUMN IF NOT EXISTS reaction_love INT DEFAULT 0;
+ALTER TABLE comments ADD COLUMN IF NOT EXISTS reaction_haha INT DEFAULT 0;
+ALTER TABLE comments ADD COLUMN IF NOT EXISTS reaction_wow INT DEFAULT 0;
+ALTER TABLE comments ADD COLUMN IF NOT EXISTS reaction_sad INT DEFAULT 0;
+ALTER TABLE comments ADD COLUMN IF NOT EXISTS reaction_angry INT DEFAULT 0;
+ALTER TABLE comments ADD COLUMN IF NOT EXISTS total_reactions INT DEFAULT 0;
+ALTER TABLE comments ADD INDEX IF NOT EXISTS idx_anonymous (isAnonymous);
+ALTER TABLE comments ADD INDEX IF NOT EXISTS idx_report_count (reportCount);
+
+-- ============================================================================
+-- IMPORTANT NOTES FOR PRODUCTION DEPLOYMENT:
+-- ============================================================================
+-- 1. MySQL < 8.0.29 doesn't support IF NOT EXISTS for ALTER TABLE ADD COLUMN
+-- 2. These ALTER statements may fail if columns already exist - THIS IS EXPECTED
+-- 3. For safer migration on existing database, use one of these methods:
+--
+--    METHOD 1 (Recommended): Run migration script
+--      cd server && node migrate-missing-columns.js
+--
+--    METHOD 2: Run update-schema.js
+--      cd server && node update-schema.js
+--
+--    METHOD 3: Fresh import (WARNING: Will recreate all tables)
+--      cd server && node import-schema.js
+--
+-- 4. After migration, restart your backend server on Railway
+-- ============================================================================
 
 
 
