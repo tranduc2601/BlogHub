@@ -350,7 +350,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
                           className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl font-semibold text-xs sm:text-sm bg-gray-600 hover:bg-gradient-to-br hover:from-gray-600 hover:to-gray-700 text-white shadow-lg hover:shadow-xl transition-all cursor-pointer transform hover:scale-105 active:scale-95"
                           title="Xóa tài khoản"
                         >
-                          <i className="fa-solid fa-trash mr-1 sm:mr-2"></i>
+                          <i className="fa-solid fa-trash-can mr-1 sm:mr-2"></i>
                           Xoá
                         </button>
                       </div>
