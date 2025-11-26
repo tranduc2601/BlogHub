@@ -105,6 +105,22 @@ export const register = async (req, res) => {
     );
     console.log('Register - JWT token:', token);
 
+    // Store session in database (giống như login)
+    const deviceInfo = req.headers['user-agent'] || 'Unknown Device';
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
+    const expiresInMs = expiresIn.includes('d') 
+      ? parseInt(expiresIn) * 24 * 60 * 60 * 1000 
+      : (expiresIn.includes('h') ? parseInt(expiresIn) * 60 * 60 * 1000 : parseInt(expiresIn) * 1000);
+    const expiresAt = new Date(Date.now() + expiresInMs);
+
+    await db.query(
+      'INSERT INTO user_sessions (userId, sessionToken, deviceInfo, ipAddress, expiresAt) VALUES (?, ?, ?, ?, ?)',
+      [result.insertId, token, deviceInfo, ipAddress, expiresAt]
+    );
+
+    console.log('Register - Session created for userId:', result.insertId);
+
     res.status(201).json({
       success: true,
       message: 'Đăng ký thành công',

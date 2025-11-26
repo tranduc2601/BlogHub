@@ -1,11 +1,12 @@
 -- ============================================================================
--- BlogHub Complete Database Schema (Production Ready)
+-- BlogHub Complete Database Schema (Fresh Installation Only)
 -- ============================================================================
--- This file contains the complete database structure without IF NOT EXISTS
--- Use this for fresh database setup in production
+-- ⚠️ CẢNH BÁO: File này sẽ XÓA TOÀN BỘ DATABASE VÀ DỮ LIỆU CŨ
+-- ⚠️ CHỈ SỬ DỤNG cho database MỚI HOÀN TOÀN
+-- ⚠️ ĐỂ CẬP NHẬT database có sẵn, dùng file: schema_update.sql
 -- ============================================================================
 
--- Drop existing database and create fresh (USE WITH CAUTION)
+-- Drop existing database and create fresh (XÓA HẾT DỮ LIỆU CŨ)
 DROP DATABASE IF EXISTS bloghub_db;
 CREATE DATABASE bloghub_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE bloghub_db;
@@ -319,19 +320,23 @@ CREATE TABLE comment_replies (
 -- ============================================================================
 -- END OF SCHEMA
 -- ============================================================================
--- Production Deployment Instructions:
 -- 
--- 1. FOR FRESH DATABASE SETUP:
---    mysql -u username -p database_name < schema_complete.sql
+-- ⚠️⚠️⚠️ QUAN TRỌNG - ĐỌC TRƯỚC KHI CHẠY ⚠️⚠️⚠️
 --
--- 2. VERIFY TABLES:
---    SHOW TABLES;
---    
--- 3. CHECK TABLE STRUCTURE:
---    DESCRIBE table_name;
+-- File này dành cho DATABASE MỚI (chưa có dữ liệu)
+-- File này sẽ XÓA TOÀN BỘ database và tạo lại từ đầu
 --
--- 4. RESTART YOUR BACKEND SERVER after importing
+-- CÁC TRƯỜNG HỢP SỬ DỤNG:
 --
--- Note: This schema drops and recreates the database. 
---       Backup your data before running in production!
+-- 1. DATABASE MỚI (chưa có dữ liệu):
+--    ✅ Dùng file này: schema_complete.sql
+--    mysql -u username -p < schema_complete.sql
+--
+-- 2. DATABASE CŨ (đã có dữ liệu):
+--    ✅ Dùng file: schema_update.sql (GIỮ NGUYÊN DỮ LIỆU)
+--    mysql -u username -p database_name < schema_update.sql
+--
+-- 3. SAO LƯU DỮ LIỆU TRƯỚC KHI CHẠY:
+--    mysqldump -u username -p database_name > backup.sql
+--
 -- ============================================================================
