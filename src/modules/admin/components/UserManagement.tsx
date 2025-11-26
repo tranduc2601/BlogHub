@@ -352,7 +352,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
                         >
                           <i className="fa-solid fa-trash-can mr-1 sm:mr-2"></i>
                           Xoá
-                        </button>
+                        </button> 
                       </div>
                     </td>
                   </tr>
