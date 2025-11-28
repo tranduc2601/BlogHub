@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from '@/core/config/axios';
 import toast from 'react-hot-toast';
 import { Modal } from '@/shared/ui';
+import { getAvatarUrl } from '@/shared/utils/apiHelpers';
 
 interface User {
   id: number;
@@ -58,8 +59,10 @@ export default function ShareModal({ isOpen, onClose, postId, postTitle }: Share
         axios.get(`/users/${currentUser.id}/following`)
       ]);
 
-      const followers = followersRes.data.users || [];
-      const following = followingRes.data.users || [];
+      const followersData = followersRes.data as { users?: User[] };
+      const followingData = followingRes.data as { users?: User[] };
+      const followers = followersData.users || [];
+      const following = followingData.users || [];
 
       const allUsers = [...followers, ...following];
       const uniqueUsers = allUsers.filter((user, index, self) =>

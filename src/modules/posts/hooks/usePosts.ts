@@ -21,7 +21,8 @@ export const usePosts = (type: 'recent' | 'popular' = 'recent', limit: number = 
       setError(null);
       const url = '/posts';
       const res = await axios.get(url);
-      let fetchedPosts: Post[] = res.data.posts || [];
+      const data = res.data as { posts?: Post[] };
+      let fetchedPosts: Post[] = data.posts || [];
       if (type === 'recent') {
         fetchedPosts = fetchedPosts
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())

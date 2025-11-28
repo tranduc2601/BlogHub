@@ -69,8 +69,9 @@ export default function PostEditor() {
           },
         });
 
-        if (response.data.success) {
-          const imageUrl = response.data.url;
+        const data = response.data as { success?: boolean; url?: string };
+        if (data.success) {
+          const imageUrl = data.url;
           
           // Insert image into Quill editor
           const quill = quillRef.current?.getEditor();
@@ -160,8 +161,9 @@ export default function PostEditor() {
         content,
         privacy,
       });
-      if (response.data.success) {
-        toast.success(response.data.message || "Bài viết đã được gửi và đang chờ admin duyệt!");
+      const data = response.data as { success?: boolean; message?: string };
+      if (data.success) {
+        toast.success(data.message || "Bài viết đã được gửi và đang chờ admin duyệt!");
         setTitle("");
         setCategory("");
         setTags("");

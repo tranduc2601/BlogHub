@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useState, useEffect, type ReactNode } from 'react';
 import { axiosInstance } from '@/core/config';
 
 export interface User {
@@ -24,13 +24,8 @@ export interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
-};
+// Export AuthContext for useAuth hook
+export { AuthContext };
 
 interface AuthProviderProps {
   children: ReactNode;

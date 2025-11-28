@@ -78,8 +78,9 @@ export default function EditPostPage() {
           },
         });
 
-        if (response.data.success) {
-          const imageUrl = response.data.url;
+        const uploadData = response.data as { success?: boolean; url?: string };
+        if (uploadData.success) {
+          const imageUrl = uploadData.url;
           
           // Insert image into Quill editor
           const quill = quillRef.current?.getEditor();
@@ -137,8 +138,8 @@ export default function EditPostPage() {
       setLoadingPost(true);
       try {
         const res = await axios.get(`/posts/${id}`);
-        
-        const post = res.data.post || res.data;
+        const resData = res.data as { post?: { title?: string; category?: string; content?: string; privacy?: string; tags?: string[]; authorId?: number } };
+        const post = resData.post || res.data as { title?: string; category?: string; content?: string; privacy?: string; tags?: string[]; authorId?: number };
         const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
         const currentUser = JSON.parse(userStr || "null");
         
@@ -151,7 +152,7 @@ export default function EditPostPage() {
         const postTitle = post.title || '';
         const postCategory = post.category || '';
         const postContent = post.content || '';
-        const postPrivacy = post.privacy || 'public';
+        const postPrivacy = (post.privacy || 'public') as 'public' | 'private' | 'followers';
         
         setTitle(postTitle);
         setCategory(postCategory);
@@ -271,12 +272,12 @@ export default function EditPostPage() {
         content,
         privacy,
       });
-      
-      if (response.data.success) {
+      const updateData = response.data as { success?: boolean; message?: string };
+      if (updateData.success) {
         toast.success("Cập nhật bài viết thành công!");
         setTimeout(() => navigate(`/post/${id}`), 1500);
       } else {
-        toast.error(response.data.message || "Cập nhật bài viết thất bại!");
+        toast.error(updateData.message || "Cập nhật bài viết thất bại!");
       }
     } catch (error) {
       console.error('Update error:', error);

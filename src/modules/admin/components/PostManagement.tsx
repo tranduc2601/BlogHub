@@ -298,7 +298,11 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
         // Fetch pinned comment ID
         let pinnedCommentId: string | null = null;
         try {
-          const pinnedResponse = await fetch(`getApiUrl(`posts/${post.id}/pinned-comment`);
+          const pinnedResponse = await fetch(getApiUrl(`posts/${post.id}/pinned-comment`), {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
+            }
+          });
           const pinnedData = await pinnedResponse.json();
           if (pinnedData.pinnedCommentId) {
             pinnedCommentId = pinnedData.pinnedCommentId.toString();
@@ -352,7 +356,11 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
         
         const reactionsPromises = transformedComments.map(async (comment) => {
           try {
-            const reactionsResponse = await fetch(`getApiUrl(`posts/comments/${comment.id}/reactions`);
+            const reactionsResponse = await fetch(getApiUrl(`posts/comments/${comment.id}/reactions`), {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
+              }
+            });
             const reactionsData = await reactionsResponse.json();
             if (reactionsData.success) {
               return { commentId: comment.id, counts: reactionsData.counts };

@@ -24,9 +24,9 @@ export const useComments = (postId: string | number): UseCommentsReturn => {
       setError(null);
       
       const response = await axios.get(`/posts/${postId}/comments`);
-      
-      if (response.data.success) {
-        setComments(response.data.comments);
+      const data = response.data as { success?: boolean; comments?: Comment[] };
+      if (data.success) {
+        setComments(data.comments || []);
       } else {
         setComments([]);
       }
@@ -92,15 +92,15 @@ export const useComments = (postId: string | number): UseCommentsReturn => {
     try {
       
       const response = await axios.post(`/posts/comments/${commentId}/like`);
-      
-      if (response.data.success) {
+      const data = response.data as { success?: boolean; likesCount?: number; isLiked?: boolean };
+      if (data.success) {
         setComments(prev => 
           prev.map(comment => 
             comment.id === commentId 
               ? { 
                   ...comment, 
-                  likes: response.data.likesCount,
-                  isLiked: response.data.isLiked 
+                  likes: data.likesCount ?? comment.likes,
+                  isLiked: data.isLiked ?? comment.isLiked 
                 }
               : comment
           )

@@ -39,10 +39,10 @@ export default function ReactionModal({ isOpen, onClose, postId, totalReactions 
       const response = await axios.get(`/posts/${postId}/reactions/users`, {
         params: { reactionType: activeTab === "all" ? undefined : activeTab }
       });
-      
-      if (response.data.success) {
-        setUsers(response.data.users || []);
-        setReactionCounts(response.data.counts || {});
+      const data = response.data as { success?: boolean; users?: ReactionUser[]; counts?: { [key: string]: number } };
+      if (data.success) {
+        setUsers(data.users || []);
+        setReactionCounts(data.counts || {});
       }
     } catch (error) {
       console.error("Error fetching reaction users:", error);

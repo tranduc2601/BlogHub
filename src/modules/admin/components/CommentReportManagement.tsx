@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from '@/core/config/axios';
 import toast from 'react-hot-toast';
+import { getAvatarUrl } from '@/shared/utils/apiHelpers';
 
 interface CommentReport {
   id: number;

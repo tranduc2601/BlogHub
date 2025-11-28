@@ -28,8 +28,9 @@ export default function HomePage() {
     const fetchStats = async () => {
       try {
         const res = await axios.get("/posts");
-        if (res.data.success && Array.isArray(res.data.posts)) {
-          const allPosts = res.data.posts;
+        const data = res.data as { success?: boolean; posts?: { views?: number; authorId: number }[] };
+        if (data.success && Array.isArray(data.posts)) {
+          const allPosts = data.posts;
           setTotalPosts(allPosts.length);
           setTotalViews(allPosts.reduce((sum: number, post: { views?: number }) => sum + (post.views || 0), 0));
           const authorIds = Array.from(new Set(allPosts.map((post: { authorId: number }) => post.authorId)));
