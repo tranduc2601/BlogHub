@@ -258,8 +258,8 @@ export default function EditPostPage() {
       .filter(t => t);
     const uniqueTags = new Set(tagArr.map(tag => tag.toLowerCase()));
     if (uniqueTags.size !== tagArr.length) {
-      setTagError("Các tags không được trùng lặp!");
-      toast.error("Các tags không được trùng lặp!");
+      setTagError("Các thẻ không được trùng lặp!");
+      toast.error("Các thẻ không được trùng lặp!");
       return;
     }
     
@@ -311,7 +311,7 @@ export default function EditPostPage() {
             <h2 className="text-3xl font-bold bg-[#2664eb] bg-clip-text text-transparent mb-2">
               Chỉnh sửa bài viết
             </h2>
-            <p className="text-gray-600">Cập nhật nội dung, tiêu đề, danh mục, tags cho bài viết của bạn.</p>
+            <p className="text-gray-600">Cập nhật nội dung, tiêu đề, danh mục, thẻ cho bài viết của bạn!</p>
           </div>
           
           {/* Privacy Menu */}
@@ -438,7 +438,7 @@ export default function EditPostPage() {
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Tags</label>
+              <label className="text-sm font-semibold text-gray-700">Thẻ</label>
               <input
                 type="text"
                 value={tags}

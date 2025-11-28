@@ -4,6 +4,7 @@ import CommentBox from "../components/CommentBox";
 import { ReportModal, Modal } from "@/shared/ui";
 import ShareModal from "../components/ShareModal";
 import ReportCommentModal from "../components/ReportCommentModal";
+import ReactionModal from "../components/ReactionModal";
 import axios from '@/core/config/axios';
 import toast from 'react-hot-toast';
 import type { Post } from "@/shared/types";
@@ -18,6 +19,7 @@ export default function PostDetailPage() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [showReportSuccessModal, setShowReportSuccessModal] = useState(false);
   const [reportCommentModalOpen, setReportCommentModalOpen] = useState(false);
+  const [isReactionModalOpen, setIsReactionModalOpen] = useState(false);
   const [commentToReport, setCommentToReport] = useState<{ id: string; content: string; author: string } | null>(null);
   const [commentsCount, setCommentsCount] = useState(0);
   const [viewTracked, setViewTracked] = useState(false);
@@ -751,15 +753,22 @@ export default function PostDetailPage() {
                   disabled={post.status === 'pending'}
                 />
                 {reactionStats && reactionStats.total_reactions > 0 && (
-                  <span className="text-sm font-semibold text-gray-700" title={`Tổng ${reactionStats.total_reactions} biểu cảm`}>
+                  <button
+                    onClick={() => setIsReactionModalOpen(true)}
+                    className="text-sm font-semibold text-gray-700 hover:text-blue-600 hover:underline transition-colors cursor-pointer"
+                    title={`Xem ${reactionStats.total_reactions} người đã thả biểu cảm`}
+                  >
                     {reactionStats.total_reactions}
-                  </span>
+                  </button>
                 )}
                 </div>
                 
                 {/* Reaction stats - ẩn chi tiết trên mobile nhỏ */}
               {reactionStats && reactionStats.total_reactions > 0 && (
-                <div className="hidden sm:flex items-center gap-1.5 md:gap-2 bg-gray-50 px-2 md:px-3 py-1.5 md:py-2 rounded-full border border-gray-200">
+                <button
+                  onClick={() => setIsReactionModalOpen(true)}
+                  className="hidden sm:flex items-center gap-1.5 md:gap-2 bg-gray-50 px-2 md:px-3 py-1.5 md:py-2 rounded-full border border-gray-200 hover:bg-gray-100 hover:border-gray-300 transition-all cursor-pointer">
+                  
                   {reactionStats.like_count > 0 && (
                     <span className="flex items-center gap-0.5 md:gap-1" title="Thích">
                       <span className="text-base md:text-lg">👍</span>
@@ -796,7 +805,7 @@ export default function PostDetailPage() {
                       <span className="text-xs md:text-sm font-medium text-gray-700">{reactionStats.angry_count}</span>
                     </span>
                   )}
-                </div>
+                </button>
               )}
               
               {/* Comments và Views - compact trên mobile */}
@@ -970,6 +979,14 @@ export default function PostDetailPage() {
         onSubmit={(reason) => commentToReport && handleCommentReport(commentToReport.id, reason)}
         commentContent={commentToReport?.content || ''}
         commentAuthor={commentToReport?.author || ''}
+      />
+
+      {/* Reaction Modal */}
+      <ReactionModal
+        isOpen={isReactionModalOpen}
+        onClose={() => setIsReactionModalOpen(false)}
+        postId={parseInt(post.id.toString())}
+        totalReactions={reactionStats.total_reactions}
       />
     </div>
   );

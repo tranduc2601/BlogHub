@@ -147,8 +147,8 @@ export default function PostEditor() {
       .filter(t => t);
     const uniqueTags = new Set(tagArr.map(tag => tag.toLowerCase()));
     if (uniqueTags.size !== tagArr.length) {
-      setTagError("Các tags của bài viết không được trùng lặp!");
-      toast.error("Các tags của bài viết không được trùng lặp!");
+      setTagError("Các thẻ của bài viết không được trùng lặp!");
+      toast.error("Các thẻ của bài viết không được trùng lặp!");
       return;
     }
     
@@ -188,7 +188,7 @@ export default function PostEditor() {
             <h2 className="text-3xl font-bold mb-2" style={{ color: '#2563eb', fontFamily: 'Inter, Arial, sans-serif' }}>
               Tạo bài viết mới
             </h2>
-            <p className="text-gray-600">Hãy chia sẻ ý tưởng và câu chuyện của bạn với cộng đồng</p>
+            <p className="text-gray-600">Hãy chia sẻ ý tưởng và câu chuyện của bạn với cộng đồng!</p>
           </div>
           
           {/* Privacy Menu */}
@@ -322,7 +322,7 @@ export default function PostEditor() {
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-base font-semibold text-gray-700">Tags</label>
+              <label className="text-base font-semibold text-gray-700">Thẻ</label>
               <input
                 type="text"
                 value={tags}
@@ -355,7 +355,7 @@ export default function PostEditor() {
               modules={modules}
               formats={formats}
               className="bg-white rounded-xl"
-              placeholder="Hãy viết nội dung bài viết của bạn ở đây..."
+              placeholder="Hãy sáng tạo nội dung bài viết của bạn ở đây..."
             />
           </div>
       

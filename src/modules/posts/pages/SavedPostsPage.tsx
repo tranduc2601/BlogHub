@@ -10,7 +10,6 @@ export default function SavedPostsPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [totalBookmarks, setTotalBookmarks] = useState(0);
 
   const loadBookmarks = useCallback(async () => {
     try {
@@ -24,7 +23,6 @@ export default function SavedPostsPage() {
           setBookmarks(prev => [...prev, ...response.bookmarks]);
         }
         
-        setTotalBookmarks(response.pagination.total);
         setHasMore(page < response.pagination.totalPages);
       }
     } catch (error) {
@@ -63,14 +61,8 @@ export default function SavedPostsPage() {
         <div className="mb-6 sm:mb-8">
           <div className="mb-4">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 flex items-center gap-2 sm:gap-3">
-              <i className="fa-solid fa-bookmark text-yellow-500 text-xl sm:text-2xl md:text-3xl mr-2"></i>
               Bài viết đã lưu
             </h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-2">
-              {totalBookmarks > 0 
-                ? `Bạn đã lưu ${totalBookmarks} bài viết` 
-                : 'Chưa có bài viết nào được lưu'}
-            </p>
           </div>
         </div>
 
