@@ -269,58 +269,61 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
   };
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
-      <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-        <i className="fa-solid fa-comments text-gray-600 mr-2"></i>
+    <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-white/20 p-4 sm:p-6">
+      <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
+        <i className="fa-solid fa-comments text-gray-600 mr-1 sm:mr-2 text-lg sm:text-2xl"></i>
         Bình luận ({commentTree.length})
       </h3>
          
       {user ? (
-        <form onSubmit={handleSubmitComment} className="mb-8">
-          <div className="flex gap-4 mb-4">
-            {user.avatarUrl ? (
-              <img 
-                src={user.avatarUrl}
-                alt={user.username}
-                className="w-12 h-12 rounded-full object-cover border-4 border-blue-500 shadow-lg flex-shrink-0"
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center border-4 border-blue-500 shadow-lg">
-                <span className="text-base font-bold text-blue-700">
-                  {user.username.split(' ').slice(-1)[0].charAt(0).toUpperCase()}
-                </span>
-              </div>
-            )}
-            <div className="flex-1">
+        <form onSubmit={handleSubmitComment} className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4">
+            <div className="flex items-center gap-3 sm:block">
+              {user.avatarUrl ? (
+                <img 
+                  src={user.avatarUrl}
+                  alt={user.username}
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 sm:border-4 border-blue-500 shadow-lg flex-shrink-0"
+                />
+              ) : (
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-100 flex items-center justify-center border-2 sm:border-4 border-blue-500 shadow-lg flex-shrink-0">
+                  <span className="text-sm sm:text-base font-bold text-blue-700">
+                    {user.username.split(' ').slice(-1)[0].charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <span className="sm:hidden text-sm font-medium text-gray-700">Bình luận với tư cách <span className="text-blue-600">{user.username}</span></span>
+            </div>
+            <div className="flex-1 min-w-0">
               <textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                className="w-full border-3 border-gray-200 rounded-xl p-4 focus:border-blue-500 focus:outline-none transition-all resize-none hover:border-gray-300"
-                rows={4}
-                placeholder="Hãy chia sẻ suy nghĩ của bạn về bài viết này..."
+                className="w-full border-2 sm:border-3 border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 focus:border-blue-500 focus:outline-none transition-all resize-none hover:border-gray-300 text-sm sm:text-base"
+                rows={3}
+                placeholder="Hãy chia sẻ suy nghĩ của bạn..."
                 disabled={submitting}
                 maxLength={MAX_COMMENT_LENGTH}
               />
-              <div className="flex justify-between items-center mt-2">
-                <div className="flex items-center gap-4">
-                  <span className={`text-sm font-medium ${newComment.length > MAX_COMMENT_LENGTH * 0.9 ? 'text-orange-500' : 'text-gray-500'}`}>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 gap-2">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                  <span className={`text-xs sm:text-sm font-medium ${newComment.length > MAX_COMMENT_LENGTH * 0.9 ? 'text-orange-500' : 'text-gray-500'}`}>
                     {newComment.length}/{MAX_COMMENT_LENGTH}
                   </span>
                   
                   {/* Anonymous Comment Toggle */}
-                  <label className="flex items-center gap-2 cursor-pointer group">
+                  <label className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
                     <input
                       type="checkbox"
                       checked={isAnonymous}
                       onChange={(e) => setIsAnonymous(e.target.checked)}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                      className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
                     />
-                    <span className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors flex items-center gap-1">
-                      <i className="fa-solid fa-user-secret mr-1"></i>
-                      Bình luận ẩn danh
+                    <span className="text-xs sm:text-sm text-gray-600 group-hover:text-blue-600 transition-colors flex items-center gap-1">
+                      <i className="fa-solid fa-user-secret"></i>
+                      <span>Ẩn danh</span>
                     </span>
-                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                      Tên và avatar của bạn sẽ được ẩn
+                    <span className="hidden md:inline text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                      Tên và avatar sẽ được ẩn
                     </span>
                   </label>
                 </div>
@@ -331,28 +334,28 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
                   <button 
                     type="button"
                     onClick={() => setNewComment('')}
-                    className="px-4 py-2 text-gray-600 font-medium rounded-xl cursor-pointer transition-all duration-200 bg-white border border-gray-200 shadow-sm hover:bg-red-100 hover:text-red-600 hover:border-red-300 hover:scale-105 hover:shadow-lg active:scale-95"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-600 font-medium rounded-lg sm:rounded-xl cursor-pointer transition-all duration-200 bg-white border border-gray-200 shadow-sm hover:bg-red-100 hover:text-red-600 hover:border-red-300 hover:scale-105 hover:shadow-lg active:scale-95"
                   >
-                    <i className="fa-solid fa-xmark mr-2"></i>Hủy
+                    <i className="fa-solid fa-xmark mr-1 sm:mr-2"></i><span className="hidden xs:inline">Hủy</span>
                   </button>
                 )}
                 <button 
                   type="submit"
                   disabled={!newComment.trim() || submitting}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-xl font-semibold transition-all duration-200 shadow-lg cursor-pointer border border-blue-600 hover:bg-blue-700 hover:border-blue-700 hover:scale-105 hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-blue-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg sm:rounded-xl font-semibold transition-all duration-200 shadow-lg cursor-pointer border border-blue-600 hover:bg-blue-700 hover:border-blue-700 hover:scale-105 hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <i className="fa-solid fa-paper-plane mr-2"></i>
-                  {submitting ? 'Đang gửi...' : 'Gửi bình luận'}
+                  <i className="fa-solid fa-paper-plane mr-1 sm:mr-2"></i>
+                  {submitting ? 'Đang gửi...' : <><span className="hidden sm:inline">Gửi bình luận</span><span className="sm:hidden">Gửi</span></>}
                 </button>
               </div>
             </div>
           </div>
         </form>
       ) : (
-        <div className="mb-8 p-6 bg-blue-100 rounded-xl text-center border-2 border-blue-200">
-          <p className="text-gray-700 mb-3 font-medium">Hãy đăng nhập để bình luận!</p>
-          <a href="/login" className="inline-block bg-blue-600 text-white px-6 py-2 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 hover:scale-105 hover:shadow-xl transition-transform duration-300 shadow-lg">
-            <i className="fa-solid fa-right-to-bracket mr-2"></i>Đăng nhập ngay
+        <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-blue-100 rounded-lg sm:rounded-xl text-center border-2 border-blue-200">
+          <p className="text-sm sm:text-base text-gray-700 mb-2 sm:mb-3 font-medium">Hãy đăng nhập để bình luận!</p>
+          <a href="/login" className="inline-block bg-blue-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base rounded-lg sm:rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 hover:scale-105 hover:shadow-xl transition-transform duration-300 shadow-lg">
+            <i className="fa-solid fa-right-to-bracket mr-1 sm:mr-2"></i>Đăng nhập ngay
           </a>
         </div>
       )}
@@ -410,12 +413,12 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
           ))}
    
           {commentTree.length === 0 && (
-            <div className="text-center py-12">
-              <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="text-center py-8 sm:py-12">
+              <svg className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Chưa có bình luận nào</h3>
-              <p className="text-gray-600">Hãy là người đầu tiên chia sẻ suy nghĩ về bài viết này!</p>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-1 sm:mb-2">Chưa có bình luận nào</h3>
+              <p className="text-sm sm:text-base text-gray-600 px-4">Hãy là người đầu tiên chia sẻ suy nghĩ!</p>
             </div>
           )}
         </div>
@@ -488,8 +491,8 @@ const CommentItem = ({
     };
 
     return (
-      <div className={`${level > 0 ? 'ml-8 sm:ml-12' : ''}`}>
-        <div className="flex gap-2 sm:gap-4 group mb-4">
+      <div className={`${level > 0 ? 'ml-4 sm:ml-8 md:ml-12' : ''}`}>
+        <div className="flex gap-2 sm:gap-3 md:gap-4 group mb-3 sm:mb-4">
           {avatarUrl ? (
             <img 
               src={avatarUrl}
@@ -541,7 +544,7 @@ const CommentItem = ({
                           className="fixed inset-0 z-40"
                           onClick={() => setShowDropdown(false)}
                         />
-                        <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[140px] sm:min-w-[160px]">
+                        <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[120px] sm:min-w-[160px]">
                           {isCurrentUserPostAuthor && level === 0 && !comment.parentId && (
                             <button
                               onClick={() => {
@@ -552,24 +555,25 @@ const CommentItem = ({
                                 }
                                 setShowDropdown(false);
                               }}
-                              className="w-full px-4 py-2 text-left text-sm hover:bg-yellow-50 text-yellow-600 flex items-center gap-2 cursor-pointer"
+                              className="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-left text-xs sm:text-sm hover:bg-yellow-50 text-yellow-600 flex items-center gap-2 cursor-pointer"
                             >
                               <i className={`fa-solid ${isPinned ? 'fa-times' : 'fa-thumbtack'} w-4`}></i>
-                              {isPinned ? 'Bỏ ghim bình luận' : 'Ghim bình luận'}
+                              <span className="hidden sm:inline">{isPinned ? 'Bỏ ghim' : 'Ghim'}</span>
+                              <span className="sm:hidden">{isPinned ? 'Bỏ ghim' : 'Ghim'}</span>
                             </button>
                           )}
                           {isOwner && (
                             <>
                               <button
                                 onClick={handleEditClick}
-                                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+                                className="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-left text-xs sm:text-sm hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
                               >
                                 <i className="fa-solid fa-edit w-4"></i>
-                                Chỉnh sửa
+                                Sửa
                               </button>
                               <button
                                 onClick={handleDeleteClick}
-                                className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 text-red-600 flex items-center gap-2 cursor-pointer"
+                                className="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-left text-xs sm:text-sm hover:bg-red-50 text-red-600 flex items-center gap-2 cursor-pointer"
                               >
                                 <i className="fa-solid fa-trash w-4"></i>
                                 Xóa
@@ -588,25 +592,25 @@ const CommentItem = ({
                   <textarea
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
-                    className="w-full border-4 border-blue-200 rounded-xl p-3 focus:border-blue-500 focus:outline-none resize-none"
+                    className="w-full border-2 sm:border-4 border-blue-200 rounded-lg sm:rounded-xl p-2 sm:p-3 focus:border-blue-500 focus:outline-none resize-none text-sm sm:text-base"
                     rows={3}
                   />
-                  <div className="flex gap-2 justify-end">
+                  <div className="flex gap-1.5 sm:gap-2 justify-end">
                     <button
                       onClick={() => {
                         setEditingId(null);
                         setEditContent("");
                       }}
-                      className="bg-gray-200 text-gray-700 px-4 py-1.5 text-sm rounded-lg font-semibold hover:bg-gray-300 hover:scale-105 hover:shadow-lg transition-all cursor-pointer"
+                      className="bg-gray-200 text-gray-700 px-2.5 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-semibold hover:bg-gray-300 transition-all cursor-pointer"
                     >
-                      <i className="fa-solid fa-xmark w-4 mr-2"></i>Hủy
+                      <i className="fa-solid fa-xmark mr-1"></i><span className="hidden sm:inline">Hủy</span>
                     </button>
                     <button
                       onClick={() => handleEdit(comment.id, editContent)}
                       disabled={editContent.trim() === comment.content.trim()}
-                      className="bg-blue-600 text-white px-4 py-1.5 text-sm rounded-lg font-semibold hover:bg-blue-700 hover:scale-105 hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
+                      className="bg-blue-600 text-white px-2.5 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-semibold hover:bg-blue-700 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <i className="fa-solid fa-floppy-disk w-4 mr-2"></i>Lưu
+                      <i className="fa-solid fa-floppy-disk mr-1"></i><span className="hidden sm:inline">Lưu</span>
                     </button>
                   </div>
                 </div>
@@ -615,7 +619,7 @@ const CommentItem = ({
               )}
 
               {editingId !== comment.id && (
-                <div className="flex items-center gap-3 sm:gap-6 text-xs sm:text-sm mt-3 sm:mt-4">
+                <div className="flex items-center gap-2 sm:gap-4 md:gap-6 text-xs sm:text-sm mt-2 sm:mt-3 md:mt-4 flex-wrap">
                   <CommentReactionButton 
                     commentId={comment.id} 
                     initialReaction={comment.reactionType}
@@ -630,34 +634,35 @@ const CommentItem = ({
                       setShowReplyForm(!showReplyForm);
                     }}
                     disabled={!user}
-                    className={`flex items-center gap-1 sm:gap-2 transition-all ${
+                    className={`flex items-center gap-1 transition-all ${
                       !user 
                         ? 'text-gray-400 opacity-50 cursor-not-allowed' 
                         : 'text-gray-500 hover:text-blue-600 cursor-pointer'
                     }`}
                     title={!user ? 'Đăng nhập để trả lời' : 'Trả lời bình luận'}
                   >
-                    <i className="fa-solid fa-reply text-xs sm:text-sm"></i>
+                    <i className="fa-solid fa-reply text-xs"></i>
                     <span className="font-medium">Trả lời</span>
                   </button>
 
                   {comment.replies && comment.replies.length > 0 && (
                     <button 
                       onClick={() => setShowReplies(!showReplies)}
-                      className="text-gray-500 hover:text-gray-800 transition-all flex items-center gap-1 sm:gap-2 cursor-pointer font-medium"
+                      className="text-gray-500 hover:text-gray-800 transition-all flex items-center gap-1 cursor-pointer font-medium"
                     >
-                      <i className={`fa-solid ${showReplies ? 'fa-chevron-up' : 'fa-chevron-down'} text-xs sm:text-sm`}></i>
-                      <span>{showReplies ? 'Ẩn bớt' : `Xem thêm (${comment.replies.length} ${comment.replies.length === 1 ? 'phản hồi' : 'phản hồi'})`}</span>
+                      <i className={`fa-solid ${showReplies ? 'fa-chevron-up' : 'fa-chevron-down'} text-xs`}></i>
+                      <span className="hidden sm:inline">{showReplies ? 'Ẩn bớt' : `Xem ${comment.replies.length} phản hồi`}</span>
+                      <span className="sm:hidden">{showReplies ? 'Ẩn' : `${comment.replies.length}`}</span>
                     </button>
                   )}
 
                   {!isOwner && user && (
                     <button 
                       onClick={() => handleReport(comment.id, comment.content, authorName)}
-                      className="text-gray-500 hover:text-red-600 transition-all flex items-center gap-1 sm:gap-2 cursor-pointer"
+                      className="text-gray-500 hover:text-red-600 transition-all flex items-center gap-1 cursor-pointer"
                     >
-                      <i className="fa-solid fa-flag text-xs sm:text-sm"></i>
-                      <span className="font-medium">Báo cáo</span>
+                      <i className="fa-solid fa-flag text-xs"></i>
+                      <span className="font-medium hidden sm:inline">Báo cáo</span>
                     </button>
                   )}
                 </div>
@@ -665,39 +670,39 @@ const CommentItem = ({
             </div>
    
             {showReplyForm && user && (
-              <div className="mt-3 ml-0 sm:ml-4">
-                <div className="flex gap-2 sm:gap-3">
+              <div className="mt-2 sm:mt-3">
+                <div className="flex gap-2">
                   <textarea
                     value={replyContent}
                     onChange={(e) => setReplyContent(e.target.value)}
-                    className="flex-1 min-w-0 border-2 sm:border-3 border-blue-200 rounded-lg sm:rounded-xl p-2 sm:p-3 focus:border-blue-500 focus:outline-none resize-none text-sm"
+                    className="flex-1 min-w-0 border-2 border-blue-200 rounded-lg p-2 sm:p-3 focus:border-blue-500 focus:outline-none resize-none text-xs sm:text-sm"
                     rows={2}
                     placeholder="Viết trả lời..."
                   />
                 </div>
-                <div className="flex gap-2 mt-2 justify-end">
+                <div className="flex gap-1.5 sm:gap-2 mt-2 justify-end">
                   <button
                     onClick={() => {
                       setShowReplyForm(false);
                       setReplyContent("");
                     }}
-                    className="px-4 py-1.5 text-sm text-gray-600 font-medium rounded-lg cursor-pointer transition-all duration-200 bg-white border border-gray-200 shadow-sm hover:bg-red-100 hover:text-red-600 hover:border-red-300 hover:scale-105 hover:shadow-lg active:scale-95"
+                    className="px-2.5 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm text-gray-600 font-medium rounded-lg cursor-pointer transition-all duration-200 bg-white border border-gray-200 shadow-sm hover:bg-red-100 hover:text-red-600 hover:border-red-300 active:scale-95"
                   >
-                    <i className="fa-solid fa-xmark w-4 mr-2"></i>Hủy
+                    <i className="fa-solid fa-xmark mr-1"></i><span className="hidden sm:inline">Hủy</span>
                   </button>
                   <button
                     onClick={submitReply}
                     disabled={!replyContent.trim()}
-                    className="bg-blue-600 text-white px-4 py-1.5 text-sm rounded-lg font-semibold transition-all duration-200 shadow-lg cursor-pointer border border-blue-600 hover:bg-blue-700 hover:border-blue-700 hover:scale-105 hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-blue-600 text-white px-2.5 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-semibold transition-all duration-200 shadow-lg cursor-pointer border border-blue-600 hover:bg-blue-700 hover:border-blue-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <i className="fa-solid fa-paper-plane w-4 mr-2"></i>Gửi
+                    <i className="fa-solid fa-paper-plane mr-1"></i><span className="hidden sm:inline">Gửi</span>
                   </button>
                 </div>
               </div>
             )}
           
             {comment.replies && comment.replies.length > 0 && showReplies && (
-              <div className="mt-3 sm:mt-4 ml-6 sm:ml-12 space-y-2 sm:space-y-3">
+              <div className="mt-2 sm:mt-3 md:mt-4 ml-2 sm:ml-6 md:ml-8 space-y-2 sm:space-y-3">
                 {comment.replies.map((reply) => (
                   <CommentItem
                     key={reply.id}

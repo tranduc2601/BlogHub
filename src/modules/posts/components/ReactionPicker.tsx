@@ -71,7 +71,7 @@ export default function ReactionPicker({ onReact, currentReaction, disabled }: R
       <button
         onClick={() => !disabled && handleReactionClick(currentReaction || 'like')}
         disabled={disabled}
-        className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer ${
+        className={`flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-all duration-200 cursor-pointer ${
           disabled 
             ? 'opacity-50 cursor-not-allowed' 
             : currentReaction
@@ -79,8 +79,8 @@ export default function ReactionPicker({ onReact, currentReaction, disabled }: R
             : 'text-gray-600 hover:bg-gray-100'
         }`}
       >
-        <span className="text-lg">{getReactionEmoji(currentReaction)}</span>
-        <span className="text-sm">
+        <span className="text-base sm:text-lg">{getReactionEmoji(currentReaction)}</span>
+        <span className="text-xs sm:text-sm hidden xs:inline">
           {currentReaction 
             ? reactions.find(r => r.type === currentReaction)?.label 
             : 'Thích'}
@@ -90,7 +90,7 @@ export default function ReactionPicker({ onReact, currentReaction, disabled }: R
       
       {showPicker && !disabled && (
         <div
-          className="absolute bottom-full left-0 bg-white rounded-full shadow-2xl border border-gray-200 px-3 py-2 flex items-center gap-1 z-50 animate-scaleIn"
+          className="absolute bottom-full left-0 bg-white rounded-full shadow-2xl border border-gray-200 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center gap-0.5 sm:gap-1 z-50 animate-scaleIn"
           style={{
             animation: 'scaleIn 0.2s ease-out',
             marginBottom: '8px'
@@ -102,16 +102,16 @@ export default function ReactionPicker({ onReact, currentReaction, disabled }: R
               onClick={() => handleReactionClick(reaction.type)}
               onMouseEnter={() => setHoveredReaction(reaction.type)}
               onMouseLeave={() => setHoveredReaction(null)}
-              className={`group relative flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-200 hover:scale-125 hover:-translate-y-1 ${
+              className={`group relative flex flex-col items-center justify-center w-8 h-8 sm:w-10 md:w-12 sm:h-10 md:h-12 rounded-full transition-all duration-200 hover:scale-125 hover:-translate-y-1 ${
                 currentReaction === reaction.type ? 'scale-110' : ''
               }`}
             >
-              <span className="text-2xl transition-transform duration-200 group-hover:scale-110 cursor-pointer">
+              <span className="text-lg sm:text-xl md:text-2xl transition-transform duration-200 group-hover:scale-110 cursor-pointer">
                 {reaction.emoji}
               </span>
               
               {hoveredReaction === reaction.type && (
-                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none z-[100]">
+                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded whitespace-nowrap pointer-events-none z-[100]">
                   {reaction.label}
                 </span>
               )}
@@ -169,7 +169,7 @@ export function ReactionStats({ stats, onClick }: ReactionStatsProps) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-1 text-sm text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
+      className="flex items-center gap-0.5 sm:gap-1 text-xs sm:text-sm text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
       title={`Xem ${stats.total_reactions} người đã thả biểu cảm`}
     >
       <div className="flex -space-x-1">
@@ -178,7 +178,7 @@ export function ReactionStats({ stats, onClick }: ReactionStatsProps) {
           return reaction ? (
             <span
               key={type}
-              className="inline-flex items-center justify-center w-5 h-5 bg-white rounded-full border border-gray-200 text-xs"
+              className="inline-flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-full border border-gray-200 text-[10px] sm:text-xs"
             >
               {reaction.emoji}
             </span>
