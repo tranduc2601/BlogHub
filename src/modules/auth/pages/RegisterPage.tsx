@@ -92,14 +92,14 @@ export default function RegisterPage() {
         navigate("/");
       }, 1000);
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { locked?: boolean } } };
+      const err = error as { response?: { data?: { locked?: boolean; message?: string } } };
       if (err.response?.data?.locked) {
         toast.error('Email này đã bị khóa. Vui lòng liên hệ Admin để biết thêm chi tiết!', {
           duration: 5000,
           position: 'top-right',
         });
       } else {
-        const errorMessage = error instanceof Error ? error.message : "Đăng ký thất bại";
+        const errorMessage = err.response?.data?.message || (error instanceof Error ? error.message : "Đăng ký thất bại");
         toast.error(errorMessage, {
           duration: 4000,
           position: 'top-right',
