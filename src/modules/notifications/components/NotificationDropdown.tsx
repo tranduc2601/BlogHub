@@ -201,7 +201,7 @@ export default function NotificationDropdown() {
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
         >
           <div className="relative">
-            <i className={`fa-solid fa-bell text-gray-700 group-hover:text-white text-lg transition-all duration-300 ${shouldAnimate ? 'animate-swing' : ''}`}></i>
+            <i className={`fa-solid fa-bell text-gray-700 group-hover:text-white text-lg transition-all duration-300 ${unreadCount > 0 ? 'animate-bell-shake-subtle' : ''} ${shouldAnimate ? 'animate-bell-shake' : ''}`}></i>
             {unreadCount > 0 && (
               <span 
                 className={`absolute -top-4 -right-4 bg-gradient-to-br from-red-500 to-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg ${

@@ -121,6 +121,34 @@ body {
   }
 }
 
+/* Bell shake animation - rung ngang nhẹ */
+@keyframes bellShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-2px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes bellShakeSubtle {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-1.5px);
+  }
+  50% {
+    transform: translateX(1.5px);
+  }
+  75% {
+    transform: translateX(-1.5px);
+  }
+}
+
 @keyframes shimmer {
   0% {
     background-position: -200px 0;
@@ -203,6 +231,15 @@ body {
 
 .animate-wiggle {
   animation: wiggle 1s ease-in-out infinite;
+}
+
+/* Bell shake animations */
+.animate-bell-shake {
+  animation: bellShake 0.5s ease-in-out infinite;
+}
+
+.animate-bell-shake-subtle {
+  animation: bellShakeSubtle 0.8s ease-in-out infinite;
 }
 
 .animate-shimmer {

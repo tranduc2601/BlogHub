@@ -740,9 +740,10 @@ export default function PostDetailPage() {
 
           
           {post.status !== 'pending' && (
-            <div className="flex flex-col gap-3 md:gap-4 py-4 md:py-6 border-t border-gray-200">
+            <div className="flex flex-col gap-3 py-4 md:py-6 border-t border-gray-200">
               
-              <div className="flex items-center gap-2 md:gap-4 flex-wrap text-sm md:text-base">
+              {/* Row 1: Reactions và Stats - gọn gàng trên mobile */}
+              <div className="flex items-center gap-2 md:gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
                   <ReactionPicker 
                   onReact={handleReaction}
@@ -755,8 +756,10 @@ export default function PostDetailPage() {
                   </span>
                 )}
                 </div>
+                
+                {/* Reaction stats - ẩn chi tiết trên mobile nhỏ */}
               {reactionStats && reactionStats.total_reactions > 0 && (
-                <div className="flex items-center gap-1.5 md:gap-2 bg-gray-50 px-2 md:px-3 py-1.5 md:py-2 rounded-full border border-gray-200">
+                <div className="hidden sm:flex items-center gap-1.5 md:gap-2 bg-gray-50 px-2 md:px-3 py-1.5 md:py-2 rounded-full border border-gray-200">
                   {reactionStats.like_count > 0 && (
                     <span className="flex items-center gap-0.5 md:gap-1" title="Thích">
                       <span className="text-base md:text-lg">👍</span>
@@ -764,50 +767,56 @@ export default function PostDetailPage() {
                     </span>
                   )}
                   {reactionStats.love_count > 0 && (
-                    <span className="flex items-center gap-1" title="Yêu thích">
-                      <span className="text-lg">❤️</span>
-                      <span className="text-sm font-medium text-gray-700">{reactionStats.love_count}</span>
+                    <span className="flex items-center gap-0.5 md:gap-1" title="Yêu thích">
+                      <span className="text-base md:text-lg">❤️</span>
+                      <span className="text-xs md:text-sm font-medium text-gray-700">{reactionStats.love_count}</span>
                     </span>
                   )}
                   {reactionStats.haha_count > 0 && (
-                    <span className="flex items-center gap-1" title="Haha">
-                      <span className="text-lg">😂</span>
-                      <span className="text-sm font-medium text-gray-700">{reactionStats.haha_count}</span>
+                    <span className="flex items-center gap-0.5 md:gap-1" title="Haha">
+                      <span className="text-base md:text-lg">😂</span>
+                      <span className="text-xs md:text-sm font-medium text-gray-700">{reactionStats.haha_count}</span>
                     </span>
                   )}
                   {reactionStats.wow_count > 0 && (
-                    <span className="flex items-center gap-1" title="Wow">
-                      <span className="text-lg">😮</span>
-                      <span className="text-sm font-medium text-gray-700">{reactionStats.wow_count}</span>
+                    <span className="flex items-center gap-0.5 md:gap-1" title="Wow">
+                      <span className="text-base md:text-lg">😮</span>
+                      <span className="text-xs md:text-sm font-medium text-gray-700">{reactionStats.wow_count}</span>
                     </span>
                   )}
                   {reactionStats.sad_count > 0 && (
-                    <span className="flex items-center gap-1" title="Buồn">
-                      <span className="text-lg">😢</span>
-                      <span className="text-sm font-medium text-gray-700">{reactionStats.sad_count}</span>
+                    <span className="flex items-center gap-0.5 md:gap-1" title="Buồn">
+                      <span className="text-base md:text-lg">😢</span>
+                      <span className="text-xs md:text-sm font-medium text-gray-700">{reactionStats.sad_count}</span>
                     </span>
                   )}
                   {reactionStats.angry_count > 0 && (
-                    <span className="flex items-center gap-1" title="Phẫn nộ">
-                      <span className="text-lg">😠</span>
-                      <span className="text-sm font-medium text-gray-700">{reactionStats.angry_count}</span>
+                    <span className="flex items-center gap-0.5 md:gap-1" title="Phẫn nộ">
+                      <span className="text-base md:text-lg">😠</span>
+                      <span className="text-xs md:text-sm font-medium text-gray-700">{reactionStats.angry_count}</span>
                     </span>
                   )}
                 </div>
               )}
-              <div className="flex items-center gap-2 text-gray-600">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              
+              {/* Comments và Views - compact trên mobile */}
+              <div className="flex items-center gap-1.5 text-gray-600 text-xs sm:text-sm">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
                 </svg>
-                <span>{commentsCount} Bình luận</span>
+                <span>{commentsCount}</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center gap-1.5 text-gray-600 text-xs sm:text-sm">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                <span>{post.views} Lượt xem</span>
+                <span>{post.views}</span>
               </div>
+              </div>
+              
+              {/* Row 2: Action buttons - responsive layout */}
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap text-sm">
 
               
               <button
@@ -823,7 +832,7 @@ export default function PostDetailPage() {
                   const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
                   return userStr !== null;
                 })()}
-                className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full font-medium text-xs md:text-sm transition-all duration-300 group border-2 ${
+                className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 md:py-2 rounded-full font-medium text-xs sm:text-sm transition-all duration-300 group border-2 ${
                   !(() => {
                     const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
                     return userStr !== null;
@@ -836,13 +845,13 @@ export default function PostDetailPage() {
                   return userStr !== null;
                 })() ? 'Đăng nhập để chia sẻ bài viết' : 'Chia sẻ bài viết'}
               >
-                <svg className={`w-3.5 h-3.5 md:w-4 md:h-4 ${!(() => {
+                <svg className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${!(() => {
                   const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
                   return userStr !== null;
                 })() ? '' : 'group-hover:scale-110'} transition-transform`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                 </svg>
-                Chia sẻ
+                <span className="hidden xs:inline">Chia sẻ</span>
               </button>
 
               <button
@@ -851,7 +860,7 @@ export default function PostDetailPage() {
                   const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
                   return userStr !== null;
                 })()}
-                className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full font-medium text-xs md:text-sm transition-all duration-300 group border-2 ${
+                className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 md:py-2 rounded-full font-medium text-xs sm:text-sm transition-all duration-300 group border-2 ${
                   !(() => {
                     const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
                     return userStr !== null;
@@ -869,11 +878,11 @@ export default function PostDetailPage() {
                   return userStr !== null;
                 })() ? 'Đăng nhập để lưu bài viết' : isBookmarked ? 'Bỏ lưu bài viết' : 'Lưu bài viết'}
               >
-                <i className={`${isBookmarked ? 'fa-solid' : 'fa-solid'} fa-bookmark ${!(() => {
+                <i className={`${isBookmarked ? 'fa-solid' : 'fa-regular'} fa-bookmark ${!(() => {
                   const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
                   return userStr !== null;
-                })() ? '' : 'group-hover:scale-110'} transition-transform`}></i>
-                {isBookmarked ? 'Bỏ lưu' : 'Lưu bài viết'}
+                })() ? '' : 'group-hover:scale-110'} transition-transform text-sm`}></i>
+                <span className="hidden xs:inline">{isBookmarked ? 'Đã lưu' : 'Lưu'}</span>
               </button>
               
               {(() => {
@@ -881,23 +890,21 @@ export default function PostDetailPage() {
                 if (currentUser && currentUser.id === post.authorId) return null;
                 
                 return (
-                  <div className="flex items-center gap-2 text-gray-600 ml-auto">
-                    <button
-                      className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-full text-orange-600 font-medium text-xs md:text-sm transition-all duration-300 group ${
-                        currentUser 
-                          ? 'hover:from-orange-100 hover:to-red-100 hover:border-orange-300 hover:shadow-md cursor-pointer' 
-                          : 'opacity-50 cursor-not-allowed'
-                      }`}
-                      title={currentUser ? "Báo cáo bài viết vi phạm" : "Đăng nhập để báo cáo"}
-                      onClick={() => currentUser && setIsReportModalOpen(true)}
-                      disabled={!currentUser}
-                    >
-                      <svg className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-                      </svg>
-                      Báo cáo
-                    </button>
-                  </div>
+                  <button
+                    className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 md:py-2 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-full text-orange-600 font-medium text-xs sm:text-sm transition-all duration-300 group sm:ml-auto ${
+                      currentUser 
+                        ? 'hover:from-orange-100 hover:to-red-100 hover:border-orange-300 hover:shadow-md cursor-pointer' 
+                        : 'opacity-50 cursor-not-allowed'
+                    }`}
+                    title={currentUser ? "Báo cáo bài viết vi phạm" : "Đăng nhập để báo cáo"}
+                    onClick={() => currentUser && setIsReportModalOpen(true)}
+                    disabled={!currentUser}
+                  >
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                    </svg>
+                    <span className="hidden xs:inline">Báo cáo</span>
+                  </button>
                 );
               })()}
               </div>
