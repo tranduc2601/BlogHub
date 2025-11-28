@@ -90,6 +90,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     return `${diffDays} ngày trước`;
   };
 
+  const getAvatarInitial = (name: string) => {
+    const words = name.trim().split(' ');
+    const lastWord = words[words.length - 1];
+    return lastWord.charAt(0).toUpperCase();
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header - responsive text sizing */}
@@ -298,11 +304,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <div className="flex-shrink-0 w-8 h-8 bg-[#2563eb] rounded-lg flex items-center justify-center text-white font-bold text-sm">
                     #{index + 1}
                   </div>
-                  <img 
-                    src={post.authorAvatar || '/default-avatar.png'} 
-                    alt={post.author}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
+                  {post.authorAvatar ? (
+                    <img 
+                      src={post.authorAvatar} 
+                      alt={post.author}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div 
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
+                      style={{ backgroundColor: '#2664eb' }}
+                    >
+                      {getAvatarInitial(post.author)}
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-800 text-sm truncate group-hover:text-blue-600 transition-colors">
                       {post.title}
@@ -334,7 +349,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <i className="fa-solid fa-crown text-yellow-500"></i>
               Top người dùng
             </h3>
-            <span className="text-sm text-gray-500">{topUsers.length} users</span>
+            <span className="text-sm text-gray-500">{topUsers.length} người dùng</span>
           </div>
           
           {topUsers.length === 0 ? (
@@ -353,11 +368,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <div className="flex-shrink-0 w-8 h-8 bg-[#2563eb] rounded-lg flex items-center justify-center text-white font-bold text-sm">
                     #{index + 1}
                   </div>
-                  <img 
-                    src={user.avatarUrl || '/default-avatar.png'} 
-                    alt={user.name}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
+                  {user.avatarUrl ? (
+                    <img 
+                      src={user.avatarUrl} 
+                      alt={user.name}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div 
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
+                      style={{ backgroundColor: '#2664eb' }}
+                    >
+                      {getAvatarInitial(user.name)}
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-800 text-sm truncate group-hover:text-blue-600 transition-colors">
                       {user.name}

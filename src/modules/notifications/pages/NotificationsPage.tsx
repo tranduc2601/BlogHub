@@ -271,10 +271,15 @@ export default function NotificationsPage() {
               <i className="fa-solid fa-bell mr-2 md:mr-3 text-blue-600"></i>
               Thông báo
             </h1>
-            <p className="text-sm md:text-base text-gray-600 mt-2">
+            <p className="text-sm md:text-base text-gray-600 mt-2 flex items-center justify-center md:justify-start gap-2">
               {unreadCount > 0 
                 ? `Bạn có ${unreadCount} thông báo chưa đọc!` 
-                : 'Bạn đã đọc tất cả thông báo!'}
+                : (
+                  <>
+                    <i className="fa-solid fa-circle-check text-green-500"></i>
+                    <span>Bạn đã đọc tất cả thông báo!</span>
+                  </>
+                )}
             </p>
           </div>
           
