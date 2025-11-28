@@ -641,7 +641,7 @@ const CommentItem = ({
                     }`}
                     title={!user ? 'Đăng nhập để trả lời' : 'Trả lời bình luận'}
                   >
-                    <i className="fa-solid fa-reply text-xs"></i>
+                    <i className="fa-solid fa-reply text-xs mr-2"></i>
                     <span className="font-medium">Trả lời</span>
                   </button>
 
@@ -650,7 +650,7 @@ const CommentItem = ({
                       onClick={() => setShowReplies(!showReplies)}
                       className="text-gray-500 hover:text-gray-800 transition-all flex items-center gap-1 cursor-pointer font-medium"
                     >
-                      <i className={`fa-solid ${showReplies ? 'fa-chevron-up' : 'fa-chevron-down'} text-xs`}></i>
+                      <i className={`fa-solid ${showReplies ? 'fa-chevron-up' : 'fa-chevron-down'} text-xs mr-2`}></i>
                       <span className="hidden sm:inline">{showReplies ? 'Ẩn bớt' : `Xem ${comment.replies.length} phản hồi`}</span>
                       <span className="sm:hidden">{showReplies ? 'Ẩn' : `${comment.replies.length}`}</span>
                     </button>
@@ -661,7 +661,7 @@ const CommentItem = ({
                       onClick={() => handleReport(comment.id, comment.content, authorName)}
                       className="text-gray-500 hover:text-red-700 transition-all flex items-center gap-1 cursor-pointer"
                     >
-                      <i className="fa-solid fa-flag text-xs"></i>
+                      <i className="fa-solid fa-flag text-xs mr-2"></i>
                       <span className="font-medium hidden sm:inline">Báo cáo</span>
                     </button>
                   )}
