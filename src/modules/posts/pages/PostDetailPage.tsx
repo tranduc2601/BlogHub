@@ -847,7 +847,7 @@ export default function PostDetailPage() {
                     return userStr !== null;
                   })()
                     ? 'bg-gray-100 border-gray-300 text-gray-400 opacity-50 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-green-50 to-blue-50 border-green-200 text-green-600 hover:from-green-100 hover:to-blue-100 hover:border-green-300 hover:shadow-md cursor-pointer'
+                    : 'bg-gradient-to-r from-green-50 to-blue-50 border-green-200 text-green-600 hover:from-green-100 hover:to-blue-100 hover:border-green-300 hover:shadow-md cursor-pointer mr-1'
                 }`}
                 title={!(() => {
                   const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
@@ -890,7 +890,7 @@ export default function PostDetailPage() {
                 <i className={`${isBookmarked ? 'fa-solid' : 'fa-regular'} fa-bookmark ${!(() => {
                   const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
                   return userStr !== null;
-                })() ? '' : 'group-hover:scale-110'} transition-transform text-sm`}></i>
+                })() ? '' : 'group-hover:scale-110'} transition-transform text-sm mr-1`}></i>
                 <span>{isBookmarked ? 'Đã lưu' : 'Lưu bài viết'}</span>
               </button>
               

@@ -80,7 +80,7 @@ export default function ReactionPicker({ onReact, currentReaction, disabled }: R
         }`}
       >
         <span className="text-base sm:text-lg">{getReactionEmoji(currentReaction)}</span>
-        <span className="text-xs sm:text-sm hidden xs:inline">
+        <span className="text-xs sm:text-sm">
           {currentReaction 
             ? reactions.find(r => r.type === currentReaction)?.label 
             : 'Thích'}
