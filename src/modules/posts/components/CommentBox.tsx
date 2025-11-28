@@ -491,7 +491,7 @@ const CommentItem = ({
     };
 
     return (
-      <div className={`${level > 0 ? 'ml-4 sm:ml-8 md:ml-12' : ''}`}>
+      <div className={`${level >= 1 ? 'ml-4 sm:ml-8 md:ml-12' : ''}`}>
         <div className="flex gap-2 sm:gap-3 md:gap-4 group mb-3 sm:mb-4">
           {avatarUrl ? (
             <img 
@@ -702,7 +702,7 @@ const CommentItem = ({
             )}
           
             {comment.replies && comment.replies.length > 0 && showReplies && (
-              <div className="mt-2 sm:mt-3 md:mt-4 ml-2 sm:ml-6 md:ml-8 space-y-2 sm:space-y-3">
+              <div className="mt-2 sm:mt-3 md:mt-4 space-y-2 sm:space-y-3">
                 {comment.replies.map((reply) => (
                   <CommentItem
                     key={reply.id}

@@ -84,20 +84,6 @@ export default function Navbar() {
     <nav className="bg-white/80 backdrop-blur-md shadow-lg border-b border-white/20 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 md:py-4 flex justify-between items-center select-none">
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowMobileMenu(!showMobileMenu)}
-            className="lg:hidden p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
-            aria-label="Toggle menu"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {showMobileMenu ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
-
           {location.pathname === "/" ? (
             <div className="flex items-center gap-2 cursor-default select-none">
               <BlogHubLogoSVG />
@@ -112,6 +98,20 @@ export default function Navbar() {
               <span className="hidden sm:inline" style={{ fontWeight: 'bold', fontSize: '1.5rem', color: '#2563eb', letterSpacing: '2px', fontFamily: "'Inter', 'Segoe UI', 'Arial', sans-serif" }}>BlogHub</span>
             </div>
           )}
+
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className="lg:hidden p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+            aria-label="Toggle menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {showMobileMenu ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
         
         <div className="hidden lg:flex gap-6 items-center">
@@ -135,7 +135,7 @@ export default function Navbar() {
             </Link>
           )}
 
-          {isAuthenticated && (
+          {isAuthenticated && location.pathname !== "/users" && (
             <Link 
               to="/users" 
               className="relative group"
@@ -163,7 +163,7 @@ export default function Navbar() {
             </Link>
           )}
 
-          {isAuthenticated && (
+          {isAuthenticated && location.pathname !== "/saved-posts" && (
             <Link 
               to="/saved-posts" 
               className="relative group"
@@ -397,7 +397,7 @@ export default function Navbar() {
                 </Link>
               )}
 
-              {isAuthenticated && (
+              {isAuthenticated && location.pathname !== "/users" && (
                 <Link 
                   to="/users" 
                   onClick={closeMobileMenu}
@@ -455,14 +455,16 @@ export default function Navbar() {
                     <i className="fa-solid fa-file-lines text-lg"></i>
                     Bài viết của tôi
                   </Link>
-                  <Link
-                    to="/saved-posts"
-                    onClick={closeMobileMenu}
-                    className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3"
-                  >
-                    <i className="fa-solid fa-bookmark text-lg"></i>
-                    Bài viết đã lưu
-                  </Link>
+                  {location.pathname !== "/saved-posts" && (
+                    <Link
+                      to="/saved-posts"
+                      onClick={closeMobileMenu}
+                      className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3"
+                    >
+                      <i className="fa-solid fa-bookmark text-lg"></i>
+                      Bài viết đã lưu
+                    </Link>
+                  )}
                   
                   <div className="my-2 border-t border-gray-200"></div>
                   
