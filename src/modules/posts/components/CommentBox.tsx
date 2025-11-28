@@ -659,7 +659,7 @@ const CommentItem = ({
                   {!isOwner && user && (
                     <button 
                       onClick={() => handleReport(comment.id, comment.content, authorName)}
-                      className="text-gray-500 hover:text-red-600 transition-all flex items-center gap-1 cursor-pointer"
+                      className="text-gray-500 hover:text-red-700 transition-all flex items-center gap-1 cursor-pointer"
                     >
                       <i className="fa-solid fa-flag text-xs"></i>
                       <span className="font-medium hidden sm:inline">Báo cáo</span>
