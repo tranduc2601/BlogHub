@@ -232,7 +232,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full"><i className="fa-regular fa-hourglass-end mr-1"></i>Chờ xử lý</span>;
+        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full"><i className="fa-solid fa-hourglass-end mr-1"></i>Chờ xử lý</span>;
       case 'approved':
         return <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">✓ Đã duyệt</span>;
       case 'rejected':
@@ -599,7 +599,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                   
                   <div className="flex items-center gap-4 text-sm text-gray-600 mt-4">
                     <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full">
-                      <i className="fa-regular fa-calendar text-blue-600"></i>
+                      <i className="fa-solid fa-calendar text-blue-600"></i>
                       <span className="font-medium">{formatDate(selectedPost.createdAt)}</span>
                     </div>
                     <div className="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full">

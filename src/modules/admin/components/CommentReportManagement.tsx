@@ -403,7 +403,7 @@ const CommentReportManagement: React.FC = () => {
                   <div className="flex items-center gap-2 mb-2">
                     {getStatusBadge(report.status)}
                     <span className="text-xs text-gray-500">
-                      <i className="fa-regular fa-calendar mr-1"></i>
+                      <i className="fa-solid fa-calendar mr-1"></i>
                       {formatDate(report.createdAt)}
                     </span>
                   </div>
@@ -695,7 +695,7 @@ const CommentReportManagement: React.FC = () => {
                   
                   <div className="flex items-center gap-4 text-sm text-gray-600 mt-4">
                     <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full">
-                      <i className="fa-regular fa-calendar text-blue-600"></i>
+                      <i className="fa-solid fa-calendar text-blue-600"></i>
                       <span className="font-medium">{formatDate(selectedPost.createdAt)}</span>
                     </div>
                     <div className="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full">
@@ -813,7 +813,7 @@ const CommentReportManagement: React.FC = () => {
                                   </div>
                                   <p className="text-gray-600 text-sm mt-1">{comment.content}</p>
                                   <p className="text-gray-400 text-xs mt-2">
-                                    <i className="fa-regular fa-calendar mr-2"></i>
+                                    <i className="fa-solid fa-calendar mr-2"></i>
                                     {formatDate(comment.createdAt)}
                                   </p>
                                 </div>
@@ -874,7 +874,7 @@ const CommentReportManagement: React.FC = () => {
                                           </div>
                                           <p className="text-gray-600 text-sm mt-1">{reply.content}</p>
                                           <p className="text-gray-400 text-xs mt-2">
-                                            <i className="fa-regular fa-calendar mr-2"></i>
+                                            <i className="fa-solid fa-calendar mr-2"></i>
                                             {formatDate(reply.createdAt)}
                                           </p>
                                         </div>

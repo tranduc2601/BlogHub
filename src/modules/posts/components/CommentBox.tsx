@@ -523,7 +523,7 @@ const CommentItem = ({
                     </span>
                   )}
                   <span className="text-[10px] sm:text-xs text-gray-500 bg-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full whitespace-nowrap">
-                    <i className="fa-regular fa-clock mr-1"></i>
+                    <i className="fa-solid fa-clock mr-1"></i>
                     {formatDate(comment.createdAt)}
                   </span>
                 </div>

@@ -120,7 +120,7 @@ const CommentManagement: React.FC<CommentManagementProps> = ({ comments, onToggl
                   
                   <div className="flex items-center gap-4 text-sm text-gray-500">
                     <span>👤 {comment.author}</span>
-                    <span><i className="fa-regular fa-calendar mr-1.5"></i> {comment.createdAt}</span>
+                    <span><i className="fa-solid fa-calendar mr-1.5"></i> {comment.createdAt}</span>
                     <span className="text-xs text-gray-400">ID: {comment.id}</span>
                   </div>
                 </div>

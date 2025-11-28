@@ -78,7 +78,7 @@ export default function SavedPostsPage() {
         {bookmarks.length === 0 && !loading && (
           <div className="text-center py-12 sm:py-16 md:py-20 px-4">
             <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-gray-100 rounded-full mb-4 sm:mb-6">
-              <i className="fa-regular fa-bookmark text-4xl sm:text-5xl md:text-6xl text-gray-400"></i>
+              <i className="fa-solid fa-bookmark text-4xl sm:text-5xl md:text-6xl text-gray-400"></i>
             </div>
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2 sm:mb-3">
               Chưa có bài viết nào được lưu

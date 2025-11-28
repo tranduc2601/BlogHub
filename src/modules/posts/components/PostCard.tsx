@@ -376,7 +376,7 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
                   : 'text-gray-700 hover:bg-yellow-50 hover:text-yellow-600'
               } ${isBookmarking ? 'opacity-50 cursor-wait' : ''}`}
             >
-              <i className={`${isBookmarked ? 'fa-solid' : 'fa-regular'} fa-bookmark`}></i>
+              <i className={`${isBookmarked ? 'fa-solid' : 'fa-solid'} fa-bookmark`}></i>
               <span>{isBookmarked ? 'Bỏ lưu bài viết' : 'Lưu bài viết'}</span>
             </button>
             <div className="my-1 border-t border-gray-200"></div>
@@ -428,7 +428,7 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
             )}
             <div>
               <p className="font-semibold text-gray-800">{typeof post.author === 'string' ? post.author : post.author?.name || 'Không rõ'}</p>
-              <p className="text-xs text-gray-500"><i className="fa-regular fa-calendar mr-2"></i>{formatDate(post.createdAt)}</p>
+              <p className="text-xs text-gray-500"><i className="fa-solid fa-calendar mr-2"></i>{formatDate(post.createdAt)}</p>
             </div>
           </div>
         </div>

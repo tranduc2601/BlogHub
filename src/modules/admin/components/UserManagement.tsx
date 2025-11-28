@@ -328,7 +328,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">
-                      <i className="fa-regular fa-calendar mr-2"></i>{formatDate(user.joinedAt || user.createdAt)}
+                      <i className="fa-solid fa-calendar mr-2"></i>{formatDate(user.joinedAt || user.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <div className="flex gap-2 justify-center flex-wrap">

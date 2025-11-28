@@ -156,7 +156,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <p className="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2">{stats.pendingReviewComments}</p>
             </div>
             <div className="text-3xl sm:text-5xl opacity-50">
-              <i className="fa-regular fa-comments"></i>
+              <i className="fa-solid fa-comments"></i>
             </div>
           </div>
           <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-purple-100">
@@ -284,7 +284,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           
           {topPosts.length === 0 ? (
             <div className="py-8 text-center text-gray-500">
-              <i className="fa-regular fa-face-sad-tear text-4xl mb-2"></i>
+              <i className="fa-solid fa-face-sad-tear text-4xl mb-2"></i>
               <p>Chưa có bài viết nào</p>
             </div>
           ) : (
@@ -339,7 +339,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           
           {topUsers.length === 0 ? (
             <div className="py-8 text-center text-gray-500">
-              <i className="fa-regular fa-face-sad-tear text-4xl mb-2"></i>
+              <i className="fa-solid fa-face-sad-tear text-4xl mb-2"></i>
               <p>Chưa có người dùng nào</p>
             </div>
           ) : (
@@ -391,7 +391,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         
         {activities.length === 0 ? (
           <div className="py-8 text-center text-gray-500">
-            <i className="fa-regular fa-face-sad-tear text-4xl mb-2"></i>
+            <i className="fa-solid fa-face-sad-tear text-4xl mb-2"></i>
             <p>Chưa có hoạt động nào</p>
           </div>
         ) : (

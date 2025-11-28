@@ -712,7 +712,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                   
                   <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
                     <span className="flex items-center gap-1">👤 {post.author}</span>
-                    <span className="flex items-center gap-1"><i className="fa-regular fa-calendar"></i>{formatDate(post.createdAt)}</span>
+                    <span className="flex items-center gap-1"><i className="fa-solid fa-calendar"></i>{formatDate(post.createdAt)}</span>
                     {postReactions[post.id] && postReactions[post.id].total > 0 ? (
                       <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
                         {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as const).map((reactionType) => {
@@ -970,7 +970,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                       <span className="font-medium">{selectedPost.author}</span>
                     </div>
                     <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full">
-                      <i className="fa-regular fa-calendar text-blue-600"></i>
+                      <i className="fa-solid fa-calendar text-blue-600"></i>
                       <span className="font-medium">{formatDate(selectedPost.createdAt)}</span>
                     </div>
                     {postReactions[selectedPost.id] && postReactions[selectedPost.id].total > 0 && (
@@ -1118,7 +1118,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                               </div>
                                 <p className="text-gray-600 text-sm mt-1">{comment.content}</p>
                                 <div className="flex items-center gap-4 mt-2">
-                                  <p className="text-gray-400 text-xs"><i className="fa-regular fa-calendar mr-2"></i> {formatDate(comment.createdAt)}</p>
+                                  <p className="text-gray-400 text-xs"><i className="fa-solid fa-calendar mr-2"></i> {formatDate(comment.createdAt)}</p>
                                   
                                   {commentReactions[comment.id] && commentReactions[comment.id].total > 0 && (
                                     <div className="flex items-center gap-2">
@@ -1223,7 +1223,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                                           </div>
                                           <p className="text-gray-600 text-sm mt-1">{reply.content}</p>
                                           <div className="flex items-center gap-4 mt-2">
-                                            <p className="text-gray-400 text-xs"><i className="fa-regular fa-calendar mr-2"></i> {formatDate(reply.createdAt)}</p>
+                                            <p className="text-gray-400 text-xs"><i className="fa-solid fa-calendar mr-2"></i> {formatDate(reply.createdAt)}</p>
                                             {commentReactions[reply.id] && commentReactions[reply.id].total > 0 && (
                                               <div className="flex items-center gap-2">
                                                 {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as const).map((reactionType) => {

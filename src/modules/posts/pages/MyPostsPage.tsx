@@ -178,7 +178,7 @@ export default function MyPostsPage() {
                     <div className="mb-3">
                       {post.status === 'pending' && (
                         <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-orange-100 to-amber-100 text-orange-700 text-xs font-semibold rounded-full">
-                          <i className="fa-regular fa-hourglass-half"></i>
+                          <i className="fa-solid fa-hourglass-half"></i>
                           Chờ duyệt
                         </span>
                       )}
@@ -217,7 +217,7 @@ export default function MyPostsPage() {
                         </span>
                       )}
                       <span className="inline-flex items-center gap-1.5 text-gray-500">
-                        <i className="fa-regular fa-calendar text-xs"></i>
+                        <i className="fa-solid fa-calendar text-xs"></i>
                         {new Date(post.createdAt).toLocaleDateString("vi-VN")}
                       </span>
                     </div>

@@ -869,7 +869,7 @@ export default function PostDetailPage() {
                   return userStr !== null;
                 })() ? 'Đăng nhập để lưu bài viết' : isBookmarked ? 'Bỏ lưu bài viết' : 'Lưu bài viết'}
               >
-                <i className={`${isBookmarked ? 'fa-solid' : 'fa-regular'} fa-bookmark ${!(() => {
+                <i className={`${isBookmarked ? 'fa-solid' : 'fa-solid'} fa-bookmark ${!(() => {
                   const userStr = localStorage.getItem("user") || sessionStorage.getItem("user");
                   return userStr !== null;
                 })() ? '' : 'group-hover:scale-110'} transition-transform`}></i>
