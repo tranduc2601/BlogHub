@@ -103,9 +103,20 @@ export default function LoginPage() {
         }
       }
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { locked?: boolean; alreadyLoggedIn?: boolean; message?: string } } };
+      const err = error as { 
+        response?: { 
+          status?: number;
+          data?: { 
+            locked?: boolean; 
+            alreadyLoggedIn?: boolean; 
+            message?: string 
+          } 
+        } 
+      };
+      
+      // Xử lý các trường hợp lỗi cụ thể
       if (err.response?.data?.locked) {
-        toast.error('Bạn đã bị khóa tài khoản!', {
+        toast.error('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin để biết thêm chi tiết!', {
           duration: 6000,
           position: 'top-right',
         });
@@ -114,8 +125,36 @@ export default function LoginPage() {
           duration: 6000,
           position: 'top-right',
         });
+      } else if (err.response?.status === 401) {
+        // Lỗi email hoặc mật khẩu không đúng
+        const errorMessage = err.response?.data?.message || 'Email hoặc mật khẩu không đúng!';
+        toast.error(errorMessage, {
+          duration: 4000,
+          position: 'top-right',
+        });
+      } else if (err.response?.status === 400) {
+        // Lỗi validation (thiếu email hoặc mật khẩu)
+        const errorMessage = err.response?.data?.message || 'Vui lòng nhập đầy đủ thông tin!';
+        toast.error(errorMessage, {
+          duration: 4000,
+          position: 'top-right',
+        });
+      } else if (err.response?.status === 403) {
+        // Lỗi tài khoản bị khóa
+        const errorMessage = err.response?.data?.message || 'Tài khoản đã bị khóa!';
+        toast.error(errorMessage, {
+          duration: 5000,
+          position: 'top-right',
+        });
+      } else if (err.response?.status === 500) {
+        // Lỗi server
+        toast.error('Lỗi server, vui lòng thử lại sau!', {
+          duration: 4000,
+          position: 'top-right',
+        });
       } else {
-        const errorMessage = err.response?.data?.message || (error instanceof Error ? error.message : "Đã xảy ra lỗi. Vui lòng thử lại sau.");
+        // Các lỗi khác hoặc lỗi network
+        const errorMessage = err.response?.data?.message || (error instanceof Error ? error.message : "Không thể kết nối đến server. Vui lòng kiểm tra kết nối internet!");
         toast.error(errorMessage, {
           duration: 4000,
           position: 'top-right',
