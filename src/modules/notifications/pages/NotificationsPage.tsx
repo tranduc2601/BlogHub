@@ -398,10 +398,11 @@ export default function NotificationsPage() {
                   )}
                   <button
                     onClick={(e) => handleDeleteNotification(notification.id, e)}
-                    className="p-1.5 md:p-2 rounded-lg text-red-500 transition-all duration-200 cursor-pointer bg-transparent hover:bg-gradient-to-br hover:from-red-400 hover:to-pink-500 hover:text-white hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-300 group"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-white bg-red-500 transition-all duration-200 cursor-pointer hover:bg-red-600 hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-300"
                     title="Xóa thông báo"
                   >
-                    <i className="fa-solid fa-trash text-xs md:text-sm group-hover:animate-shake"></i>
+                    <i className="fa-solid fa-trash text-sm"></i>
+                    <span>Xóa</span>
                   </button>
                 </div>
               </div>
