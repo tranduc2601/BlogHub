@@ -30,7 +30,7 @@ export default function PostsPage() {
     const fetchPosts = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("/posts");
+        const res = await axios.get<{ success: boolean; posts: Post[] }>("/posts");
         if (res.data.success && Array.isArray(res.data.posts)) {
           setPosts(res.data.posts);
         } else {
