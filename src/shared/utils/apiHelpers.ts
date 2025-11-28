@@ -1,4 +1,4 @@
-import { config } from '../core/config/env';
+import { config } from '../../core/config/env';
 
 /**
  * Get the full API URL
