@@ -152,7 +152,7 @@ export default function ReactionModal({ isOpen, onClose, postId, totalReactions 
             </div>
           ) : users.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              Chưa có ai thả biểu cảm
+              Chưa có ai thả biểu cảm!
             </div>
           ) : (
             <div className="space-y-3">

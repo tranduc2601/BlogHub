@@ -82,11 +82,11 @@ export default function PostDetailPage() {
         await axios.post(`/posts/${post.id}/react`, { reactionType: typeToSend });
         setCurrentReaction(reactionType);
         
-        if (reactionType === null) {
-          toast.success('Đã bỏ biểu cảm!');
-        } else {
-          toast.success('Đã thả biểu cảm!');
-        }
+        // if (reactionType === null) {
+        //   toast.success('Đã bỏ biểu cảm!');
+        // } else {
+        //   toast.success('Đã thả biểu cảm!');
+        // }
         const statsRes = await axios.get(`/posts/${post.id}/reaction-stats`);
         if (statsRes.data.success) {
           const counts = statsRes.data.counts || {};

@@ -223,7 +223,7 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
       
       setNewComment("");
       setIsAnonymous(false);
-      toast.success(isAnonymous ? 'Đã bình luận ẩn danh!' : 'Đã bình luận thành công!');
+      // toast.success(isAnonymous ? 'Đã bình luận ẩn danh!' : 'Đã bình luận thành công!');
       if (onCommentAdded) onCommentAdded();
     } catch (error) {
       console.error('Error submitting comment:', error);
@@ -878,11 +878,11 @@ const CommentReactionButton = ({
       setCounts(newCounts);
       setCurrentReaction(reactionType);
       
-      if (reactionType === null) {
-        toast.success('Đã bỏ biểu cảm của bình luận!');
-      } else {
-        toast.success('Đã thả biểu cảm của bình luận!');
-      }
+      // if (reactionType === null) {
+      //   toast.success('Đã bỏ biểu cảm của bình luận!');
+      // } else {
+      //   toast.success('Đã thả biểu cảm của bình luận!');
+      // }
     } catch (error) {
       console.error('Error reacting to comment:', error);
       toast.error('Không thể thả biểu cảm!');

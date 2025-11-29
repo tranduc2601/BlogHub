@@ -206,11 +206,11 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
       const typeToSend = reactionType !== null ? reactionType : currentReaction;
       await axios.post(`/posts/${post.id}/react`, { reactionType: typeToSend });
       
-      if (reactionType === null) {
-        toast.success('Đã bỏ biểu cảm!');
-      } else {
-        toast.success('Đã thả biểu cảm!');
-      }
+      // if (reactionType === null) {
+      //   toast.success('Đã bỏ biểu cảm!');
+      // } else {
+      //   toast.success('Đã thả biểu cảm!');
+      // }
       
       // Đồng bộ lại với server để đảm bảo chính xác
       const statsRes = await axios.get(`/posts/${post.id}/reaction-stats`);

@@ -709,7 +709,6 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-4">
                     <div>
                       <p><span className="font-semibold">👤 Tác giả:</span> {post.author}</p>
-                      <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-calendar mr-2"></i>Ngày đăng:</span> {formatDate(post.createdAt)}</p>
                     </div>
                   </div>
                   
