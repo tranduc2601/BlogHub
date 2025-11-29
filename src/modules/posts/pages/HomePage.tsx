@@ -7,6 +7,7 @@ import axios from "@/core/config/axios";
 export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [typedText, setTypedText] = useState("");
   
   // Lấy giá trị từ URL query params
   const [activeTab, setActiveTab] = useState<"recent" | "popular">(
@@ -73,13 +74,58 @@ export default function HomePage() {
     setReactionModalState({ isOpen: false, postId: 0, totalReactions: 0 });
   };
 
+  // Typing animation effect
+  useEffect(() => {
+    const text = "Chào mừng đến với BlogHub";
+    let currentIndex = 0;
+    let isDeleting = false;
+    let timeoutId: number;
+
+    const type = () => {
+      if (!isDeleting) {
+        // Typing phase
+        if (currentIndex <= text.length) {
+          setTypedText(text.substring(0, currentIndex));
+          currentIndex++;
+          timeoutId = setTimeout(type, 100); // Typing speed
+        } else {
+          // Pause before deleting
+          timeoutId = setTimeout(() => {
+            isDeleting = true;
+            type();
+          }, 2000); // Pause duration
+        }
+      } else {
+        // Deleting phase
+        if (currentIndex > 0) {
+          currentIndex--;
+          setTypedText(text.substring(0, currentIndex));
+          timeoutId = setTimeout(type, 50); // Deleting speed
+        } else {
+          // Pause before typing again
+          timeoutId = setTimeout(() => {
+            isDeleting = false;
+            type();
+          }, 500); // Pause before restart
+        }
+      }
+    };
+
+    type();
+
+    return () => clearTimeout(timeoutId);
+  }, []);
+
   return (
     <div className="space-y-12 select-none">
       
       <section className="text-center py-16">
         <h1 className="text-5xl md:text-6xl font-extrabold text-blue-700 drop-shadow-lg mb-6 animate-fadeInUp leading-tight flex items-center justify-center gap-4">
           <i className="fa-solid fa-blog" style={{ fontSize: '1.2em', color: '#3b82f6', textShadow: '0 2px 8px #a5b4fc', marginRight: '10px' }}></i>
-          Chào mừng đến với BlogHub
+          <span className="inline-block min-w-[20ch]">
+            {typedText}
+            <span className="animate-pulse">|</span>
+          </span>
         </h1>
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed animate-fadeInUp animation-delay-200">
           Nơi chia sẻ những câu chuyện, ý tưởng và kinh nghiệm quý báu từ cộng đồng
