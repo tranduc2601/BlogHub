@@ -79,6 +79,7 @@ const CommentReportManagement: React.FC = () => {
   const [postComments, setPostComments] = useState<Comment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isClosingActionModal, setIsClosingActionModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [reasonFilter, setReasonFilter] = useState<string>(searchParams.get('reason') || 'all');
@@ -181,9 +182,7 @@ const CommentReportManagement: React.FC = () => {
       if (response.data.success) {
         toast.success(response.data.message);
         fetchReports();
-        setShowModal(false);
-        setSelectedReport(null);
-        setAdminResponse('');
+        handleCloseActionModal();
       }
     } catch (error) {
       console.error('Error handling comment report:', error);
@@ -237,6 +236,16 @@ const CommentReportManagement: React.FC = () => {
       setSelectedPost(null);
       setPostComments([]);
       setIsClosing(false);
+    }, 300);
+  };
+
+  const handleCloseActionModal = () => {
+    setIsClosingActionModal(true);
+    setTimeout(() => {
+      setShowModal(false);
+      setSelectedReport(null);
+      setAdminResponse('');
+      setIsClosingActionModal(false);
     }, 300);
   };
 
@@ -558,14 +567,25 @@ const CommentReportManagement: React.FC = () => {
 
       {/* Modal xử lý báo cáo */}
       {showModal && selectedReport && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl">
+        <div 
+          className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
+            isClosingActionModal ? 'opacity-0' : 'opacity-100'
+          }`}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
+          onClick={handleCloseActionModal}
+        >
+          <div 
+            className={`bg-white rounded-2xl max-w-2xl w-full shadow-2xl transition-all duration-300 ${
+              isClosingActionModal ? 'scale-95 opacity-0 translate-y-4' : 'scale-100 opacity-100 translate-y-0'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={`p-6 ${actionType === 'hide' ? 'bg-red-600' : 'bg-gray-600'} text-white rounded-t-2xl flex justify-between items-center`}>
               <h3 className="text-xl font-bold">
                 {actionType === 'hide' ? 'Ẩn bình luận vi phạm' : 'Từ chối báo cáo'}
               </h3>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={handleCloseActionModal}
                 className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition-all duration-300 cursor-pointer group"
                 aria-label="Đóng"
               >
@@ -592,14 +612,14 @@ const CommentReportManagement: React.FC = () => {
                   placeholder={
                     actionType === 'hide'
                       ? 'Nhập lý do ẩn bình luận để thông báo cho tác giả...'
-                      : 'Nhập lý do từ chối để thông báo cho người báo cáo...'
+                      : 'Nhập lý do từ chối để thông báo cho người báo cáo bình luận này...'
                   }
                 />
               </div>
 
               <div className="flex gap-3">
                 <button
-                  onClick={() => setShowModal(false)}
+                  onClick={handleCloseActionModal}
                   className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 hover:scale-105 hover:shadow-lg active:scale-95 transition-all duration-300 cursor-pointer group"
                 >
                   <i className="fa-solid fa-times mr-2 group-hover:rotate-90 transition-transform duration-300"></i>Hủy
