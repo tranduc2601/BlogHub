@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from '@/core/config/axios';
@@ -198,12 +199,30 @@ const CommentReportManagement: React.FC = () => {
       ]);
       
       if (postResponse.data.success) {
-        setSelectedPost(postResponse.data.post);
+        const post = postResponse.data.post;
+        // Normalize author to string if it's an object
+        const normalizedPost = {
+          ...post,
+          author: typeof post.author === 'object' ? post.author.username || post.author.email : post.author,
+          authorAvatar: typeof post.author === 'object' ? post.author.avatarUrl : post.authorAvatar
+        };
+        setSelectedPost(normalizedPost);
       }
 
       if (commentsResponse.data.success) {
         setIsLoadingComments(false);
-        setPostComments(commentsResponse.data.comments || []);
+        // Normalize comments author to string
+        const normalizedComments = (commentsResponse.data.comments || []).map((comment: any) => ({
+          ...comment,
+          author: typeof comment.author === 'object' ? comment.author.username || comment.author.email : comment.author,
+          authorAvatar: typeof comment.author === 'object' ? comment.author.avatarUrl : comment.authorAvatar,
+          replies: comment.replies?.map((reply: any) => ({
+            ...reply,
+            author: typeof reply.author === 'object' ? reply.author.username || reply.author.email : reply.author,
+            authorAvatar: typeof reply.author === 'object' ? reply.author.avatarUrl : reply.authorAvatar
+          }))
+        }));
+        setPostComments(normalizedComments);
       }
     } catch (error) {
       console.error('Failed to fetch post detail:', error);
