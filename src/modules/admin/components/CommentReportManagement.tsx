@@ -387,67 +387,76 @@ const CommentReportManagement: React.FC = () => {
         )}
       </div>
 
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-4">
         {filteredReports.length === 0 ? (
-          <div className="bg-white rounded-[16px] p-6 sm:p-8 text-center shadow-lg">
-            <p className="text-sm sm:text-base text-gray-500">Không có báo cáo nào</p>
+          <div className="bg-white rounded-[16px] p-8 text-center shadow-lg">
+            <p className="text-gray-500">Không có báo cáo nào</p>
           </div>
         ) : (
           paginatedReports.map(report => (
             <div
               key={report.id}
-              className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg transition-all hover:shadow-xl"
+              className={`bg-white rounded-[16px] p-4 sm:p-6 shadow-lg transition-all hover:shadow-xl ${
+                report.status === 'pending' ? 'border-2 border-yellow-400' : ''
+              }`}
             >
-              <div className="flex flex-col lg:flex-row justify-between items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
+              <div className="flex flex-col lg:flex-row justify-between items-start gap-3 sm:gap-4">
+                {/* Report content - responsive */}
                 <div className="flex-1 w-full lg:w-auto">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-800 break-words">{report.postTitle}</h3>
                     {getStatusBadge(report.status)}
-                    <span className="text-xs text-gray-500">
-                      <i className="fa-solid fa-calendar mr-1"></i>
-                      {formatDate(report.createdAt)}
-                    </span>
+                    {report.status !== 'pending' && (
+                      <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                        <i className="fa-solid fa-check-double mr-1"></i>Đã xử lý
+                      </span>
+                    )}
                   </div>
                   
-                  <div className="bg-gray-50 rounded-xl p-4 mb-3 border-l-4 border-red-500 mt-5">
-                    <p className="text-sm text-gray-600 mb-1">
+                  <div className="bg-gray-50 rounded-xl p-3 sm:p-4 mb-3 border-l-4 border-red-500">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1">
                       <span className="font-semibold">Bình luận từ:</span> {report.commentAuthor}
                     </p>
-                    <p className="text-sm text-gray-600 mb-2">
-                      <span className="font-semibold">Trên bài viết:</span> "{report.postTitle}"
-                    </p>
-                    <p className="text-gray-800 bg-white p-3 rounded-lg">{report.commentContent}</p>
+                    <p className="text-xs sm:text-sm text-gray-800 bg-white p-3 rounded-lg mt-2">{report.commentContent}</p>
                   </div>
 
-                  <div className="bg-orange-50 rounded-lg p-3 mb-3 mt-7">
-                    <p className="text-sm font-semibold text-orange-800 mb-1">
-                      <i className="fa-solid fa-exclamation-triangle mr-1"></i>
-                      Lý do báo cáo:
+                  <div className="bg-red-50 border-l-4 border-red-500 p-3 sm:p-4 rounded mb-3">
+                    <p className="text-xs sm:text-sm text-red-800">
+                      <span className="font-semibold">Lý do:</span> {report.reason}
                     </p>
-                    <p className="text-gray-700">{report.reason}</p>
-                    <p className="text-xs text-gray-500 mt-2">
-                      <i className="fa-solid fa-user mr-1"></i>
-                      Người báo cáo: {report.reporterUsername}
-                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-4">
+                    <div>
+                      <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-user mr-2"></i>Người báo cáo:</span> {report.reporterUsername}</p>
+                      <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-user-pen mr-2"></i>Tác giả bình luận:</span> {report.commentAuthor}</p>
+                    </div>
+                    <div>
+                      {report.reviewedAt && (
+                        <p className="ml-180"><span className="font-semibold">Ngày xử lý:</span> {formatDate(report.reviewedAt)}</p>
+                      )}
+                      {report.reviewerUsername && (
+                        <p className="ml-180"><span className="font-semibold">Xử lý bởi:</span> {report.reviewerUsername}</p>
+                      )}
+                    </div>
                   </div>
 
                   {report.adminResponse && (
-                    <div className="bg-blue-50 rounded-lg p-3 border-l-4 border-blue-500">
+                    <div className="bg-blue-50 rounded-lg p-3 border-l-4 border-blue-500 mb-3">
                       <p className="text-sm font-semibold text-blue-800 mb-1">
                         <i className="fa-solid fa-comment-dots mr-1"></i>
                         Phản hồi của Admin:
                       </p>
                       <p className="text-gray-700">{report.adminResponse}</p>
-                      {report.reviewerUsername && (
-                        <p className="text-xs text-gray-500 mt-2">
-                          <i className="fa-solid fa-user-shield mr-1"></i>
-                          Xử lý bởi: {report.reviewerUsername} • {report.reviewedAt && formatDate(report.reviewedAt)}
-                        </p>
-                      )}
                     </div>
                   )}
-
-                  {/* Button xem bài viết - responsive */}
-                  <div className="mt-3 sm:mt-4 flex justify-start sm:justify-end">
+                  
+                  {/* Footer with date and view button - responsive */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+                    <p className="text-xs text-gray-500">
+                      Ngày báo cáo: {formatDate(report.createdAt)}
+                    </p>
+                    
                     <button
                       onClick={() => handleViewPost(report.postId)}
                       className="px-3 sm:px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm sm:text-base font-medium transition-all shadow-md cursor-pointer hover:scale-105 hover:shadow-lg w-full sm:w-auto"
@@ -457,11 +466,10 @@ const CommentReportManagement: React.FC = () => {
                       Xem bài viết
                     </button>
                   </div>
-                </div>
 
-                {/* Action buttons - responsive */}
-                {report.status === 'pending' && (
-                  <div className="flex flex-wrap gap-2 mt-3 lg:mt-0 w-full lg:w-auto">
+                  {/* Action buttons - responsive */}
+                  {report.status === 'pending' && (
+                    <div className="flex flex-wrap gap-2 mt-4 justify-end">
                     <button
                       onClick={() => handleOpenModal(report, 'hide')}
                       className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 group cursor-pointer"
@@ -476,6 +484,7 @@ const CommentReportManagement: React.FC = () => {
                     </button>
                   </div>
                 )}
+                </div>
               </div>
             </div>
           ))

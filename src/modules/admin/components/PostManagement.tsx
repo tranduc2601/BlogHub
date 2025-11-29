@@ -677,7 +677,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                 post.needsReview ? 'border-2 border-orange-400' : ''
               }`}
             >
-              <div className="flex flex-col lg:flex-row justify-between items-start gap-3 sm:gap-4">
+              <div className="flex flex-col">
                 {/* Post content - responsive */}
                 <div className="flex-1 cursor-pointer" onClick={() => handleViewPost(post)}>
                   <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -748,7 +748,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                 </div>
   
                 {/* Action buttons - responsive */}
-                <div className="flex flex-wrap gap-2 sm:gap-3 mt-3 lg:mt-0">
+                <div className="flex flex-wrap gap-2 mt-4 justify-end">
                   {post.status === 'pending' && (
                     <>
                       <button

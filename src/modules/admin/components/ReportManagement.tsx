@@ -386,8 +386,8 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-4">
                     <div>
-                      <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-file-lines mr-1"></i>Bài viết của:</span> {report.postAuthor}</p>
-                      <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-user mr-1"></i>Báo cáo bởi:</span> {report.reportedByUser}</p>
+                      <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-file-lines mr-2"></i>Bài viết của:</span> {report.postAuthor}</p>
+                      <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-user mr-2"></i>Báo cáo bởi:</span> {report.reportedByUser}</p>
                     </div>
                     <div>
                       {report.reviewedAt && (
@@ -414,11 +414,10 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                       Xem bài viết
                     </button>
                   </div>
-                </div>
 
-                {/* Action buttons - responsive */}
-                {report.status === 'pending' && (
-                  <div className="flex flex-wrap gap-2 mt-3 lg:mt-10 w-full lg:w-auto">
+                  {/* Action buttons - responsive */}
+                  {report.status === 'pending' && (
+                    <div className="flex flex-wrap gap-2 mt-4 justify-end">
                     <button
                       onClick={() => handleApprove(report.id)}
                       className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm sm:text-base font-medium transition-all shadow-md cursor-pointer hover:scale-105 hover:shadow-lg"
@@ -438,6 +437,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                     </button>
                   </div>
                 )}
+                </div>
               </div>
             </div>
           ))
