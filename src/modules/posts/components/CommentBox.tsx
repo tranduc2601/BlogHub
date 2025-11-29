@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useComments } from "../hooks/useComments";
 import { useAuth } from "@/core/auth";
 import toast from 'react-hot-toast';
@@ -50,8 +50,16 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
   const [pinnedCommentId, setPinnedCommentId] = useState<string | null>(null);
   
+  // Infinite Scroll states
+  const [displayedComments, setDisplayedComments] = useState<Comment[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const observerTarget = useRef<HTMLDivElement>(null);
+  
   const MIN_COMMENT_LENGTH = 2; 
-  const MAX_COMMENT_LENGTH = 500; 
+  const MAX_COMMENT_LENGTH = 500;
+  const COMMENTS_PER_PAGE = 5; 
 
   useEffect(() => {
     const fetchPinnedComment = async () => {
@@ -85,12 +93,48 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
     return { valid: true };
   };
 
+  // Load comments with pagination
+  useEffect(() => {
+    if (comments.length > 0) {
+      const startIndex = 0;
+      const endIndex = currentPage * COMMENTS_PER_PAGE;
+      const paginatedComments = comments.slice(startIndex, endIndex);
+      setDisplayedComments(paginatedComments);
+      setHasMore(endIndex < comments.length);
+    } else {
+      setDisplayedComments([]);
+      setHasMore(false);
+    }
+  }, [comments, currentPage]);
+
+  // Intersection Observer for infinite scroll
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const target = entries[0];
+    if (target.isIntersecting && hasMore && !loadingMore && !loading) {
+      setLoadingMore(true);
+      setTimeout(() => {
+        setCurrentPage(prev => prev + 1);
+        setLoadingMore(false);
+      }, 500);
+    }
+  }, [hasMore, loadingMore, loading]);
+
+  useEffect(() => {
+    const element = observerTarget.current;
+    const option = { threshold: 0 };
+    const observer = new IntersectionObserver(handleObserver, option);
+    if (element) observer.observe(element);
+    return () => {
+      if (element) observer.unobserve(element);
+    };
+  }, [handleObserver]);
+
   const commentTree = useMemo(() => {
     const tree: Comment[] = [];
     const commentMap = new Map<string, Comment>();
     
 
-    comments.forEach((comment: Comment) => {
+    displayedComments.forEach((comment: Comment) => {
       commentMap.set(comment.id, { ...comment, replies: [] });
     });
     
@@ -116,7 +160,7 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
     }
     
     return tree;
-  }, [comments, pinnedCommentId]);
+  }, [displayedComments, pinnedCommentId]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -419,6 +463,31 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
               </svg>
               <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-1 sm:mb-2">Chưa có bình luận nào</h3>
               <p className="text-sm sm:text-base text-gray-600 px-4">Hãy là người đầu tiên chia sẻ suy nghĩ!</p>
+            </div>
+          )}
+
+          {/* Loading more indicator */}
+          {loadingMore && (
+            <div className="flex justify-center py-4">
+              <div className="flex items-center gap-2 text-blue-600">
+                <i className="fa-solid fa-spinner fa-spin"></i>
+                <span className="text-sm font-medium">Đang tải thêm bình luận...</span>
+              </div>
+            </div>
+          )}
+
+          {/* Infinite scroll observer target */}
+          {hasMore && !loadingMore && commentTree.length > 0 && (
+            <div ref={observerTarget} className="h-4"></div>
+          )}
+
+          {/* End of comments indicator */}
+          {!hasMore && commentTree.length > 0 && (
+            <div className="flex flex-col items-center justify-center py-6 gap-2">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-100">
+                <i className="fa-solid fa-check text-2xl text-green-600"></i>
+              </div>
+              <p className="text-sm font-medium text-green-600">Đã đọc hết tất cả bình luận</p>
             </div>
           )}
         </div>

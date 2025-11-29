@@ -383,10 +383,10 @@ export default function ProfilePage() {
                 value={about}
                 onChange={(e) => setAbout(e.target.value)}
                 placeholder="Nhập mô tả về bạn..."
-                maxLength={50}
+                maxLength={100}
                 disabled={!isViewingOwnProfile}
               />
-              <div className="text-xs text-gray-500 mt-1 text-right">{about.length}/50</div>
+              <div className="text-xs text-gray-500 mt-1 text-right">{about.length}/100</div>
             </div>
           </div>
         </div>
