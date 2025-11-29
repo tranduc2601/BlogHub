@@ -80,6 +80,7 @@ const CommentReportManagement: React.FC = () => {
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isClosingActionModal, setIsClosingActionModal] = useState(false);
+  const [isOpeningActionModal, setIsOpeningActionModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [reasonFilter, setReasonFilter] = useState<string>(searchParams.get('reason') || 'all');
@@ -168,6 +169,11 @@ const CommentReportManagement: React.FC = () => {
     setActionType(action);
     setAdminResponse('');
     setShowModal(true);
+    setIsOpeningActionModal(false);
+    // Trigger animation after render
+    setTimeout(() => {
+      setIsOpeningActionModal(true);
+    }, 10);
   };
 
   const handleSubmitAction = async () => {
@@ -240,6 +246,7 @@ const CommentReportManagement: React.FC = () => {
   };
 
   const handleCloseActionModal = () => {
+    setIsOpeningActionModal(false);
     setIsClosingActionModal(true);
     setTimeout(() => {
       setShowModal(false);
@@ -569,14 +576,18 @@ const CommentReportManagement: React.FC = () => {
       {showModal && selectedReport && (
         <div 
           className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
-            isClosingActionModal ? 'opacity-0' : 'opacity-100'
+            isClosingActionModal ? 'opacity-0' : isOpeningActionModal ? 'opacity-100' : 'opacity-0'
           }`}
           style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
           onClick={handleCloseActionModal}
         >
           <div 
             className={`bg-white rounded-2xl max-w-2xl w-full shadow-2xl transition-all duration-300 ${
-              isClosingActionModal ? 'scale-95 opacity-0 translate-y-4' : 'scale-100 opacity-100 translate-y-0'
+              isClosingActionModal 
+                ? 'scale-95 opacity-0 translate-y-4' 
+                : isOpeningActionModal 
+                  ? 'scale-100 opacity-100 translate-y-0' 
+                  : 'scale-95 opacity-0 translate-y-4'
             }`}
             onClick={(e) => e.stopPropagation()}
           >
