@@ -359,7 +359,7 @@ export default function Navbar() {
                       </div>
                     )}
                     <div className="flex-1">
-                      <p className="font-bold text-gray-900 text-base">{user?.username}</p>
+                      <p className="font-bold text-white text-base">{user?.username}</p>
                       {user?.role === 'admin' && (
                         <span className="inline-block text-xs bg-yellow-400 text-black-500 px-2 py-1 rounded-full font-bold mt-1">
                           <i className="fa-solid fa-shield-halved mr-1"></i>ADMIN

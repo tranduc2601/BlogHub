@@ -386,7 +386,7 @@ export default function ProfilePage() {
                 maxLength={100}
                 disabled={!isViewingOwnProfile}
               />
-              <div className="text-xs text-gray-500 mt-1 text-right">{about.length}/100</div>
+              <div className="text-xs text-gray-500 mt-1 text-right">{about.length}/100 ký tự</div>
             </div>
           </div>
         </div>

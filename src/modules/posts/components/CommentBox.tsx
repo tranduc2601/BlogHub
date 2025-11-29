@@ -351,7 +351,7 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 gap-2">
                 <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                   <span className={`text-xs sm:text-sm font-medium ${newComment.length > MAX_COMMENT_LENGTH * 0.9 ? 'text-orange-500' : 'text-gray-500'}`}>
-                    {newComment.length}/{MAX_COMMENT_LENGTH}
+                    {newComment.length}/{MAX_COMMENT_LENGTH} ký tự
                   </span>
                   
                   {/* Anonymous Comment Toggle */}
@@ -363,11 +363,8 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
                       className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
                     />
                     <span className="text-xs sm:text-sm text-gray-600 group-hover:text-blue-600 transition-colors flex items-center gap-1">
-                      <i className="fa-solid fa-user-secret"></i>
-                      <span>Ẩn danh</span>
-                    </span>
-                    <span className="hidden md:inline text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                      Tên và avatar sẽ được ẩn
+                      <i className="fa-solid fa-user-secret mr-2"></i>
+                      <span>Bình luận ẩn danh</span>
                     </span>
                   </label>
                 </div>
