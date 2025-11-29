@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from '@/core/config/axios';
 import toast from 'react-hot-toast';
 import { Modal } from '@/shared/ui';
-import { getAvatarUrl } from '@/shared/utils/apiHelpers';
+import { getAvatarUrl, getApiUrl } from '@/shared/utils/apiHelpers';
 
 interface Report {
   id: number;
@@ -34,6 +35,20 @@ interface PostDetail {
   updatedAt: string;
 }
 
+interface Comment {
+  id: number;
+  author: string;
+  authorId?: number;
+  authorAvatar?: string;
+  authorRole?: string;
+  content: string;
+  createdAt: string;
+  isHidden: boolean;
+  isPinned?: boolean;
+  parentId?: number | null;
+  replies?: Comment[];
+}
+
 interface ReportManagementProps {
   onPendingCountChange?: (count: number) => void;
 }
@@ -48,7 +63,14 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
   const [reasonFilter, setReasonFilter] = useState<string>(searchParams.get('reason') || '');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<PostDetail | null>(null);
+  const [postComments, setPostComments] = useState<Comment[]>([]);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [currentPostAuthorId, setCurrentPostAuthorId] = useState<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
+
+  const getCommentAvatar = (avatarUrl?: string) => {
+    return avatarUrl || null;
+  };
   const [modal, setModal] = useState<{
     isOpen: boolean;
     type: 'info' | 'warning' | 'error' | 'success' | 'confirm';
@@ -155,13 +177,88 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
 
   const handleViewPost = async (postId: number) => {
     try {
-      const response = await axios.get(`/posts/${postId}`);
-      if (response.data.success) {
-        setSelectedPost(response.data.post);
+      setPostComments([]);
+      setIsLoadingComments(true);
+      
+      // Fetch post detail
+      const postResponse = await axios.get(`/posts/${postId}`);
+      if (postResponse.data.success) {
+        setSelectedPost(postResponse.data.post);
+        setCurrentPostAuthorId(postResponse.data.post.authorId);
+      }
+
+      // Fetch comments
+      const response = await fetch(getApiUrl(`posts/${postId}/comments`), {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success && data.comments) {
+        // Fetch pinned comment ID
+        let pinnedCommentId: string | null = null;
+        try {
+          const pinnedResponse = await fetch(getApiUrl(`posts/${postId}/pinned-comment`), {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
+            }
+          });
+          const pinnedData = await pinnedResponse.json();
+          if (pinnedData.pinnedCommentId) {
+            pinnedCommentId = pinnedData.pinnedCommentId.toString();
+          }
+        } catch (err) {
+          console.error('Error fetching pinned comment:', err);
+        }
+
+        const transformedComments: Comment[] = data.comments.map((c: any) => ({
+          id: parseInt(c.id),
+          author: c.author.username || c.author.email,
+          authorId: c.authorId,
+          authorAvatar: c.author.avatarUrl,
+          authorRole: c.author.role,
+          content: c.content,
+          createdAt: c.createdAt,
+          isHidden: false,
+          isPinned: pinnedCommentId === c.id,
+          parentId: c.parentId ? parseInt(c.parentId) : null,
+          replies: []
+        }));
+
+        const commentMap = new Map<number, Comment>();
+        const rootComments: Comment[] = [];
+        
+        transformedComments.forEach(comment => {
+          commentMap.set(comment.id, comment);
+        });
+        
+        transformedComments.forEach(comment => {
+          if (comment.parentId) {
+            const parent = commentMap.get(comment.parentId);
+            if (parent) {
+              parent.replies!.push(comment);
+            }
+          } else {
+            rootComments.push(comment);
+          }
+        });
+        
+        // Sort: pinned comments first
+        rootComments.sort((a, b) => {
+          if (a.isPinned && !b.isPinned) return -1;
+          if (!a.isPinned && b.isPinned) return 1;
+          return 0;
+        });
+        
+        setPostComments(rootComments);
       }
     } catch (error) {
       console.error('Failed to fetch post detail:', error);
       toast.error('Không thể tải chi tiết bài viết!');
+    } finally {
+      setIsLoadingComments(false);
     }
   };
 
@@ -169,6 +266,8 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
     setIsClosing(true);
     setTimeout(() => {
       setSelectedPost(null);
+      setPostComments([]);
+      setCurrentPostAuthorId(null);
       setIsClosing(false);
     }, 300);
   };
@@ -632,15 +731,185 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                 </div>
               </div>
 
-              {/* Footer */}
-              <div className="p-6 bg-gray-50 flex justify-end gap-3">
-                <button
-                  onClick={handleCloseModal}
-                  className="group px-6 py-3 bg-gray-500 hover:bg-red-500 text-white rounded-xl font-medium transition-all duration-300 shadow-md hover:shadow-xl cursor-pointer hover:scale-105 active:scale-95"
-                >
-                  <i className="fa-solid fa-times mr-2 group-hover:rotate-90 transition-transform duration-300"></i>
-                  Đóng
-                </button>
+              {/* Comments Section */}
+              <div className="p-8 bg-gray-50">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
+                  <h4 className="text-xl font-bold text-gray-800">
+                    <i className="fa-solid fa-comments text-blue-600 mr-2"></i>
+                    Bình luận 
+                    <span className="ml-2 text-lg text-black font-bold">
+                      ({postComments.reduce((acc, c) => acc + 1 + (c.replies?.length || 0), 0)})
+                    </span>
+                  </h4>
+                </div>
+
+                <div className="space-y-4">
+                  {isLoadingComments ? (
+                    <div className="flex items-center justify-center py-16">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                        <p className="mt-4 text-gray-600">Đang tải...</p>
+                      </div>
+                    </div>
+                  ) : postComments.length === 0 ? (
+                    <div className="text-center py-16">
+                      <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i className="fa-solid fa-comments text-4xl text-gray-400"></i>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-800 mb-2">Chưa có bình luận nào</h3>
+                      <p className="text-gray-500">Bài viết này chưa có bình luận hay phản hồi từ người dùng!</p>
+                    </div>
+                  ) : (
+                    postComments.map(comment => {
+                      const commentAvatarUrl = getCommentAvatar(comment.authorAvatar);
+                      const isAdmin = comment.authorRole === 'admin';
+                      
+                      return (
+                        <div key={comment.id}>
+                          {/* Comment */}
+                          <div
+                            className={`p-5 rounded-2xl border-2 shadow-md ${
+                              comment.isHidden 
+                                ? 'bg-gray-100 border-gray-300 opacity-50' 
+                                : 'bg-white border-gray-200'
+                            }`}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex gap-3 flex-1">
+                                {/* Avatar */}
+                                <div className="relative w-10 h-10 flex-shrink-0">
+                                  {commentAvatarUrl ? (
+                                    <img 
+                                      src={commentAvatarUrl} 
+                                      alt={comment.author}
+                                      className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                        if (fallback) fallback.style.display = 'flex';
+                                      }}
+                                    />
+                                  ) : null}
+                                  <div style={{ display: commentAvatarUrl ? 'none' : 'flex' }} className="w-10 h-10 rounded-full bg-blue-600 items-center justify-center text-white font-bold border-2 border-blue-500">
+                                    {comment.author.charAt(0).toUpperCase()}
+                                  </div>
+                                </div>
+                                
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-semibold text-gray-800">{comment.author}</p>
+                                    {comment.author.startsWith('Người dùng ẩn danh') && (
+                                      <span className="text-xs bg-gradient-to-r from-gray-500 to-gray-600 text-white px-2 py-1 rounded-full font-semibold">
+                                        <i className="fa-solid fa-user-secret mr-1"></i>Ẩn danh
+                                      </span>
+                                    )}
+                                    {comment.isPinned && (
+                                      <span className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-2 py-1 rounded-full font-semibold shadow-sm">
+                                        <i className="fa-solid fa-thumbtack mr-1"></i>Đã ghim
+                                      </span>
+                                    )}
+                                    {isAdmin && (
+                                      <span className="text-xs bg-gradient-to-r from-red-500 to-pink-500 text-white px-2 py-1 rounded-full font-semibold shadow-sm">
+                                        <i className="fa-solid fa-shield-halved mr-1"></i>Quản trị viên
+                                      </span>
+                                    )}
+                                    {currentPostAuthorId && comment.authorId && String(currentPostAuthorId) === String(comment.authorId) && (
+                                      <span className="text-xs bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-2 py-1 rounded-full font-semibold shadow-sm">
+                                        <i className="fa-solid fa-pen-nib mr-1"></i>Tác giả
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-gray-600 text-sm mt-1">{comment.content}</p>
+                                  <p className="text-gray-400 text-xs mt-2">
+                                    <i className="fa-solid fa-calendar mr-2"></i>
+                                    {formatDate(comment.createdAt)}
+                                  </p>
+                                </div>
+                              </div>
+                              {comment.isHidden && (
+                                <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">
+                                  Đã ẩn
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Replies */}
+                          {comment.replies && comment.replies.length > 0 && (
+                            <div className="ml-4 sm:ml-8 md:ml-12 mt-3 space-y-3">
+                              {comment.replies.map((reply) => {
+                                const replyAvatarUrl = getCommentAvatar(reply.authorAvatar);
+                                const isReplyAdmin = reply.authorRole === 'admin';
+                                
+                                return (
+                                  <div key={reply.id} className="flex gap-3 group">
+                                    {/* Avatar */}
+                                    <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mt-2">
+                                      {replyAvatarUrl ? (
+                                        <img 
+                                          src={replyAvatarUrl} 
+                                          alt={reply.author}
+                                          className="w-full h-full rounded-full object-cover border-2 border-blue-500 shadow-lg"
+                                          onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                            if (fallback) fallback.style.display = 'flex';
+                                          }}
+                                        />
+                                      ) : null}
+                                      <div style={{ display: replyAvatarUrl ? 'none' : 'flex' }} className="w-full h-full rounded-full bg-blue-600 items-center justify-center text-white font-bold border-2 border-blue-500 shadow-lg text-xs sm:text-sm">
+                                        {reply.author.charAt(0).toUpperCase()}
+                                      </div>
+                                    </div>
+                                    
+                                    {/* Reply Content */}
+                                    <div className="flex-1 min-w-0">
+                                      <div className={`rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm transition-all ${
+                                        reply.isHidden 
+                                          ? 'bg-gray-100 opacity-50' 
+                                          : 'bg-gradient-to-br from-blue-50 to-blue-100'
+                                      }`}>
+                                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                          <span className="font-bold text-gray-800 text-sm sm:text-base">{reply.author}</span>
+                                          {reply.author.startsWith('Người dùng ẩn danh') && (
+                                            <span className="text-[10px] sm:text-xs bg-gradient-to-r from-gray-500 to-gray-600 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold shadow-sm">
+                                              <i className="fa-solid fa-user-secret mr-1"></i>Ẩn danh
+                                            </span>
+                                          )}
+                                          {isReplyAdmin && (
+                                            <span className="text-[10px] sm:text-xs bg-gradient-to-r from-red-500 to-pink-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold shadow-sm">
+                                              <i className="fa-solid fa-shield-halved mr-1"></i>Admin
+                                            </span>
+                                          )}
+                                          {currentPostAuthorId && reply.authorId && String(currentPostAuthorId) === String(reply.authorId) && (
+                                            <span className="text-[10px] sm:text-xs bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold shadow-sm">
+                                              <i className="fa-solid fa-pen-nib mr-1"></i>Tác giả
+                                            </span>
+                                          )}
+                                          {reply.isHidden && (
+                                            <span className="text-[10px] sm:text-xs bg-red-100 text-red-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold">
+                                              Đã ẩn
+                                            </span>
+                                          )}
+                                        </div>
+                                        <p className="text-gray-700 text-sm sm:text-base break-words mb-2">{reply.content}</p>
+                                        <div className="flex items-center gap-2 text-[10px] sm:text-xs text-gray-500">
+                                          <i className="fa-solid fa-clock"></i>
+                                          <span>{formatDate(reply.createdAt)}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
               </div>
             </div>
           </div>
