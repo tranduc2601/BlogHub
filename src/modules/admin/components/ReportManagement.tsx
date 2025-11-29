@@ -355,7 +355,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
       <div className="space-y-4">
         {paginatedReports.length === 0 ? (
           <div className="bg-white rounded-[16px] p-8 text-center shadow-lg">
-            <p className="text-gray-500">Chưa có báo cáo nào</p>
+            <p className="text-gray-500">Chưa có báo cáo nào!</p>
           </div>
         ) : (
           paginatedReports.map(report => (

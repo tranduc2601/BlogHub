@@ -667,21 +667,21 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
       <div className="space-y-4">
         {paginatedPosts.length === 0 ? (
           <div className="bg-white rounded-[16px] p-8 text-center shadow-lg">
-            <p className="text-gray-500">Chưa có bài viết nào</p>
+            <p className="text-gray-500">Chưa có bài viết nào!</p>
           </div>
         ) : (
           paginatedPosts.map(post => (
             <div
               key={post.id}
               className={`bg-white rounded-[16px] p-4 sm:p-6 shadow-lg transition-all hover:shadow-xl ${
-                post.needsReview ? 'border-2 border-orange-400' : ''
+                post.status === 'pending' ? 'border-2 border-yellow-400' : ''
               }`}
             >
-              <div className="flex flex-col">
+              <div className="flex flex-col lg:flex-row justify-between items-start gap-3 sm:gap-4">
                 {/* Post content - responsive */}
-                <div className="flex-1 cursor-pointer" onClick={() => handleViewPost(post)}>
+                <div className="flex-1 w-full lg:w-auto">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-800">{post.title}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-800 break-words">{post.title}</h3>
                     {post.hasReports && (
                       <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full flex items-center gap-1">
                         <i className="fa-solid fa-triangle-exclamation"></i> Có báo cáo
@@ -702,6 +702,11 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                         <i className="fa-solid fa-eye-slash mr-1"></i>Đang bị ẩn
                       </span>
                     )}
+                    {post.status !== 'pending' && (
+                      <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                        <i className="fa-solid fa-check-double mr-1"></i>Đã xử lý
+                      </span>
+                    )}
                   </div>
                   
                   <div className="prose prose-sm max-w-none text-gray-600 mb-3 line-clamp-2">
@@ -710,122 +715,152 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                     </ReactMarkdown>
                   </div>
                   
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
-                    <span className="flex items-center gap-1">👤 {post.author}</span>
-                    <span className="flex items-center gap-1"><i className="fa-solid fa-calendar"></i>{formatDate(post.createdAt)}</span>
-                    {postReactions[post.id] && postReactions[post.id].total > 0 ? (
-                      <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
-                        {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as const).map((reactionType) => {
-                          const reactions = postReactions[post.id] as Record<string, number>;
-                          const count = reactions[reactionType] || 0;
-                          if (count > 0) {
-                            const emojis: Record<string, string> = {
-                              like: '👍',
-                              love: '❤️',
-                              haha: '😂',
-                              wow: '😮',
-                              sad: '😢',
-                              angry: '😠'
-                            };
-                            return (
-                              <span 
-                                key={reactionType}
-                                className="flex items-center gap-0.5 bg-gray-100 px-2 py-0.5 rounded-full text-xs"
-                                title={`${count} ${reactionType}`}
-                              >
-                                <span className="text-sm">{emojis[reactionType]}</span>
-                                <span className="font-semibold text-gray-700">{count}</span>
-                              </span>
-                            );
-                          }
-                          return null;
-                        })}
-                      </div>
-                    ) : (
-                      <span>❤️ {post.likes} lượt thích</span>
-                    )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-4">
+                    <div>
+                      <p><span className="font-semibold">👤 Tác giả:</span> {post.author}</p>
+                      <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-calendar mr-2"></i>Ngày đăng:</span> {formatDate(post.createdAt)}</p>
+                    </div>
+                    <div>
+                      {postReactions[post.id] && postReactions[post.id].total > 0 && (
+                        <div className="flex flex-wrap items-center gap-2">
+                          {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as const).map((reactionType) => {
+                            const reactions = postReactions[post.id] as Record<string, number>;
+                            const count = reactions[reactionType] || 0;
+                            if (count > 0) {
+                              const emojis: Record<string, string> = {
+                                like: '👍',
+                                love: '❤️',
+                                haha: '😂',
+                                wow: '😮',
+                                sad: '😢',
+                                angry: '😠'
+                              };
+                              return (
+                                <span 
+                                  key={reactionType}
+                                  className="flex items-center gap-1 bg-gray-50 px-3 py-1.5 rounded-full text-xs border border-gray-200"
+                                  title={`${count} ${reactionType}`}
+                                >
+                                  <span className="text-base">{emojis[reactionType]}</span>
+                                  <span className="font-bold text-gray-700">{count}</span>
+                                </span>
+                              );
+                            }
+                            return null;
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-  
-                {/* Action buttons - responsive */}
-                <div className="flex flex-wrap gap-2 mt-4 justify-end">
+                  
+                  {/* Footer with view button - responsive */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+                    <p className="text-xs text-gray-500">
+                      Ngày tạo: {formatDate(post.createdAt)}
+                    </p>
+                    
+                    <button
+                      onClick={() => handleViewPost(post)}
+                      className="px-3 sm:px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm sm:text-base font-medium transition-all shadow-md cursor-pointer hover:scale-105 hover:shadow-lg w-full sm:w-auto"
+                      title="Xem chi tiết bài viết"
+                    >
+                      <i className="fa-solid fa-eye mr-2"></i>
+                      Xem bài viết
+                    </button>
+                  </div>
+
+                  {/* Action buttons - responsive */}
                   {post.status === 'pending' && (
-                    <>
+                    <div className="flex flex-wrap gap-2 mt-4 justify-end">
                       <button
                         onClick={() => handleApprove(post.id)}
-                        className="group relative flex-1 sm:flex-none px-3 sm:px-4 py-2 flex items-center justify-center gap-1 sm:gap-2 rounded-xl bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer text-sm sm:text-base"
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm sm:text-base font-medium transition-all shadow-md cursor-pointer hover:scale-105 hover:shadow-lg"
                         title="Duyệt bài viết"
                       >
-                        <i className="fa-solid fa-check text-sm sm:text-base"></i>
-                        <span className="font-medium">Duyệt</span>
-                        <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                        <i className="fa-solid fa-check mr-1 sm:mr-2"></i>
+                        Duyệt
                       </button>
+                      
                       <button
                         onClick={() => handleReject(post.id)}
-                        className="group relative flex-1 sm:flex-none px-3 sm:px-4 py-2 flex items-center justify-center gap-1 sm:gap-2 rounded-xl bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer text-sm sm:text-base"
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm sm:text-base font-medium transition-all shadow-md cursor-pointer hover:scale-105 hover:shadow-lg"
                         title="Từ chối bài viết"
                       >
-                        <i className="fa-solid fa-times text-sm sm:text-base"></i>
-                        <span className="font-medium">Từ chối</span>
-                        <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                        <i className="fa-solid fa-times mr-1 sm:mr-2"></i>
+                        Từ chối
                       </button>
-                    </>
+                    </div>
                   )}
                             
                   {post.status === 'visible' && (
-                    <button
-                      onClick={() => handleToggle(post.id, post.status)}
-                      className={`group relative flex-1 sm:flex-none px-3 sm:px-4 py-2 flex items-center justify-center gap-1 sm:gap-2 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer text-sm sm:text-base ${
-                        toggledPostId === post.id
-                          ? 'bg-gradient-to-br from-green-500 to-green-600 text-white'
-                          : 'bg-gradient-to-br from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white'
-                      }`}
-                      title="Ẩn bài viết"
-                    >
-                      {toggledPostId === post.id ? (
-                        <>
-                          <i className="fa-solid fa-check text-sm sm:text-base"></i>
-                          <span className="font-medium">Ẩn</span>
-                        </>
-                      ) : (
-                        <>
-                          <i className="fa-solid fa-eye-slash text-sm sm:text-base"></i>
-                          <span className="font-medium">Ẩn</span>
-                        </>
-                      )}
-                      <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
-                    </button>
+                    <div className="flex flex-wrap gap-2 mt-4 justify-end">
+                      <button
+                        onClick={() => handleToggle(post.id, post.status)}
+                        className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all shadow-md cursor-pointer hover:scale-105 hover:shadow-lg ${
+                          toggledPostId === post.id
+                            ? 'bg-green-500 text-white'
+                            : 'bg-gray-500 hover:bg-gray-600 text-white'
+                        }`}
+                        title="Ẩn bài viết"
+                      >
+                        {toggledPostId === post.id ? (
+                          <>
+                            <i className="fa-solid fa-check mr-1 sm:mr-2"></i>
+                            Ẩn
+                          </>
+                        ) : (
+                          <>
+                            <i className="fa-solid fa-eye-slash mr-1 sm:mr-2"></i>
+                            Ẩn
+                          </>
+                        )}
+                      </button>
+                      
+                      <button
+                        onClick={() => handleDelete(post.id)}
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm sm:text-base font-medium transition-all shadow-md cursor-pointer hover:scale-105 hover:shadow-lg"
+                        title="Xóa bài viết"
+                      >
+                        <i className="fa-solid fa-trash-can mr-1 sm:mr-2"></i>
+                        Xóa
+                      </button>
+                    </div>
                   )}
                                  
                   {post.status === 'hidden' && (
-                    <button
-                      onClick={() => handleToggle(post.id, post.status)}
-                      className={`group relative flex-1 sm:flex-none px-3 sm:px-4 py-2 flex items-center justify-center gap-1 sm:gap-2 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer text-sm sm:text-base ${
-                        toggledPostId === post.id
-                          ? 'bg-gradient-to-br from-green-500 to-green-600 text-white'
-                          : 'bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white'
-                      }`}
-                      title="Hiện bài viết"
-                    >
-                      {toggledPostId === post.id ? (
-                        <i className="fa-solid fa-check text-sm sm:text-base"></i>
-                      ) : (
-                        <i className="fa-solid fa-eye text-sm sm:text-base"></i>
-                      )}
-                      <span className="font-medium">Hiện</span>
-                      <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
-                    </button>
+                    <div className="flex flex-wrap gap-2 mt-4 justify-end">
+                      <button
+                        onClick={() => handleToggle(post.id, post.status)}
+                        className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all shadow-md cursor-pointer hover:scale-105 hover:shadow-lg ${
+                          toggledPostId === post.id
+                            ? 'bg-green-500 text-white'
+                            : 'bg-blue-500 hover:bg-blue-600 text-white'
+                        }`}
+                        title="Hiện bài viết"
+                      >
+                        {toggledPostId === post.id ? (
+                          <>
+                            <i className="fa-solid fa-check mr-1 sm:mr-2"></i>
+                            Hiện
+                          </>
+                        ) : (
+                          <>
+                            <i className="fa-solid fa-eye mr-1 sm:mr-2"></i>
+                            Hiện
+                          </>
+                        )}
+                      </button>
+                      
+                      <button
+                        onClick={() => handleDelete(post.id)}
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm sm:text-base font-medium transition-all shadow-md cursor-pointer hover:scale-105 hover:shadow-lg"
+                        title="Xóa bài viết"
+                      >
+                        <i className="fa-solid fa-trash-can mr-1 sm:mr-2"></i>
+                        Xóa
+                      </button>
+                    </div>
                   )}
-
-                  <button
-                    onClick={() => handleDelete(post.id)}
-                    className="group relative flex-1 sm:flex-none px-3 sm:px-4 py-2 flex items-center justify-center gap-1 sm:gap-2 rounded-xl bg-gradient-to-br from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer text-sm sm:text-base"
-                    title="Xóa bài viết"
-                  >
-                    <i className="fa-solid fa-trash-can text-sm sm:text-base"></i>
-                    <span className="font-medium">Xóa</span>
-                    <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
-                  </button>
                 </div>
               </div>
             </div>
@@ -1042,8 +1077,8 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                     <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <i className="fa-solid fa-comments text-4xl text-gray-400"></i>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">Chưa có bình luận nào!</h3>
-                    <p className="text-gray-500">Bài viết này chưa có bình luận hay phản hồi từ người dùng</p>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">Chưa có bình luận nào</h3>
+                    <p className="text-gray-500">Bài viết này chưa có bình luận hay phản hồi từ người dùng!</p>
                   </div>
                 ) : (
                   postComments.map(comment => {

@@ -390,7 +390,7 @@ const CommentReportManagement: React.FC = () => {
       <div className="space-y-4">
         {filteredReports.length === 0 ? (
           <div className="bg-white rounded-[16px] p-8 text-center shadow-lg">
-            <p className="text-gray-500">Không có báo cáo nào</p>
+            <p className="text-gray-500">Không có báo cáo nào!</p>
           </div>
         ) : (
           paginatedReports.map(report => (
