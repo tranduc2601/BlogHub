@@ -332,14 +332,13 @@ export default function PostsPage() {
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {displayedPosts.map((post, i) => (
-              <div
-                key={post.id}
-                className="animate-fadeInUp"
-                style={{ animationDelay: `${i * 100}ms` }}
-              >
-                <PostCard post={post} hideShare={true} onOpenReactionModal={handleOpenReactionModal} />
-              </div>
+            {displayedPosts.map((post) => (
+              <PostCard 
+                key={post.id} 
+                post={post} 
+                hideShare={true} 
+                onOpenReactionModal={handleOpenReactionModal} 
+              />
             ))}
           </div>
 

@@ -92,11 +92,12 @@ export default function SavedPostsPage() {
         {/* Bookmarks Grid */}
         {bookmarks.length > 0 && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {bookmarks.map((post) => (
                 <PostCard 
                   key={post.id} 
                   post={post}
+                  hideShare={true}
                   onOpenReactionModal={() => {}}
                 />
               ))}
