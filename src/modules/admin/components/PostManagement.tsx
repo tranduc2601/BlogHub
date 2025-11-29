@@ -702,11 +702,6 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                         <i className="fa-solid fa-eye-slash mr-1"></i>Đang bị ẩn
                       </span>
                     )}
-                    {post.status !== 'pending' && (
-                      <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                        <i className="fa-solid fa-check-double mr-1"></i>Đã xử lý
-                      </span>
-                    )}
                   </div>
                   
                   <div className="prose prose-sm max-w-none text-gray-600 mb-3 line-clamp-2">
@@ -719,37 +714,6 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                     <div>
                       <p><span className="font-semibold">👤 Tác giả:</span> {post.author}</p>
                       <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-calendar mr-2"></i>Ngày đăng:</span> {formatDate(post.createdAt)}</p>
-                    </div>
-                    <div>
-                      {postReactions[post.id] && postReactions[post.id].total > 0 && (
-                        <div className="flex flex-wrap items-center gap-2">
-                          {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as const).map((reactionType) => {
-                            const reactions = postReactions[post.id] as Record<string, number>;
-                            const count = reactions[reactionType] || 0;
-                            if (count > 0) {
-                              const emojis: Record<string, string> = {
-                                like: '👍',
-                                love: '❤️',
-                                haha: '😂',
-                                wow: '😮',
-                                sad: '😢',
-                                angry: '😠'
-                              };
-                              return (
-                                <span 
-                                  key={reactionType}
-                                  className="flex items-center gap-1 bg-gray-50 px-3 py-1.5 rounded-full text-xs border border-gray-200"
-                                  title={`${count} ${reactionType}`}
-                                >
-                                  <span className="text-base">{emojis[reactionType]}</span>
-                                  <span className="font-bold text-gray-700">{count}</span>
-                                </span>
-                              );
-                            }
-                            return null;
-                          })}
-                        </div>
-                      )}
                     </div>
                   </div>
                   
