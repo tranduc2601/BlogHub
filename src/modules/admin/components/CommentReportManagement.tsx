@@ -468,10 +468,10 @@ const CommentReportManagement: React.FC = () => {
                     </div>
                     <div>
                       {report.reviewedAt && (
-                        <p className="ml-180"><span className="font-semibold">Ngày xử lý:</span> {formatDate(report.reviewedAt)}</p>
+                        <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-calendar-check mr-2"></i>Ngày xử lý:</span> {formatDate(report.reviewedAt)}</p>
                       )}
                       {report.reviewerUsername && (
-                        <p className="ml-180"><span className="font-semibold">Xử lý bởi:</span> {report.reviewerUsername}</p>
+                        <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-user-shield mr-2"></i>Xử lý bởi:</span> {report.reviewerUsername}</p>
                       )}
                     </div>
                   </div>
