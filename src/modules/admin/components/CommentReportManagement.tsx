@@ -472,7 +472,7 @@ const CommentReportManagement: React.FC = () => {
                     <p className="text-xs sm:text-sm text-gray-800 bg-white p-3 rounded-lg mt-2">{report.commentContent}</p>
                   </div>
 
-                  <div className="bg-red-50 border-l-4 border-red-500 p-3 sm:p-4 rounded mb-3">
+                  <div className="bg-red-50 border-l-4 border-red-500 p-3 sm:p-4 rounded-lg mb-3">
                     <p className="text-xs sm:text-sm text-red-800">
                       <span className="font-semibold">Lý do:</span> {report.reason}
                     </p>

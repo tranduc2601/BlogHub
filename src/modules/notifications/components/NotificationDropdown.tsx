@@ -67,6 +67,28 @@ export default function NotificationDropdown() {
     };
   }, [isOpen, setActiveDropdown]);
 
+  // Vô hiệu hóa cuộn trang khi dropdown mở
+  useEffect(() => {
+    if (isOpen) {
+      // Lưu giá trị overflow hiện tại
+      const originalOverflow = document.body.style.overflow;
+      const originalPaddingRight = document.body.style.paddingRight;
+      
+      // Tính toán scrollbar width để tránh layout shift
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+      // Vô hiệu hóa cuộn
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      
+      return () => {
+        // Khôi phục lại khi đóng
+        document.body.style.overflow = originalOverflow;
+        document.body.style.paddingRight = originalPaddingRight;
+      };
+    }
+  }, [isOpen]);
+
   const fetchUnreadCount = async () => {
     try {
       const response = await axios.get('/notifications/unread-count');
