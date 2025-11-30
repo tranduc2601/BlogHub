@@ -366,33 +366,33 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
 
         
         {showMenu && (
-          <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 animate-fadeIn">
+          <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 animate-fadeIn overflow-hidden">
             <button
               onClick={handleBookmark}
               disabled={isBookmarking}
-              className={`w-full px-4 py-2 text-left text-sm transition-colors duration-200 flex items-center gap-2 cursor-pointer ${
+              className={`w-full px-4 py-3 text-left text-sm transition-all duration-300 flex items-center gap-3 cursor-pointer group/item ${
                 isBookmarked 
-                  ? 'text-yellow-600 hover:bg-yellow-50' 
-                  : 'text-gray-700 hover:bg-yellow-50 hover:text-yellow-600'
+                  ? 'text-yellow-600 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-yellow-100 hover:shadow-inner hover:scale-[1.02]' 
+                  : 'text-gray-700 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-yellow-100 hover:text-yellow-600 hover:shadow-inner hover:scale-[1.02]'
               } ${isBookmarking ? 'opacity-50 cursor-wait' : ''}`}
             >
-              <i className={`${isBookmarked ? 'fa-solid' : 'fa-solid'} fa-bookmark`}></i>
-              <span>{isBookmarked ? 'Bỏ lưu bài viết' : 'Lưu bài viết'}</span>
+              <i className={`${isBookmarked ? 'fa-solid' : 'fa-solid'} fa-bookmark text-base group-hover/item:scale-110 transition-transform duration-300`}></i>
+              <span className="font-medium">{isBookmarked ? 'Bỏ lưu bài viết' : 'Lưu bài viết'}</span>
             </button>
             <div className="my-1 border-t border-gray-200"></div>
             <button
               onClick={handleExportMarkdown}
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 flex items-center gap-2 cursor-pointer"
+              className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:text-blue-600 hover:shadow-inner hover:scale-[1.02] transition-all duration-300 flex items-center gap-3 cursor-pointer group/item"
             >
-              <i className="fa-solid fa-file-code"></i>
-              <span>Xuất Markdown</span>
+              <i className="fa-solid fa-file-code text-base group-hover/item:scale-110 group-hover/item:rotate-6 transition-all duration-300"></i>
+              <span className="font-medium">Xuất Markdown</span>
             </button>
             <button
               onClick={handleExportPDF}
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 flex items-center gap-2 cursor-pointer"
+              className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:text-red-600 hover:shadow-inner hover:scale-[1.02] transition-all duration-300 flex items-center gap-3 cursor-pointer group/item"
             >
-              <i className="fa-solid fa-file-pdf"></i>
-              <span>Xuất PDF</span>
+              <i className="fa-solid fa-file-pdf text-base group-hover/item:scale-110 group-hover/item:-rotate-6 transition-all duration-300"></i>
+              <span className="font-medium">Xuất PDF</span>
             </button>
           </div>
         )}
