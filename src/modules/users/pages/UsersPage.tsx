@@ -115,8 +115,8 @@ export default function UsersPage() {
   
   // Lấy giá trị từ URL query params
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
-  const [sortBy, setSortBy] = useState<"name" | "posts" | "comments" | "followers" | "likes">(
-    (searchParams.get("sortBy") as "name" | "posts" | "comments" | "followers" | "likes") || "followers"
+  const [sortBy, setSortBy] = useState<"name" | "posts" | "comments" | "followers" | "likes" | "joinedEarliest" | "joinedLatest">(
+    (searchParams.get("sortBy") as "name" | "posts" | "comments" | "followers" | "likes" | "joinedEarliest" | "joinedLatest") || "followers"
   );
   
   const { users, loading, error } = useUsers();
@@ -168,6 +168,16 @@ export default function UsersPage() {
             const aAvgLikes = a.postsCount > 0 ? aLikes / a.postsCount : 0;
             const bAvgLikes = b.postsCount > 0 ? bLikes / b.postsCount : 0;
             return bAvgLikes - aAvgLikes;
+          }
+          case "joinedEarliest": {
+            const aDate = new Date(a.joinedAt).getTime();
+            const bDate = new Date(b.joinedAt).getTime();
+            return aDate - bDate; // Sớm nhất đến muộn nhất
+          }
+          case "joinedLatest": {
+            const aDate = new Date(a.joinedAt).getTime();
+            const bDate = new Date(b.joinedAt).getTime();
+            return bDate - aDate; // Mới nhất đến cũ nhất
           }
           default:
             return 0;
@@ -351,7 +361,7 @@ export default function UsersPage() {
             <select
               value={sortBy}
               onChange={(e) =>
-                setSortBy(e.target.value as "name" | "posts" | "comments" | "followers" | "likes")
+                setSortBy(e.target.value as "name" | "posts" | "comments" | "followers" | "likes" | "joinedEarliest" | "joinedLatest")
               }
               className="w-full p-3 border-3 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300 cursor-pointer select-none"
             >
@@ -360,6 +370,8 @@ export default function UsersPage() {
               <option value="likes">Sắp xếp theo lượt tim/bài viết</option>
               <option value="posts">Sắp xếp theo số bài viết</option>
               <option value="comments">Sắp xếp theo số bình luận</option>
+              <option value="joinedEarliest">Sắp xếp theo ngày tham gia sớm nhất</option>
+              <option value="joinedLatest">Sắp xếp theo ngày tham gia mới đây</option>
             </select>
           </div>
         </div>

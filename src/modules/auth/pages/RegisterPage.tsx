@@ -28,6 +28,8 @@ export default function RegisterPage() {
       newErrors.username = "Vui lòng nhập tên người dùng!";
     } else if (formData.username.length < 3) {
       newErrors.username = "Tên người dùng phải có ít nhất 3 ký tự!";
+    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+      newErrors.username = "Tên người dùng chỉ được chứa chữ cái (a-z, A-Z), số (0-9) và dấu gạch dưới (_)";
     } else if (/admin/i.test(formData.username)) {
       newErrors.username = "Tên người dùng không được chứa từ 'admin'";
     }
@@ -115,7 +117,15 @@ export default function RegisterPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Chỉ cho phép a-z, A-Z, 0-9 và _ cho username
+    if (name === 'username') {
+      const filteredValue = value.replace(/[^a-zA-Z0-9_]/g, '');
+      setFormData(prev => ({ ...prev, [name]: filteredValue }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+    
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: "" }));
     }
@@ -162,6 +172,17 @@ export default function RegisterPage() {
                 </svg>
               </div>
               {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
+              {!errors.username && formData.username && (
+                <div className="text-xs text-gray-500 space-y-1">
+                  <div className="font-semibold">Thường cho phép:</div>
+                  <ul className="list-disc list-inside pl-2">
+                    <li>Chữ cái: <span className="font-mono">a-z, A-Z</span></li>
+                    <li>Chữ số: <span className="font-mono">0-9</span></li>
+                    <li>Dấu gạch dưới: <span className="font-mono">_</span></li>
+                    <li className="text-red-500">Không dùng ký tự đặc biệt khác</li>
+                  </ul>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

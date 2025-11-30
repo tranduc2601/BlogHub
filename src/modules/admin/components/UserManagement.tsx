@@ -199,7 +199,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
               }`}
             >
               <i className="fa-solid fa-circle-check mr-1 sm:mr-2"></i>
-              Hoạt động ({users.filter(u => u.status === 'active' && u.role !== 'admin').length})
+              Đang hoạt động ({users.filter(u => u.status === 'active' && u.role !== 'admin').length})
             </button>
             <button
               onClick={() => {
@@ -213,7 +213,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
               }`}
             >
               <i className="fa-solid fa-lock mr-1 sm:mr-2"></i>
-              Khóa ({users.filter(u => u.status === 'locked' && u.role !== 'admin').length})
+              Đã khóa ({users.filter(u => u.status === 'locked' && u.role !== 'admin').length})
             </button>
           </div>
         </div>

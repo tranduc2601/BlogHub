@@ -118,7 +118,7 @@ export default function Navbar() {
           {location.pathname !== "/" && (
             <Link to="/" className="relative group" title="Trang chủ">
               <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3" style={{ '--tw-bg-opacity': '1' } as React.CSSProperties} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2664eb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}>
-                <i className="fa-solid fa-house text-gray-700 group-hover:text-white text-lg transition-all duration-300"></i>
+                <i className="fa-solid fa-house text-gray-700 group-hover:text-white text-lg transition-all duration-300" draggable="false"></i>
               </div>
             </Link>
           )}
@@ -130,7 +130,7 @@ export default function Navbar() {
               title="Quản lý"
             >
               <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2664eb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}>
-                <i className="fa-solid fa-shield-halved text-gray-700 group-hover:text-white text-lg transition-all duration-300"></i>
+                <i className="fa-solid fa-shield-halved text-gray-700 group-hover:text-white text-lg transition-all duration-300" draggable="false"></i>
               </div>
             </Link>
           )}
@@ -144,7 +144,7 @@ export default function Navbar() {
               onTouchStart={preloader.onTouchStart('users')}
             >
               <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2664eb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}>
-                <i className="fa-solid fa-user-pen text-gray-700 group-hover:text-white text-lg transition-all duration-300"></i>
+                <i className="fa-solid fa-user-pen text-gray-700 group-hover:text-white text-lg transition-all duration-300" draggable="false"></i>
               </div>
             </Link>
           )}
@@ -158,7 +158,7 @@ export default function Navbar() {
               onTouchStart={preloader.onTouchStart('createPost')}
             >
               <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2664eb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}>
-                <i className="fa-solid fa-file-alt text-gray-700 group-hover:text-white text-lg transition-all duration-300"></i>
+                <i className="fa-solid fa-file-alt text-gray-700 group-hover:text-white text-lg transition-all duration-300" draggable="false"></i>
               </div>
             </Link>
           )}
@@ -170,7 +170,7 @@ export default function Navbar() {
               title="Bài viết đã lưu"
             >
               <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2664eb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}>
-                <i className="fa-solid fa-bookmark text-gray-700 group-hover:text-white text-lg transition-all duration-300"></i>
+                <i className="fa-solid fa-bookmark text-gray-700 group-hover:text-white text-lg transition-all duration-300" draggable="false"></i>
               </div>
             </Link>
           )}
@@ -187,7 +187,7 @@ export default function Navbar() {
                   hover:bg-blue-600 hover:text-white hover:scale-105 hover:shadow-xl hover:border-blue-700"
                 style={{ fontFamily: 'Inter, Arial, sans-serif' }}
               >
-                <i className="fa-solid fa-right-to-bracket text-lg"></i>
+                <i className="fa-solid fa-right-to-bracket text-lg" draggable="false"></i>
                 Đăng nhập
               </Link>
               <button
@@ -195,7 +195,7 @@ export default function Navbar() {
                 className="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2 cursor-pointer"
                 type="button"
               >
-                <i className="fa-solid fa-user-plus text-lg"></i>
+                <i className="fa-solid fa-user-plus text-lg" draggable="false"></i>
                 Tạo tài khoản miễn phí
               </button>
             </div>
@@ -246,17 +246,17 @@ export default function Navbar() {
                         <p className="font-bold text-gray-900 text-base">{user?.username}</p>
                         {user?.role === 'admin' && (
                           <span className="inline-block text-xs bg-yellow-400 text-black-500 px-2 py-1 rounded-full font-bold mt-2">
-                            <i className="fa-solid fa-shield-halved mr-1"></i>ADMIN
+                            <i className="fa-solid fa-shield-halved mr-1" draggable="false"></i>ADMIN
                           </span>
                         )}
                         {user?.role === 'user' && (
                           <span className="inline-block text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full font-bold mt-2">
-                            <i className="fa-solid fa-user mr-1"></i>USER
+                            <i className="fa-solid fa-user mr-1" draggable="false"></i>USER
                           </span>
                         )}
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600 truncate mt-4"><i className="fa-solid fa-envelope mr-2"></i>{user?.email}</p>
+                    <p className="text-sm text-gray-600 truncate mt-4"><i className="fa-solid fa-envelope mr-2" draggable="false"></i>{user?.email}</p>
                   </div>
                   <div className="py-2">
                     <Link
@@ -289,7 +289,7 @@ export default function Navbar() {
                       className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200 group"
                     >
                       <div className="w-9 h-9 rounded-lg bg-yellow-100 flex items-center justify-center group-hover:bg-yellow-200 transition-colors">
-                        <i className="fa-solid fa-bookmark text-yellow-600 text-lg"></i>
+                        <i className="fa-solid fa-bookmark text-yellow-600 text-lg" draggable="false"></i>
                       </div>
                       <span className="font-medium">Bài viết đã lưu</span>
                     </Link>
@@ -322,7 +322,7 @@ export default function Navbar() {
                   hover:bg-blue-600 hover:text-white hover:scale-105 hover:shadow-xl hover:border-blue-700 text-sm"
                 style={{ fontFamily: 'Inter, Arial, sans-serif' }}
               >
-                <i className="fa-solid fa-right-to-bracket text-base"></i>
+                <i className="fa-solid fa-right-to-bracket text-base" draggable="false"></i>
                 <span className="hidden sm:inline">Đăng nhập</span>
               </Link>
               <button
@@ -330,7 +330,7 @@ export default function Navbar() {
                 className="bg-blue-600 text-white px-3 py-2 rounded-full font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-1 cursor-pointer text-sm"
                 type="button"
               >
-                <i className="fa-solid fa-user-plus text-base"></i>
+                <i className="fa-solid fa-user-plus text-base" draggable="false"></i>
                 <span className="hidden sm:inline">Đăng ký</span>
               </button>
             </div>
@@ -362,12 +362,12 @@ export default function Navbar() {
                       <p className="font-bold text-white text-base">{user?.username}</p>
                       {user?.role === 'admin' && (
                         <span className="inline-block text-xs bg-yellow-400 text-black-500 px-2 py-1 rounded-full font-bold mt-1">
-                          <i className="fa-solid fa-shield-halved mr-1"></i>ADMIN
+                          <i className="fa-solid fa-shield-halved mr-1" draggable="false"></i>ADMIN
                         </span>
                       )}
                       {user?.role === 'user' && (
                         <span className="inline-block text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full font-bold mt-1">
-                          <i className="fa-solid fa-user mr-1"></i>USER
+                          <i className="fa-solid fa-user mr-1" draggable="false"></i>USER
                         </span>
                       )}
                     </div>
@@ -381,7 +381,7 @@ export default function Navbar() {
                   onClick={closeMobileMenu}
                   className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3"
                 >
-                  <i className="fa-solid fa-house text-lg"></i>
+                  <i className="fa-solid fa-house text-lg" draggable="false"></i>
                   Trang chủ
                 </Link>
               )}
@@ -392,7 +392,7 @@ export default function Navbar() {
                   onClick={closeMobileMenu}
                   className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3"
                 >
-                  <i className="fa-solid fa-shield-halved text-lg"></i>
+                  <i className="fa-solid fa-shield-halved text-lg" draggable="false"></i>
                   Quản lý
                 </Link>
               )}
@@ -403,7 +403,7 @@ export default function Navbar() {
                   onClick={closeMobileMenu}
                   className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3"
                 >
-                  <i className="fa-solid fa-user-pen text-lg"></i>
+                  <i className="fa-solid fa-user-pen text-lg" draggable="false"></i>
                   Người dùng
                 </Link>
               )}
@@ -414,7 +414,7 @@ export default function Navbar() {
                   onClick={closeMobileMenu}
                   className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3"
                 >
-                  <i className="fa-solid fa-file-alt text-lg"></i>
+                  <i className="fa-solid fa-file-alt text-lg" draggable="false"></i>
                   Tạo bài viết
                 </Link>
               )}
@@ -426,7 +426,7 @@ export default function Navbar() {
                   onClick={closeMobileMenu}
                   className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3 cursor-pointer"
                 >
-                  <i className="fa-solid fa-bell text-lg cursor-pointer"></i>
+                  <i className="fa-solid fa-bell text-lg cursor-pointer" draggable="false"></i>
                   Thông báo
                 </Link>
               )}
@@ -444,7 +444,7 @@ export default function Navbar() {
                     onClick={closeMobileMenu}
                     className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3"
                   >
-                    <i className="fa-solid fa-user text-lg"></i>
+                    <i className="fa-solid fa-user text-lg" draggable="false"></i>
                     Hồ sơ của tôi
                   </Link>
                   <Link
@@ -452,7 +452,7 @@ export default function Navbar() {
                     onClick={closeMobileMenu}
                     className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3"
                   >
-                    <i className="fa-solid fa-file-lines text-lg"></i>
+                    <i className="fa-solid fa-file-lines text-lg" draggable="false"></i>
                     Bài viết của tôi
                   </Link>
                   {location.pathname !== "/saved-posts" && (
@@ -461,7 +461,7 @@ export default function Navbar() {
                       onClick={closeMobileMenu}
                       className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3"
                     >
-                      <i className="fa-solid fa-bookmark text-lg"></i>
+                      <i className="fa-solid fa-bookmark text-lg" draggable="false"></i>
                       Bài viết đã lưu
                     </Link>
                   )}
@@ -472,7 +472,7 @@ export default function Navbar() {
                     onClick={handleLogout}
                     className="text-red-600 hover:text-red-700 font-medium transition-all duration-300 hover:bg-red-50 p-3 rounded-lg flex items-center gap-3 w-full text-left cursor-pointer"
                   >
-                    <i className="fa-solid fa-right-from-bracket text-lg"></i>
+                    <i className="fa-solid fa-right-from-bracket text-lg" draggable="false"></i>
                     Đăng xuất
                   </button>
                 </>
