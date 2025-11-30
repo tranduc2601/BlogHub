@@ -428,7 +428,10 @@ export default function NotificationsPage() {
       
       {!hasMore && displayedNotifications.length > 0 && (
         <div className="text-center py-6">
-          <p className="text-sm text-gray-500">Đã hiển thị tất cả thông báo</p>
+          <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
+            <i className="fa-solid fa-circle-check text-green-500"></i>
+            Đã hiển thị tất cả thông báo
+          </p>
         </div>
       )}
 
