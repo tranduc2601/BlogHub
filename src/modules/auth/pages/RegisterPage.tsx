@@ -273,9 +273,9 @@ export default function RegisterPage() {
                 />
                 <label className="text-sm text-gray-600 cursor-pointer">
                   Tôi đồng ý với{" "}
-                  <Link to="/terms" className="text-blue-600 hover:text-blue-700 relative inline-block after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 hover:after:w-full after:transition-all after:duration-300" target="_blank">Điều khoản sử dụng</Link>
+                  <Link to="/terms" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-300" target="_blank">Điều khoản sử dụng</Link>
                   {" "}và{" "}
-                  <Link to="/privacy" className="text-blue-600 hover:text-blue-700 relative inline-block after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 hover:after:w-full after:transition-all after:duration-300" target="_blank">Chính sách bảo mật</Link>
+                  <Link to="/privacy" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-300" target="_blank">Chính sách bảo mật</Link>
                 </label>
               </div>
               {errors.terms && <p className="text-red-500 text-xs">{errors.terms}</p>}
