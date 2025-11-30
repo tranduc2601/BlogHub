@@ -554,13 +554,13 @@ export default function PostDetailPage() {
                     </div>
                     <a
                       href={`/edit/${post.id}`}
-                      className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-yellow-50 transition-colors duration-200 flex items-center gap-3 cursor-pointer"
+                      className="group w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 transition-all duration-300 flex items-center gap-3 cursor-pointer hover:pl-5 hover:shadow-md border-l-4 border-transparent hover:border-yellow-500"
                       onClick={() => setShowMenu(false)}
                     >
-                      <i className="fa-solid fa-pen text-yellow-600 text-lg w-5"></i>
+                      <i className="fa-solid fa-pen text-yellow-600 text-lg w-5 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300"></i>
                       <div>
-                        <p className="font-medium">Sửa bài viết</p>
-                        <p className="text-xs text-gray-500">Chỉnh sửa nội dung</p>
+                        <p className="font-medium group-hover:text-yellow-700">Sửa bài viết</p>
+                        <p className="text-xs text-gray-500 group-hover:text-yellow-600">Chỉnh sửa nội dung</p>
                       </div>
                     </a>
                     <div className="my-1 border-t border-gray-100"></div>
@@ -573,27 +573,27 @@ export default function PostDetailPage() {
               <button
                 onClick={handleExportMarkdown}
                 disabled={isExporting}
-                className={`w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex items-center gap-3 cursor-pointer ${
+                className={`group w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all duration-300 flex items-center gap-3 cursor-pointer hover:pl-5 hover:shadow-md border-l-4 border-transparent hover:border-gray-500 ${
                   isExporting ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                <i className="fa-solid fa-file-code text-gray-600 text-lg w-5"></i>
+                <i className="fa-solid fa-file-code text-gray-600 text-lg w-5 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300"></i>
                 <div>
-                  <p className="font-medium">Xuất Markdown</p>
-                  <p className="text-xs text-gray-500">Định dạng .md</p>
+                  <p className="font-medium group-hover:text-gray-800">Xuất Markdown</p>
+                  <p className="text-xs text-gray-500 group-hover:text-gray-600">Định dạng .md</p>
                 </div>
               </button>
               <button
                 onClick={handleExportPDF}
                 disabled={isExporting}
-                className={`w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-red-50 transition-colors duration-200 flex items-center gap-3 cursor-pointer ${
+                className={`group w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-300 flex items-center gap-3 cursor-pointer hover:pl-5 hover:shadow-md border-l-4 border-transparent hover:border-red-500 ${
                   isExporting ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                <i className="fa-solid fa-file-pdf text-red-600 text-lg w-5"></i>
+                <i className="fa-solid fa-file-pdf text-red-600 text-lg w-5 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300"></i>
                 <div>
-                  <p className="font-medium">Xuất PDF</p>
-                  <p className="text-xs text-gray-500">Định dạng .pdf</p>
+                  <p className="font-medium group-hover:text-red-700">Xuất PDF</p>
+                  <p className="text-xs text-gray-500 group-hover:text-red-600">Định dạng .pdf</p>
                 </div>
               </button>
             </div>
