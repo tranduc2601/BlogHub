@@ -175,6 +175,27 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
     });
   };
 
+  const handleDeleteReport = async (reportId: number) => {
+    setModal({
+      isOpen: true,
+      type: 'warning',
+      title: 'Xóa báo cáo',
+      message: 'Bạn có chắc muốn xóa báo cáo này? Báo cáo sẽ được lưu vào lịch sử.',
+      onConfirm: async () => {
+        try {
+          const response = await axios.delete(`/admin/reports/${reportId}`);
+          if (response.data.success) {
+            toast.success('Đã xóa báo cáo và lưu vào lịch sử!');
+            fetchReports();
+          }
+        } catch (error) {
+          console.error('Failed to delete report:', error);
+          toast.error('Không thể xóa báo cáo!');
+        }
+      }
+    });
+  };
+
   const handleViewPost = async (postId: number) => {
     try {
       setPostComments([]);
@@ -361,8 +382,8 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
       {/* Header - responsive */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Quản lý báo cáo</h2>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">Xử lý báo cáo vi phạm từ người dùng</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Quản lý báo cáo bài viết</h2>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Xử lý báo cáo bài viết vi phạm từ người dùng</p>
         </div>
         
         {/* Filter buttons - responsive */}
@@ -464,7 +485,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                 {/* Report content - responsive */}
                 <div className="flex-1 w-full lg:w-auto">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-800 break-words">{report.postTitle}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-800 break-words mr-1">{report.postTitle}</h3>
                     {getStatusBadge(report.status)}
                     {report.status !== 'pending' && (
                       <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
@@ -484,12 +505,12 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                       <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-file-lines mr-2"></i>Bài viết của:</span> {report.postAuthor}</p>
                       <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-user mr-2"></i>Báo cáo bởi:</span> {report.reportedByUser}</p>
                     </div>
-                    <div>
+                    <div className="sm:text-right">
                       {report.reviewedAt && (
-                        <p className="ml-180"><span className="font-semibold">Ngày xử lý:</span> {formatDate(report.reviewedAt)}</p>
+                        <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-calendar-check mr-2"></i>Ngày xử lý:</span> {formatDate(report.reviewedAt)}</p>
                       )}
                       {report.reviewedByUser && (
-                        <p className="ml-180"><span className="font-semibold">Xử lý bởi:</span> {report.reviewedByUser}</p>
+                        <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-user-shield mr-2"></i>Xử lý bởi:</span> {report.reviewedByUser}</p>
                       )}
                     </div>
                   </div>
@@ -511,27 +532,37 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                   </div>
 
                   {/* Action buttons - responsive */}
-                  {report.status === 'pending' && (
+                  {report.status === 'pending' ? (
                     <div className="flex flex-wrap gap-2 mt-4 justify-end">
-                    <button
-                      onClick={() => handleApprove(report.id)}
-                      className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm sm:text-base font-medium transition-all shadow-md cursor-pointer hover:scale-105 hover:shadow-lg"
-                      title="Duyệt báo cáo"
-                    >
-                      <i className="fa-solid fa-check mr-1 sm:mr-2"></i>
-                      Duyệt
-                    </button>
-                    
-                    <button
-                      onClick={() => handleReject(report.id)}
-                      className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm sm:text-base font-medium transition-all shadow-md cursor-pointer hover:scale-105 hover:shadow-lg"
-                      title="Từ chối báo cáo"
-                    >
-                      <i className="fa-solid fa-times mr-1 sm:mr-2"></i>
-                      Từ chối
-                    </button>
-                  </div>
-                )}
+                      <button
+                        onClick={() => handleApprove(report.id)}
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm sm:text-base font-medium transition-all shadow-md cursor-pointer hover:scale-105 hover:shadow-lg"
+                        title="Duyệt báo cáo"
+                      >
+                        <i className="fa-solid fa-check mr-1 sm:mr-2"></i>
+                        Duyệt
+                      </button>
+                      
+                      <button
+                        onClick={() => handleReject(report.id)}
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm sm:text-base font-medium transition-all shadow-md cursor-pointer hover:scale-105 hover:shadow-lg"
+                        title="Từ chối báo cáo"
+                      >
+                        <i className="fa-solid fa-times mr-1 sm:mr-2"></i>
+                        Từ chối
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2 mt-4 justify-end">
+                      <button
+                        onClick={() => handleDeleteReport(report.id)}
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 group cursor-pointer"
+                        title="Xóa báo cáo và thêm vào lịch sử"
+                      >
+                        <i className="fa-solid fa-trash mr-1 sm:mr-2 group-hover:scale-110 transition-transform duration-300"></i>Xóa
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -256,6 +256,23 @@ const CommentReportManagement: React.FC = () => {
     }, 300);
   };
 
+  const handleDeleteReport = async (reportId: number) => {
+    if (!window.confirm('Bạn có chắc muốn xóa báo cáo này? Báo cáo sẽ được lưu vào lịch sử.')) {
+      return;
+    }
+
+    try {
+      const response = await axios.delete(`/admin/comment-reports/${reportId}`);
+      if (response.data.success) {
+        toast.success('Đã xóa báo cáo và lưu vào lịch sử!');
+        fetchReports();
+      }
+    } catch (error) {
+      console.error('Error deleting comment report:', error);
+      toast.error('Không thể xóa báo cáo!');
+    }
+  };
+
   const getCommentAvatar = (avatar?: string) => {
     if (!avatar) return null;
     if (avatar.startsWith('http')) return avatar;
@@ -439,7 +456,7 @@ const CommentReportManagement: React.FC = () => {
                 {/* Report content - responsive */}
                 <div className="flex-1 w-full lg:w-auto">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-800 break-words">{report.postTitle}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-800 break-words mr-1">{report.postTitle}</h3>
                     {getStatusBadge(report.status)}
                     {report.status !== 'pending' && (
                       <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
@@ -466,7 +483,7 @@ const CommentReportManagement: React.FC = () => {
                       <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-user mr-2"></i>Người báo cáo:</span> {report.reporterUsername}</p>
                       <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-user-pen mr-2"></i>Tác giả bình luận:</span> {report.commentAuthor}</p>
                     </div>
-                    <div>
+                    <div className="sm:text-right">
                       {report.reviewedAt && (
                         <p className="mt-2"><span className="font-semibold"><i className="fa-solid fa-calendar-check mr-2"></i>Ngày xử lý:</span> {formatDate(report.reviewedAt)}</p>
                       )}
@@ -503,22 +520,32 @@ const CommentReportManagement: React.FC = () => {
                   </div>
 
                   {/* Action buttons - responsive */}
-                  {report.status === 'pending' && (
+                  {report.status === 'pending' ? (
                     <div className="flex flex-wrap gap-2 mt-4 justify-end">
-                    <button
-                      onClick={() => handleOpenModal(report, 'hide')}
-                      className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 group cursor-pointer"
-                    >
-                      <i className="fa-solid fa-ban mr-1 sm:mr-2 group-hover:rotate-12 transition-transform duration-300"></i>Ẩn
-                    </button>
-                    <button
-                      onClick={() => handleOpenModal(report, 'reject')}
-                      className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-500 hover:from-gray-700 hover:to-gray-600 text-white rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 group cursor-pointer"
-                    >
-                      <i className="fa-solid fa-times mr-1 sm:mr-2 group-hover:rotate-90 transition-transform duration-300"></i>Từ chối
-                    </button>
-                  </div>
-                )}
+                      <button
+                        onClick={() => handleOpenModal(report, 'hide')}
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 group cursor-pointer"
+                      >
+                        <i className="fa-solid fa-ban mr-1 sm:mr-2 group-hover:rotate-12 transition-transform duration-300"></i>Ẩn
+                      </button>
+                      <button
+                        onClick={() => handleOpenModal(report, 'reject')}
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-500 hover:from-gray-700 hover:to-gray-600 text-white rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 group cursor-pointer"
+                      >
+                        <i className="fa-solid fa-times mr-1 sm:mr-2 group-hover:rotate-90 transition-transform duration-300"></i>Từ chối
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2 mt-4 justify-end">
+                      <button
+                        onClick={() => handleDeleteReport(report.id)}
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 group cursor-pointer"
+                        title="Xóa báo cáo và thêm vào lịch sử"
+                      >
+                        <i className="fa-solid fa-trash mr-1 sm:mr-2 group-hover:scale-110 transition-transform duration-300"></i>Xóa
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

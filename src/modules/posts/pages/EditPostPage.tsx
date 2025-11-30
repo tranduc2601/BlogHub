@@ -26,6 +26,35 @@ export default function EditPostPage() {
   const privacyMenuRef = useRef<HTMLDivElement>(null);
   const quillRef = useRef<ReactQuill>(null);
 
+  const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    
+    // Chỉ cho phép chữ cái, số, dấu phẩy và khoảng trắng
+    value = value.replace(/[^a-zA-Z0-9\sàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ,]/g, '');
+    
+    // Xử lý format: sau dấu phẩy phải có đúng 1 khoảng trắng
+    const parts = value.split(',');
+    const formattedParts = parts.map((part, index) => {
+      // Trim khoảng trắng thừa
+      part = part.trim();
+      // Nếu không phải phần cuối, thêm dấu phẩy và khoảng trắng
+      return index < parts.length - 1 ? part + ', ' : part;
+    });
+    
+    value = formattedParts.join('');
+    
+    // Không cho phép bắt đầu bằng dấu phẩy hoặc khoảng trắng
+    if (value.startsWith(',') || value.startsWith(' ')) {
+      value = value.trimStart().replace(/^,+/, '');
+    }
+    
+    // Không cho phép nhiều dấu phẩy liên tiếp
+    value = value.replace(/,+/g, ',');
+    
+    setTags(value);
+    if (tagError) setTagError('');
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (privacyMenuRef.current && !privacyMenuRef.current.contains(event.target as Node)) {
@@ -442,7 +471,7 @@ export default function EditPostPage() {
               <input
                 type="text"
                 value={tags}
-                onChange={e => setTags(e.target.value)}
+                onChange={handleTagsChange}
                 placeholder="Blogging, Tips, Technology..."
                 className={`w-full p-4 border-3 rounded-xl focus:border-[#2664eb] focus:outline-none transition-all duration-300 hover:border-gray-300 ${tagError ? 'border-red-500' : 'border-gray-200'}`}
               />
