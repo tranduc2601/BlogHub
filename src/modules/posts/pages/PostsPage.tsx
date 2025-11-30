@@ -203,10 +203,12 @@ export default function PostsPage() {
           {(searchQuery || selectedCategory !== "all" || sortBy !== "hot") && (
             <button
               onClick={handleClearFilters}
-              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
+              className="px-4 py-2 bg-red-500 text-white rounded-lg transition-all duration-300 flex items-center gap-2 shadow-md cursor-pointer
+                hover:bg-gradient-to-r hover:from-red-500 hover:to-pink-500 hover:scale-105 hover:shadow-xl hover:border-red-600 border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-red-400"
+              style={{ boxShadow: '0 2px 8px rgba(255,0,0,0.08)' }}
             >
-              <i className="fa-solid fa-times-circle"></i>
-              <span className="hidden sm:inline">Xóa bộ lọc</span>
+              <i className="fa-solid fa-times-circle group-hover:rotate-12 transition-transform duration-300"></i>
+              <span className="hidden sm:inline font-semibold">Xóa bộ lọc</span>
             </button>
           )}
         </div>
