@@ -430,11 +430,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <img 
-                      src={activity.userAvatar || '/default-avatar.png'} 
-                      alt={activity.userName}
-                      className="w-6 h-6 rounded-full object-cover"
-                    />
+                    {activity.userAvatar ? (
+                      <img 
+                        src={activity.userAvatar} 
+                        alt={activity.userName}
+                        className="w-6 h-6 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-[#2664eb] flex items-center justify-center">
+                        <span className="text-xs font-bold text-white">
+                          {getAvatarInitial(activity.userName)}
+                        </span>
+                      </div>
+                    )}
                     <span className="font-semibold text-gray-800 text-sm">
                       {activity.userName}
                     </span>
