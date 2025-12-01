@@ -353,21 +353,20 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
                   <span className={`text-xs sm:text-sm font-medium ${newComment.length > MAX_COMMENT_LENGTH * 0.9 ? 'text-orange-500' : 'text-gray-500'}`}>
                     {newComment.length}/{MAX_COMMENT_LENGTH} ký tự
                   </span>
-                  
-                  {/* Anonymous Comment Toggle */}
-                  <label className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={isAnonymous}
-                      onChange={(e) => setIsAnonymous(e.target.checked)}
-                      className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
-                    />
-                    <span className="text-xs sm:text-sm text-gray-600 group-hover:text-blue-600 transition-colors flex items-center gap-1">
-                      <i className="fa-solid fa-user-secret mr-1.5"></i>
-                      <span>Bình luận ẩn danh</span>
-                    </span>
-                  </label>
                 </div>
+                {/* Anonymous Comment Toggle */}
+                <label className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={isAnonymous}
+                    onChange={(e) => setIsAnonymous(e.target.checked)}
+                    className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                  />
+                  <span className="text-xs sm:text-sm text-gray-600 group-hover:text-blue-600 transition-colors flex items-center gap-1">
+                    <i className="fa-solid fa-user-secret mr-1.5"></i>
+                    <span>Bình luận ẩn danh</span>
+                  </span>
+                </label>
               </div>
 
               <div className="flex justify-end gap-2 mt-3">
