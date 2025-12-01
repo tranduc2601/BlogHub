@@ -8,6 +8,7 @@ export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [typedText, setTypedText] = useState("");
+  const [showScrollTop, setShowScrollTop] = useState(false);
   
   // Lấy giá trị từ URL query params
   const [activeTab, setActiveTab] = useState<"recent" | "popular">(
@@ -72,6 +73,28 @@ export default function HomePage() {
 
   const handleCloseReactionModal = () => {
     setReactionModalState({ isOpen: false, postId: 0, totalReactions: 0 });
+  };
+
+  // Scroll to top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 400) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
   };
 
   // Typing animation effect
@@ -354,6 +377,19 @@ export default function HomePage() {
         postId={reactionModalState.postId}
         totalReactions={reactionModalState.totalReactions}
       />
+
+      {/* Scroll to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className={`fixed bottom-8 right-8 w-12 h-12 rounded-full bg-[#2664eb] text-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-xl z-50 ${
+          showScrollTop 
+            ? "opacity-100 translate-y-0" 
+            : "opacity-0 translate-y-16 pointer-events-none"
+        }`}
+        aria-label="Scroll to top"
+      >
+        <i className="fa-solid fa-arrow-up text-lg"></i>
+      </button>
     </div>
   );
 }

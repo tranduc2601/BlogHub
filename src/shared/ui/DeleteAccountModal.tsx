@@ -215,14 +215,6 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
             )}
           </button>
         </div>
-
-        {/* Additional Info */}
-        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-800">
-            <i className="fa-solid fa-info-circle mr-2"></i>
-            <strong>Lưu ý:</strong> Sau khi xóa tài khoản, bạn có thể liên hệ với bộ phận hỗ trợ trong vòng 30 ngày nếu muốn khôi phục.
-          </p>
-        </div>
       </div>
       </div>
     </div>
