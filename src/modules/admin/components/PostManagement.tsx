@@ -765,12 +765,12 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                         {toggledPostId === post.id ? (
                           <>
                             <i className="fa-solid fa-check mr-1 sm:mr-2"></i>
-                            Ẩn
+                              Ẩn!
                           </>
                         ) : (
                           <>
                             <i className="fa-solid fa-eye-slash mr-1 sm:mr-2"></i>
-                            Ẩn
+                              Ẩn!
                           </>
                         )}
                       </button>
@@ -800,12 +800,12 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                         {toggledPostId === post.id ? (
                           <>
                             <i className="fa-solid fa-check mr-1 sm:mr-2"></i>
-                            Hiện
+                              Hiện!
                           </>
                         ) : (
                           <>
                             <i className="fa-solid fa-eye mr-1 sm:mr-2"></i>
-                            Hiện
+                              Hiện!
                           </>
                         )}
                       </button>
