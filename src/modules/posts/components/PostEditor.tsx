@@ -228,7 +228,11 @@ export default function PostEditor() {
               className="p-3 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300 cursor-pointer"
               title="Cài đặt quyền riêng tư"
             >
-              <i className="fa-solid fa-lock text-xl text-gray-700"></i>
+              <i className={`text-xl text-gray-700 fa-solid ${
+                privacy === 'public' ? 'fa-globe' : 
+                privacy === 'followers' ? 'fa-user-group' : 
+                'fa-lock'
+              }`}></i>
             </button>
 
             {showPrivacyMenu && (
@@ -243,7 +247,6 @@ export default function PostEditor() {
                     onClick={() => {
                       setPrivacy('public');
                       setShowPrivacyMenu(false);
-                      toast.success('Đã đặt bài viết ở chế độ Công khai');
                     }}
                     className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-start gap-3 cursor-pointer group ${
                       privacy === 'public' 
@@ -268,7 +271,6 @@ export default function PostEditor() {
                     onClick={() => {
                       setPrivacy('followers');
                       setShowPrivacyMenu(false);
-                      toast.success('Chỉ người theo dõi bạn mới xem được bài viết này');
                     }}
                     className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-start gap-3 mt-2 cursor-pointer group ${
                       privacy === 'followers' 
@@ -293,7 +295,6 @@ export default function PostEditor() {
                     onClick={() => {
                       setPrivacy('private');
                       setShowPrivacyMenu(false);
-                      toast.success('Bài viết ở chế độ Riêng tư - Chỉ bạn xem được');
                     }}
                     className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-start gap-3 mt-2 cursor-pointer group ${
                       privacy === 'private' 

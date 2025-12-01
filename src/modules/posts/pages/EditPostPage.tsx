@@ -351,7 +351,11 @@ export default function EditPostPage() {
               className="p-3 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300 cursor-pointer"
               title="Cài đặt quyền riêng tư"
             >
-              <i className="fa-solid fa-lock text-xl text-gray-700"></i>
+              <i className={`text-xl text-gray-700 fa-solid ${
+                privacy === 'public' ? 'fa-globe' : 
+                privacy === 'followers' ? 'fa-user-group' : 
+                'fa-lock'
+              }`}></i>
             </button>
 
             {showPrivacyMenu && (
