@@ -143,8 +143,8 @@ export default function HomePage() {
     <div className="space-y-12 select-none">
       
       <section className="text-center py-16">
-        <h1 className="text-5xl md:text-6xl font-extrabold text-blue-700 drop-shadow-lg mb-6 animate-fadeInUp leading-tight flex items-center justify-center gap-4">
-          <i className="fa-solid fa-blog" style={{ fontSize: '1.2em', color: '#3b82f6', textShadow: '0 2px 8px #a5b4fc', marginRight: '10px' }}></i>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-blue-700 drop-shadow-lg mb-6 animate-fadeInUp leading-relaxed flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+          <i className="fa-solid fa-blog text-4xl sm:text-5xl md:text-6xl" style={{ color: '#3b82f6', textShadow: '0 2px 8px #a5b4fc' }}></i>
           <span className="inline-block min-w-[20ch]">
             {typedText}
             <span className="animate-pulse">|</span>
