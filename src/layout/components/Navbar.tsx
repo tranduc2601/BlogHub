@@ -315,31 +315,6 @@ export default function Navbar() {
         </div>
 
         
-        <div className="lg:hidden flex items-center gap-2">
-          {!isAuthenticated && (
-            <div className="flex gap-2">
-              <Link 
-                to="/login" 
-                className="bg-white text-blue-700 px-3 py-2 rounded-full font-semibold border-2 border-blue-600 shadow-md transition-all duration-300 flex items-center gap-1 cursor-pointer
-                  hover:bg-blue-600 hover:text-white hover:scale-105 hover:shadow-xl hover:border-blue-700 text-sm"
-                style={{ fontFamily: 'Inter, Arial, sans-serif' }}
-              >
-                <i className="fa-solid fa-right-to-bracket text-base" draggable="false"></i>
-                <span className="hidden sm:inline">Đăng nhập</span>
-              </Link>
-              <button
-                onClick={() => navigate('/register')}
-                className="bg-blue-600 text-white px-3 py-2 rounded-full font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-1 cursor-pointer text-sm"
-                type="button"
-              >
-                <i className="fa-solid fa-user-plus text-base" draggable="false"></i>
-                <span className="hidden sm:inline">Đăng ký</span>
-              </button>
-            </div>
-          )}
-        </div>
-
-        
         {showMobileMenu && (
           <div className="lg:hidden absolute left-0 right-0 top-full bg-white shadow-2xl border-t border-gray-200 z-40">
             <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
