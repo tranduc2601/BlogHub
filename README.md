@@ -25,7 +25,7 @@ Nền tảng chia sẻ blog hiện đại với đầy đủ tính năng quản 
 - 📝 Xử lý báo cáo từ người dùng
 - 📌 Ghim bình luận quan trọng
 
-## 🛠️ Công nghệ sử dụ
+## 🛠️ Công nghệ sử dụng
 
 ### Frontend
 - ⚛️ **React 18** + **TypeScript**
@@ -185,11 +185,6 @@ npm run reset-db     # Reset database
 - `GET /admin/stats` - Thống kê tổng quan
 - `GET /admin/reports` - Danh sách báo cáo
 - `PUT /admin/posts/:id/approve` - Duyệt bài viết
-
-## 👨‍💻 Tác giả
-
-**Trần Đức**
-- GitHub: [@tranduc2601](https://github.com/tranduc2601)
 
 ## 🙏 Đóng góp
 
