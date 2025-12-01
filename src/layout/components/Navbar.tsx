@@ -100,21 +100,22 @@ export default function Navbar() {
           )}
         </div>
 
-        <button
-          onClick={() => setShowMobileMenu(!showMobileMenu)}
-          className="lg:hidden p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
-          aria-label="Toggle menu"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            {showMobileMenu ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className="lg:hidden p-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+            aria-label="Toggle menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {showMobileMenu ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         
-        <div className="hidden lg:flex gap-6 items-center">
+          <div className="hidden lg:flex gap-6 items-center">
           {location.pathname !== "/" && (
             <Link to="/" className="relative group" title="Trang chủ">
               <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3" style={{ '--tw-bg-opacity': '1' } as React.CSSProperties} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2664eb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}>
@@ -310,6 +311,7 @@ export default function Navbar() {
               )}
             </div>
           )}
+          </div>
         </div>
 
         
