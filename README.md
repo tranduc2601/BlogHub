@@ -1,161 +1,200 @@
 # 📝 BlogHub
 
-Nền tảng blog hiện đại với React + TypeScript (Frontend) và Node.js + Express (Backend).
+Nền tảng chia sẻ blog hiện đại với đầy đủ tính năng quản lý bài viết, người dùng và tương tác cộng đồng.
 
-## 🎯 Giới thiệu
+## 🌟 Tính năng chính
 
-**BlogHub** là ứng dụng blog full-stack với tính năng quản lý nội dung, tương tác người dùng và hệ thống quản trị.
+### Người dùng
+- ✍️ Tạo và quản lý bài viết với trình soạn thảo Rich Text (React Quill)
+- 🖼️ Upload ảnh đại diện và ảnh bài viết (Cloudinary)
+- 👥 Theo dõi/Bỏ theo dõi người dùng khác
+- 💬 Bình luận và trả lời bình luận (có hỗ trợ bình luận ẩn danh)
+- 😊 Thả cảm xúc (Like, Love, Haha, Wow, Sad, Angry) cho bài viết và bình luận
+- 🔖 Lưu bài viết yêu thích
+- 📤 Xuất bài viết sang PDF hoặc Markdown
+- 🔔 Nhận thông báo real-time
+- 🚨 Báo cáo vi phạm bài viết/bình luận
+- 🔒 Quản lý quyền riêng tư bài viết (Public, Followers, Private)
 
-## ✨ Tính năng chính
+### Quản trị viên
+- 👨‍💼 Dashboard thống kê tổng quan
+- 📊 Biểu đồ thống kê theo tháng
+- ✅ Duyệt/Từ chối bài viết chờ duyệt
+- 🔨 Quản lý người dùng (khóa/mở khóa tài khoản)
+- 🗑️ Xóa bài viết/bình luận vi phạm
+- 📝 Xử lý báo cáo từ người dùng
+- 📌 Ghim bình luận quan trọng
 
-- 🔐 Đăng ký, đăng nhập với JWT authentication
-- 📝 Tạo, sửa, xóa bài viết với Rich Text Editor (TinyMCE)
-- 💬 Bình luận đa cấp, bình luận ẩn danh với ID ngẫu nhiên
-- 👍 Thả biểu cảm (6 loại: Like, Love, Haha, Wow, Sad, Angry)
-- 👥 Theo dõi người dùng, quản lý hồ sơ cá nhân
-- 🔔 Hệ thống thông báo real-time
-- 📷 Upload ảnh qua Cloudinary
-- 🛡️ Trang quản trị: quản lý users, posts, comments, reports
-- 📱 Responsive design với Tailwind CSS
+## 🛠️ Công nghệ sử dụ
 
-## 🛠️ Công nghệ sử dụng
+### Frontend
+- ⚛️ **React 18** + **TypeScript**
+- 🎨 **Tailwind CSS 4** - Styling
+- 🚀 **Vite** - Build tool
+- 🌐 **React Router v6** - Routing
+- 📡 **Axios** - HTTP client
+- 🔥 **React Hot Toast** - Thông báo
+- 📝 **React Quill** - Rich text editor
+- 📊 **Recharts** - Biểu đồ thống kê
+- 📄 **jsPDF** + **html2canvas** - Xuất PDF
+- 🔄 **Turndown** - Convert HTML to Markdown
 
-**Frontend:** React 18, TypeScript, Vite, Tailwind CSS, React Router, Axios, TinyMCE
+### Backend
+- 🟢 **Node.js** + **Express.js**
+- 🗄️ **MySQL** - Database
+- 🔐 **JWT** - Authentication
+- 🔒 **bcrypt** - Password hashing
+- ☁️ **Cloudinary** - Lưu trữ ảnh
+- 📤 **Multer** - Upload file
 
-**Backend:** Node.js, Express.js, MySQL 8.0, JWT, bcryptjs, Cloudinary
+## 🚀 Deployment
 
-## 🚀 Cài đặt và chạy
+- **Frontend**: [Vercel](https://vercel.com) ⚡
+- **Backend**: [Railway](https://railway.app) 🚂
+- **Database**: MySQL trên Railway
+- **Storage**: Cloudinary
 
-### 1. Cài đặt dependencies
+## 📦 Cài đặt và chạy local
 
+### 1. Clone repository
 ```bash
-# Frontend
-npm install
+git clone https://github.com/tranduc2601/BlogHub.git
+cd BlogHub
+```
 
-# Backend
+### 2. Cài đặt Frontend
+```bash
+npm install
+```
+
+Tạo file `.env` trong thư mục gốc:
+```env
+VITE_API_URL=http://localhost:3001
+```
+
+Chạy development server:
+```bash
+npm run dev
+```
+
+### 3. Cài đặt Backend
+```bash
 cd server
 npm install
 ```
 
-### 2. Cấu hình môi trường
-
-Tạo file `server/.env`:
-
+Tạo file `.env` trong thư mục `server`:
 ```env
-PORT=5000
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=your_password
-DB_NAME=bloghub
-JWT_SECRET=your_secret_key
+DB_NAME=bloghub_db
+DB_PORT=3306
+
+JWT_SECRET=your_jwt_secret_key
+
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
-CORS_ORIGIN=http://localhost:5173
+
+PORT=3001
 ```
 
-### 3. Khởi tạo database
-
+Khởi tạo database:
 ```bash
-cd server
-
-# Tạo database và tables
-mysql -u root -p < schema.sql
-
-# Tạo tài khoản admin
-node setup-admin.js
+npm run setup-db
 ```
 
-**Tài khoản admin mặc định:**
-
-- Email: `admin@bloghub.com`
-- Password: `admin123`
-
-### 4. Chạy ứng dụng
-
-**Backend:**
-
+Chạy server:
 ```bash
-cd server
 npm start
-# Server chạy tại: http://localhost:5000
 ```
 
-**Frontend:**
+## 📁 Cấu trúc dự án
 
+```
+BlogHub/
+├── src/                      # Frontend source code
+│   ├── core/                 # Core utilities (auth, routing, config)
+│   ├── layout/               # Layout components (Navbar, Footer)
+│   ├── modules/              # Feature modules
+│   │   ├── admin/            # Admin dashboard
+│   │   ├── auth/             # Authentication
+│   │   ├── notifications/    # Notifications
+│   │   ├── posts/            # Posts management
+│   │   └── users/            # User profiles
+│   └── shared/               # Shared components & utilities
+│
+├── server/                   # Backend source code
+│   ├── config/               # Database & service configs
+│   ├── controllers/          # Request handlers
+│   ├── middleware/           # Custom middleware
+│   ├── routes/               # API routes
+│   ├── migrations/           # Database migrations
+│   └── server.js             # Entry point
+│
+└── package.json
+```
+
+## 🔑 Tài khoản mặc định
+
+Sau khi setup database, tài khoản admin mặc định:
+- **Email**: duyhoangtran2006@gmail.com
+- **Password**: Duy1tran!?2006
+
+## 📝 Script commands
+
+### Frontend
 ```bash
-npm run dev
-# Frontend chạy tại: http://localhost:5173
+npm run dev          # Chạy development server
+npm run build        # Build production
+npm run preview      # Preview production build
+npm run lint         # Kiểm tra code
 ```
 
-**Truy cập:**
+### Backend
+```bash
+npm start            # Chạy production server
+npm run dev          # Chạy development với nodemon
+npm run setup-admin  # Tạo tài khoản admin
+npm run update-schema # Cập nhật schema database
+npm run reset-db     # Reset database
+```
 
-- Frontend: <http://localhost:5173>
-- Backend API: <http://localhost:5000>
-- Admin: <http://localhost:5173/admin>
+## 🌐 API Endpoints
 
-**Tài khoản admin mặc định:**
+### Authentication
+- `POST /auth/register` - Đăng ký
+- `POST /auth/login` - Đăng nhập
+- `GET /auth/me` - Lấy thông tin user hiện tại
 
-- Email: `admin@bloghub.com`
-- Password: `admin123`
+### Posts
+- `GET /posts` - Lấy danh sách bài viết
+- `POST /posts` - Tạo bài viết mới
+- `PUT /posts/:id` - Cập nhật bài viết
+- `DELETE /posts/:id` - Xóa bài viết
+- `POST /posts/:id/react` - Thả cảm xúc
+- `POST /posts/:id/view` - Tăng lượt xem
 
-## 🌐 Triển khai (Deployment)
+### Comments
+- `GET /posts/:id/comments` - Lấy bình luận
+- `POST /posts/:id/comments` - Tạo bình luận
+- `POST /posts/comments/:id/react` - Thả cảm xúc bình luận
 
-### 📚 Tài liệu đầy đủ
+### Admin
+- `GET /admin/stats` - Thống kê tổng quan
+- `GET /admin/reports` - Danh sách báo cáo
+- `PUT /admin/posts/:id/approve` - Duyệt bài viết
 
-Chi tiết cách deploy lên production, xem:
+## 👨‍💻 Tác giả
 
-- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Hướng dẫn chi tiết từng bước
-- **[DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)** - Checklist đầy đủ
-- **[QUICK_DEPLOY.md](./QUICK_DEPLOY.md)** - Hướng dẫn nhanh 5 bước
-- **[ENV_VARIABLES.md](./ENV_VARIABLES.md)** - Tham khảo environment variables
+**Trần Đức**
+- GitHub: [@tranduc2601](https://github.com/tranduc2601)
 
-### 🚀 Tóm tắt nhanh
+## 🙏 Đóng góp
 
-**1. Frontend → Vercel:**
-- Import project từ GitHub
-- Set `VITE_API_BASE_URL=https://your-backend.onrender.com/api`
-- Deploy
-
-**2. Backend → Render:**
-- Tạo MySQL Database
-- Import `schema.sql`
-- Deploy Web Service (root: `server`)
-- Thêm environment variables
-- Update `CLIENT_URL=https://your-frontend.vercel.app`
-
-**3. Cloudinary:**
-- Đăng ký tại [cloudinary.com](https://cloudinary.com)
-- Thêm credentials vào Render ENV
-
-**Chi tiết xem [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)**
-
-## 👥 Nhóm phát triển
-
-| Thành viên | Vai trò | GitHub |
-|------------|---------|--------|
-| **Trần Hoàng Duy** | Full-stack Developer | [@duyhoangtran2006](https://github.com/duyhoangtran2006) |
-| **Trần Minh Đức** | Backend Developer | - |
-| **Đoàn Nhật Cường** | Frontend Developer | - |
-| **Nguyễn Gia Huy** | UI/UX Designer | - |
-
-## 🙏 Acknowledgments
-
-- [React](https://reactjs.org/) - UI Framework
-- [Vite](https://vitejs.dev/) - Build tool
-- [TailwindCSS](https://tailwindcss.com/) - CSS Framework
-- [Express](https://expressjs.com/) - Backend Framework
-- [MySQL](https://www.mysql.com/) - Database
-- [Cloudinary](https://cloudinary.com/) - Image hosting
-- [TinyMCE](https://www.tiny.cloud/) - Rich text editor
-
-## 📞 Contact
-
-- Email: <duyhoangtran2006@gmail.com>
-- Project Link: [https://github.com/duyhoangtran2006/bloghub-project](https://github.com/duyhoangtran2006/bloghub-project)
+Mọi đóng góp đều được hoan nghênh! Hãy tạo Pull Request hoặc Issues nếu bạn có ý tưởng cải thiện dự án.
 
 ---
 
-**⭐ Star this repo if you find it helpful!**
-
-© 2025 BlogHub - Made with ❤️ by Group 4
+⭐ Nếu bạn thấy dự án hữu ích, đừng quên cho một star nhé!

@@ -43,10 +43,10 @@ function FollowButton({ userId, onFollowChange }: { userId: number; onFollowChan
       await axios.post(`/users/${userId}/follow`);
       setFollowing(true);
       onFollowChange();
-      toast.success("Đã theo dõi thành công!", {
-        duration: 2000,
-        position: 'top-right',
-      });
+      // toast.success("Đã theo dõi thành công!", {
+      //   duration: 2000,
+      //   position: 'top-right',
+      // });
     } catch (error) {
       console.error('Error following user:', error);
       toast.error("Đã xảy ra lỗi!", {
@@ -64,10 +64,10 @@ function FollowButton({ userId, onFollowChange }: { userId: number; onFollowChan
       await axios.delete(`/users/${userId}/follow`);
       setFollowing(false);
       onFollowChange();
-      toast.success("Đã hủy theo dõi thành công!", {
-        duration: 2000,
-        position: 'top-right',
-      });
+      // toast.success("Đã hủy theo dõi thành công!", {
+      //   duration: 2000,
+      //   position: 'top-right',
+      // });
     } catch (error) {
       console.error('Error unfollowing user:', error);
       toast.error("Đã xảy ra lỗi!", {
