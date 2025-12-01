@@ -30,6 +30,7 @@ export default function PostDetailPage() {
   const menuRef = useRef<HTMLDivElement>(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isBookmarking, setIsBookmarking] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const [reactionStats, setReactionStats] = useState({
     like_count: 0,
     love_count: 0,
@@ -260,6 +261,28 @@ export default function PostDetailPage() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showMenu]);
+
+  // Scroll to top button visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 400) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
   const handleFollowToggle = async () => {
     if (!post || !post.authorId || followLoading) return;
@@ -988,6 +1011,19 @@ export default function PostDetailPage() {
         postId={parseInt(post.id.toString())}
         totalReactions={reactionStats.total_reactions}
       />
+
+      {/* Scroll to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className={`fixed bottom-8 right-8 w-12 h-12 rounded-full bg-[#2664eb] text-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-xl z-50 cursor-pointer ${
+          showScrollTop 
+            ? "opacity-100 translate-y-0" 
+            : "opacity-0 translate-y-16 pointer-events-none"
+        }`}
+        aria-label="Scroll to top"
+      >
+        <i className="fa-solid fa-arrow-up text-lg"></i>
+      </button>
     </div>
   );
 }
