@@ -376,7 +376,7 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
                     onClick={() => setNewComment('')}
                     className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-600 font-medium rounded-lg sm:rounded-xl cursor-pointer transition-all duration-200 bg-white border border-gray-200 shadow-sm hover:bg-red-100 hover:text-red-600 hover:border-red-300 hover:scale-105 hover:shadow-lg active:scale-95"
                   >
-                    <i className="fa-solid fa-xmark mr-1 sm:mr-2"></i><span className="hidden xs:inline">Hủy</span>
+                    <i className="fa-solid fa-xmark mr-1 sm:mr-2"></i>Hủy
                   </button>
                 )}
                 <button 
