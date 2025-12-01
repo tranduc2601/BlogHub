@@ -319,6 +319,30 @@ export default function Navbar() {
           <div className="lg:hidden absolute left-0 right-0 top-full bg-white shadow-2xl border-t border-gray-200 z-40">
             <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
               
+              {!isAuthenticated && (
+                <div className="flex flex-col gap-3 mb-3">
+                  <Link 
+                    to="/login" 
+                    onClick={closeMobileMenu}
+                    className="bg-white text-blue-700 px-4 py-3 rounded-lg font-semibold border-2 border-blue-600 shadow-md transition-all duration-300 flex items-center justify-center gap-2 hover:bg-blue-600 hover:text-white"
+                  >
+                    <i className="fa-solid fa-right-to-bracket text-lg" draggable="false"></i>
+                    Đăng nhập
+                  </Link>
+                  <button
+                    onClick={() => {
+                      navigate('/register');
+                      closeMobileMenu();
+                    }}
+                    className="bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
+                    type="button"
+                  >
+                    <i className="fa-solid fa-user-plus text-lg" draggable="false"></i>
+                    Đăng ký
+                  </button>
+                </div>
+              )}
+
               {isAuthenticated && (
                 <div className="p-4 mb-2 bg-[#2664eb] rounded-lg border border-gray-200">
                   <div className="flex items-center gap-3">
