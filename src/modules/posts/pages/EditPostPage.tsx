@@ -29,26 +29,26 @@ export default function EditPostPage() {
   const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
     
-    // Chỉ cho phép chữ cái, số, dấu phẩy và khoảng trắng
+
     value = value.replace(/[^a-zA-Z0-9\sàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ,]/g, '');
     
-    // Xử lý format: sau dấu phẩy phải có đúng 1 khoảng trắng
+
     const parts = value.split(',');
     const formattedParts = parts.map((part, index) => {
-      // Trim khoảng trắng thừa
+
       part = part.trim();
-      // Nếu không phải phần cuối, thêm dấu phẩy và khoảng trắng
+
       return index < parts.length - 1 ? part + ', ' : part;
     });
     
     value = formattedParts.join('');
     
-    // Không cho phép bắt đầu bằng dấu phẩy hoặc khoảng trắng
+
     if (value.startsWith(',') || value.startsWith(' ')) {
       value = value.trimStart().replace(/^,+/, '');
     }
     
-    // Không cho phép nhiều dấu phẩy liên tiếp
+
     value = value.replace(/,+/g, ',');
     
     setTags(value);
@@ -71,7 +71,7 @@ export default function EditPostPage() {
     };
   }, [showPrivacyMenu]);
 
-  // Image upload handler for React Quill
+
   const imageHandler = () => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
@@ -82,13 +82,13 @@ export default function EditPostPage() {
       const file = input.files?.[0];
       if (!file) return;
 
-      // Validate file size (5MB)
+
       if (file.size > 5 * 1024 * 1024) {
         toast.error('Kích thước ảnh không được vượt quá 5MB!');
         return;
       }
 
-      // Validate file type
+
       if (!file.type.startsWith('image/')) {
         toast.error('Chỉ chấp nhận file ảnh!');
         return;
@@ -111,7 +111,7 @@ export default function EditPostPage() {
         if (uploadData.success) {
           const imageUrl = uploadData.url;
           
-          // Insert image into Quill editor
+
           const quill = quillRef.current?.getEditor();
           if (quill) {
             const range = quill.getSelection(true);
@@ -130,7 +130,7 @@ export default function EditPostPage() {
     };
   };
 
-  // Quill modules configuration
+
   const modules = useMemo(() => ({
     toolbar: {
       container: [
@@ -207,7 +207,7 @@ export default function EditPostPage() {
         setTags(postTags);
         setOriginalTags(postTags);
       } catch (error) {
-        console.error('❌ Error loading post:', error);
+        console.error('Error loading post:', error);
         
         if (error && typeof error === 'object' && 'response' in error) {
           const axiosError = error as { response?: { status?: number; data?: unknown; statusText?: string } };
@@ -236,28 +236,28 @@ export default function EditPostPage() {
     if (id) fetchPost();
   }, [id, navigate]);
   
-  // Normalize content để so sánh - loại bỏ các thay đổi formatting không quan trọng
+
   const normalizeContent = (str: string) => {
     if (!str) return '';
     
     return str
-      // Loại bỏ các tag p rỗng
+
       .replace(/<p><br\s*\/?><\/p>/gi, '')
       .replace(/<p>\s*<\/p>/gi, '')
-      // Chuẩn hóa whitespace
+
       .replace(/\s+/g, ' ')
-      // Chuẩn hóa các HTML entities
+
       .replace(/&nbsp;/g, ' ')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .replace(/&amp;/g, '&')
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
-      // Loại bỏ whitespace đầu cuối
+
       .trim();
   };
   
-  // Lưu bản gốc đã được chuẩn hóa ngay khi load xong
+
   useEffect(() => {
     if (content && !originalContent && !loadingPost) {
       setOriginalContent(normalizeContent(content));
@@ -343,7 +343,7 @@ export default function EditPostPage() {
             <p className="text-gray-600">Cập nhật nội dung, tiêu đề, danh mục, thẻ cho bài viết của bạn!</p>
           </div>
           
-          {/* Privacy Menu */}
+
           <div className="relative" ref={privacyMenuRef}>
             <button
               type="button"

@@ -11,10 +11,6 @@ export const getApiUrl = (path: string = ''): string => {
   return cleanPath ? `${baseUrl}/${cleanPath}` : baseUrl;
 };
 
-/**
- * Get the server base URL (without /api)
- * For serving static files like avatars
- */
 export const getServerUrl = (): string => {
   return config.apiBaseUrl.replace('/api', '');
 };
@@ -26,15 +22,13 @@ export const getServerUrl = (): string => {
  */
 export const getAvatarUrl = (avatarPath: string | null | undefined): string => {
   if (!avatarPath) {
-    return '/default-avatar.png'; // Fallback to default avatar
+    return '/default-avatar.png';
   }
   
-  // If already a full URL (starts with http), return as is
   if (avatarPath.startsWith('http')) {
     return avatarPath;
   }
   
-  // Otherwise, prepend server URL
   const serverUrl = getServerUrl();
   const cleanPath = avatarPath.startsWith('/') ? avatarPath : `/${avatarPath}`;
   return `${serverUrl}${cleanPath}`;

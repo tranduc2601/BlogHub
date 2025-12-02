@@ -1,5 +1,3 @@
-// Common types used across the application
-
 export interface User {
   id: string;
   name: string;
@@ -83,7 +81,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T> {
   limit?: number;
 }
 
-// Admin-specific types
+
 export interface AdminPost {
   id: number;
   title: string;

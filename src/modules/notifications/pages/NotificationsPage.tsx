@@ -122,7 +122,7 @@ export default function NotificationsPage() {
       setMarkingAllAsRead(true);
       await axios.put('/notifications/read-all');
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-      // Dispatch event to update notification count in navbar
+
       window.dispatchEvent(new CustomEvent('notification-deleted'));
       toast.success('Đã đánh dấu tất cả đã đọc!');
     } catch (error) {
@@ -146,7 +146,7 @@ export default function NotificationsPage() {
       );
       setNotifications([]);
       
-      // Trigger unread count refresh
+
       window.dispatchEvent(new CustomEvent('notification-deleted'));
       
       toast.success('Đã xóa tất cả thông báo!');
@@ -166,14 +166,14 @@ export default function NotificationsPage() {
     if (!deleteModal.notificationId) return;
 
     try {
-      // Check if the notification being deleted is unread
+
       const deletedNotif = notifications.find(n => n.id === deleteModal.notificationId);
       const wasUnread = deletedNotif && !deletedNotif.isRead;
       
       await axios.delete(`/notifications/${deleteModal.notificationId}`);
       setNotifications(prev => prev.filter(n => n.id !== deleteModal.notificationId));
       
-      // Trigger unread count refresh by dispatching a custom event
+
       if (wasUnread) {
         window.dispatchEvent(new CustomEvent('notification-deleted'));
       }
@@ -263,7 +263,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-6 select-none">
-      {/* Header */}
+
       <div className="bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 mb-4 md:mb-6">
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
           <div className="text-center md:text-left">
@@ -435,7 +435,7 @@ export default function NotificationsPage() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+
       <Modal
         isOpen={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, type: 'single' })}

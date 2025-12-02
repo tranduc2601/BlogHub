@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from '@/core/config/axios';
@@ -31,7 +32,7 @@ export default function NotificationDropdown() {
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 30000);
     
-    // Listen for notification deletion events
+
     const handleNotificationDeleted = () => {
       fetchUnreadCount();
     };
@@ -42,7 +43,7 @@ export default function NotificationDropdown() {
       clearInterval(interval);
       window.removeEventListener('notification-deleted', handleNotificationDeleted);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
   useEffect(() => {
@@ -67,22 +68,22 @@ export default function NotificationDropdown() {
     };
   }, [isOpen, setActiveDropdown]);
 
-  // Vô hiệu hóa cuộn trang khi dropdown mở
+
   useEffect(() => {
     if (isOpen) {
-      // Lưu giá trị overflow hiện tại
+
       const originalOverflow = document.body.style.overflow;
       const originalPaddingRight = document.body.style.paddingRight;
       
-      // Tính toán scrollbar width để tránh layout shift
+
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
       
-      // Vô hiệu hóa cuộn
+
       document.body.style.overflow = 'hidden';
       document.body.style.paddingRight = `${scrollbarWidth}px`;
       
       return () => {
-        // Khôi phục lại khi đóng
+
         document.body.style.overflow = originalOverflow;
         document.body.style.paddingRight = originalPaddingRight;
       };

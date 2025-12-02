@@ -50,7 +50,7 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      // Cleanup timeout khi component unmount
+
       if (reactionTimeoutRef.current) {
         clearTimeout(reactionTimeoutRef.current);
       }
@@ -78,21 +78,21 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
           setReactionStats(stats);
         }
       } catch (error) {
-        console.error('❌ Error fetching reaction data:', error);
+        console.error('Error fetching reaction data:', error);
       }
     };
 
     fetchReactionData();
   }, [post.id]);
 
-  // Fetch comments count - only visible comments
+
   useEffect(() => {
     const fetchCommentsCount = async () => {
       try {
-        // Add timestamp to bypass cache and always get fresh data
+
         const response = await axios.get(`/posts/${post.id}/comments?_t=${Date.now()}`);
         if (response.data.success) {
-          // totalCount already filters only visible comments from backend
+
           const count = response.data.totalCount !== undefined 
             ? response.data.totalCount 
             : response.data.comments.filter((c: { status?: string }) => c.status !== 'hidden').length;
@@ -100,20 +100,20 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
         }
       } catch (error) {
         console.error('Error fetching comments count:', error);
-        // Fallback to 0 on error
+
         setCommentsCount(0);
       }
     };
 
     fetchCommentsCount();
     
-    // Refresh count every 10 seconds to catch admin changes
+
     const interval = setInterval(fetchCommentsCount, 10000);
     
     return () => clearInterval(interval);
   }, [post.id]);
 
-  // Check if post is bookmarked
+
   useEffect(() => {
     const checkBookmarkStatus = async () => {
       try {
@@ -166,7 +166,7 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
   };
 
   const handleReaction = async (reactionType: ReactionType) => {
-    // Ngăn chặn spam - chỉ cho phép 1 action trong 500ms
+
     if (isReacting) {
       toast.error('Vui lòng chờ một chút trước khi thực hiện lại!', { duration: 1000 });
       return;
@@ -178,13 +178,13 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
     try {
       setIsReacting(true);
       
-      // Optimistic update - cập nhật UI ngay lập tức
+
       setCurrentReaction(reactionType);
       
-      // Tính toán stats mới dựa trên thay đổi
+
       const newStats = { ...reactionStats };
       
-      // Giảm count của reaction cũ
+
       if (previousReaction) {
         const oldKey = `${previousReaction}_count` as keyof typeof newStats;
         if (newStats[oldKey] > 0) {
@@ -193,7 +193,7 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
         }
       }
       
-      // Tăng count của reaction mới (nếu không phải null)
+
       if (reactionType) {
         const newKey = `${reactionType}_count` as keyof typeof newStats;
         newStats[newKey]++;
@@ -202,17 +202,17 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
       
       setReactionStats(newStats);
       
-      // Gửi request lên server
+
       const typeToSend = reactionType !== null ? reactionType : currentReaction;
       await axios.post(`/posts/${post.id}/react`, { reactionType: typeToSend });
       
-      // if (reactionType === null) {
-      //   toast.success('Đã bỏ biểu cảm!');
-      // } else {
-      //   toast.success('Đã thả biểu cảm!');
-      // }
+
+
+
+
+
       
-      // Đồng bộ lại với server để đảm bảo chính xác
+
       const statsRes = await axios.get(`/posts/${post.id}/reaction-stats`);
       if (statsRes.data.success && statsRes.data.stats) {
         setReactionStats({
@@ -226,14 +226,14 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
         });
       }
     } catch (error) {
-      // Rollback về trạng thái cũ nếu có lỗi
+
       setCurrentReaction(previousReaction);
       setReactionStats(previousStats);
       
       console.error('Error reacting to post:', error);
       toast.error('Hãy đăng nhâp để thả biểu cảm cho bài viết này!');
     } finally {
-      // Đặt timeout để cho phép reaction tiếp theo sau 500ms
+
       if (reactionTimeoutRef.current) {
         clearTimeout(reactionTimeoutRef.current);
       }
@@ -322,21 +322,21 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
     return colors[category] || 'bg-gray-500';
   };
 
-  // Tính toán xem bài viết có "hot" không
+
   const isHotPost = () => {
     const totalReactions = reactionStats.total_reactions || 0;
     const totalComments = commentsCount || 0;
     const totalViews = post.views || 0;
     
-    // Tiêu chí: Tối thiểu 10 reactions HOẶC 5 comments HOẶC 100 views
-    // Hoặc tổng điểm engagement >= 15 (reactions + comments*2 + views/10)
+
+
     const engagementScore = totalReactions + (totalComments * 2) + (totalViews / 10);
     
     return totalReactions >= 10 || totalComments >= 5 || totalViews >= 100 || engagementScore >= 15;
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Không navigate nếu click vào các phần tử tương tác
+
     const target = e.target as HTMLElement;
     if (
       target.closest('button') ||
@@ -457,7 +457,7 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
             <span>Hot</span>
           </div>
         )}
-        {/* Privacy Badge */}
+
         {post.privacy && post.privacy !== 'public' && (
           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
             post.privacy === 'private' ? 'bg-gray-600' : 'bg-indigo-600'

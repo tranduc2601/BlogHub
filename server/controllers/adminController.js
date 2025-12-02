@@ -237,7 +237,7 @@ export const deletePost = async (req, res) => {
     const postId = parseInt(req.params.id);
     const adminId = req.user?.id;
 
-    // Get post info before deleting
+
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     
     if (posts.length === 0) {
@@ -265,7 +265,7 @@ export const deletePost = async (req, res) => {
 
     await db.query('DELETE FROM comments WHERE postId = ?', [postId]);
 
-    // Delete the post
+
     await db.query('DELETE FROM posts WHERE id = ?', [postId]);
 
     res.json({ 
@@ -306,7 +306,7 @@ export const getComments = async (req, res) => {
       comments: comments.map(c => ({
         ...c,
         createdAt: c.createdAt?.toISOString().slice(0, 10) || '',
-        needsReview: false // Comments không có cơ chế kiểm duyệt
+
       }))
     });
   } catch (error) {
@@ -875,7 +875,7 @@ export const approveReport = async (req, res) => {
       console.error('Error creating report notification:', notifError);
     }
 
-    // Create notification for reporter (person who reported)
+
     try {
       await createNotification(
         report.reportedBy,
@@ -916,7 +916,7 @@ export const rejectReport = async (req, res) => {
     const reportId = parseInt(req.params.id);
     const adminId = req.user?.id;
 
-    // Get report with post title
+
     const [reports] = await db.query(`
       SELECT r.*, p.title as postTitle
       FROM reports r
@@ -933,13 +933,13 @@ export const rejectReport = async (req, res) => {
 
     const report = reports[0];
 
-    // Update report status
+
     await db.query(
       'UPDATE reports SET status = ?, reviewedAt = NOW(), reviewedBy = ? WHERE id = ?',
       ['reviewed', adminId, reportId]
     );
 
-    // Create notification for reporter (person who reported)
+
     try {
       const postTitle = report.postTitle || 'bài viết';
       await createNotification(
@@ -966,7 +966,7 @@ export const rejectReport = async (req, res) => {
   }
 };
 
-// Get all comment reports for admin
+
 export const getCommentReports = async (req, res) => {
   try {
     const [reports] = await db.query(`
@@ -1019,14 +1019,14 @@ export const getCommentReports = async (req, res) => {
   }
 };
 
-// Handle comment report - Hide comment and notify users
+
 export const handleCommentReport = async (req, res) => {
   try {
     const reportId = parseInt(req.params.id);
-    const { action, adminResponse } = req.body; // action: 'hide' | 'reject'
+
     const adminId = req.user?.id;
 
-    // Get report details
+
     const [reports] = await db.query(`
       SELECT 
         cr.*,
@@ -1054,16 +1054,16 @@ export const handleCommentReport = async (req, res) => {
     const report = reports[0];
 
     if (action === 'hide') {
-      // Hide the comment
+
       await db.query('UPDATE comments SET status = ? WHERE id = ?', ['hidden', report.commentId]);
 
-      // Update report status
+
       await db.query(
         'UPDATE comment_reports SET status = ?, adminResponse = ?, reviewedBy = ?, reviewedAt = NOW() WHERE id = ?',
         ['action_taken', adminResponse || 'Bình luận đã bị ẩn do vi phạm quy định', adminId, reportId]
       );
 
-      // Notify comment author
+
       try {
         await createNotification({
           userId: report.commentAuthorId,
@@ -1076,7 +1076,7 @@ export const handleCommentReport = async (req, res) => {
         console.error('Error creating comment author notification:', notifError);
       }
 
-      // Notify reporter
+
       try {
         await createNotification({
           userId: report.reporterId,
@@ -1094,13 +1094,13 @@ export const handleCommentReport = async (req, res) => {
         message: 'Đã ẩn bình luận và thông báo cho người dùng!'
       });
     } else if (action === 'reject') {
-      // Reject the report
+
       await db.query(
         'UPDATE comment_reports SET status = ?, adminResponse = ?, reviewedBy = ?, reviewedAt = NOW() WHERE id = ?',
         ['rejected', adminResponse || 'Bình luận không vi phạm quy định', adminId, reportId]
       );
 
-      // Notify reporter
+
       try {
         await createNotification({
           userId: report.reporterId,

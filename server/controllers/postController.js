@@ -68,35 +68,35 @@ export const getPosts = async (req, res) => {
       params.push(authorIdInt);
       
       
-      // If viewing other user's posts, apply privacy and status filter
+
       if (currentUserId && currentUserId !== authorIdInt) {
         query += ' AND p.status = "visible"';
         query += ' AND (p.privacy = "public"';
-        // Check if current user follows this author
+
         query += ' OR (p.privacy = "followers" AND EXISTS (SELECT 1 FROM follows WHERE followerId = ? AND followingId = ?))';
         params.push(currentUserId, authorIdInt);
         query += ')';
       } else if (!currentUserId) {
-        // Not logged in, only show public visible posts
+
         query += ' AND p.status = "visible"';
         query += ' AND p.privacy = "public"';
       } else {
 
       }
-      // If viewing own posts (currentUserId === authorIdInt), show ALL posts regardless of status or privacy
+
     } else {
       query += ' WHERE p.status = "visible"';
       
-      // Apply privacy filter for general feed
+
       if (currentUserId) {
         query += ' AND (p.privacy = "public" OR p.authorId = ?';
         params.push(currentUserId);
-        // Show followers-only posts from people current user follows
+
         query += ' OR (p.privacy = "followers" AND EXISTS (SELECT 1 FROM follows WHERE followerId = ? AND followingId = p.authorId))';
         params.push(currentUserId);
         query += ')';
       } else {
-        // Not logged in, only show public posts
+
         query += ' AND p.privacy = "public"';
       }
     }
@@ -187,7 +187,7 @@ export const getPostById = async (req, res) => {
       });
     }
 
-    // Check privacy settings
+
     if (post.privacy === 'private' && !isAuthor && !isAdmin) {
       return res.status(403).json({
         success: false,
@@ -196,7 +196,7 @@ export const getPostById = async (req, res) => {
     }
 
     if (post.privacy === 'followers' && !isAuthor && !isAdmin) {
-      // Check if current user follows the author
+
       if (!userId) {
         return res.status(403).json({
           success: false,
@@ -286,7 +286,7 @@ export const createPost = async (req, res) => {
       ? 'Bài viết đã được đăng thành công!' 
       : 'Bài viết đã được gửi và đang chờ admin duyệt!';
 
-    // Gửi thông báo cho admin khi có bài viết mới cần duyệt
+
     if (postStatus === 'pending') {
       try {
         const [admins] = await db.query('SELECT id FROM users WHERE role = "admin"');
@@ -367,7 +367,7 @@ export const reportPost = async (req, res) => {
       [postId, reportedBy, reason]
     );
 
-    // Gửi thông báo cho admin khi có báo cáo mới
+
     try {
       const [postInfo] = await db.query('SELECT title FROM posts WHERE id = ?', [postId]);
       const postTitle = postInfo.length > 0 ? postInfo[0].title : 'một bài viết';
@@ -465,7 +465,7 @@ export const reactPost = async (req, res) => {
         likes = likes + 1
         WHERE id = ?`, [postId]);
       
-      // Create notification for post author
+
       try {
         const post = posts[0];
         const reactionEmojis = {
@@ -575,7 +575,7 @@ export const getReactionUsers = async (req, res) => {
 
     const [users] = await db.query(query, params);
 
-    // Get reaction counts
+
     const [counts] = await db.query(`
       SELECT 
         SUM(CASE WHEN reactionType = 'like' THEN 1 ELSE 0 END) as \`like\`,
@@ -757,14 +757,14 @@ export const trackPostView = async (req, res) => {
   }
 };
 
-// Pin comment
+
 export const pinComment = async (req, res) => {
   try {
     const postId = parseInt(req.params.postId);
     const { commentId } = req.body;
     const userId = req.user?.id;
 
-    // Kiểm tra bài viết tồn tại
+
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     if (posts.length === 0) {
       return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
@@ -772,12 +772,12 @@ export const pinComment = async (req, res) => {
 
     const post = posts[0];
 
-    // Kiểm tra quyền (chỉ tác giả bài viết mới được ghim)
+
     if (post.authorId !== userId) {
       return res.status(403).json({ success: false, message: 'Bạn không có quyền ghim bình luận' });
     }
 
-    // Kiểm tra bình luận tồn tại và thuộc về bài viết này
+
     const [comments] = await db.query(
       'SELECT * FROM comments WHERE id = ? AND postId = ? AND parentId IS NULL',
       [commentId, postId]
@@ -787,7 +787,7 @@ export const pinComment = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Bình luận không tồn tại hoặc không phải bình luận gốc' });
     }
 
-    // Cập nhật pinnedCommentId trong posts
+
     await db.query('UPDATE posts SET pinnedCommentId = ? WHERE id = ?', [commentId, postId]);
 
     res.json({ success: true, message: 'Đã ghim bình luận thành công', pinnedCommentId: commentId });
@@ -797,13 +797,13 @@ export const pinComment = async (req, res) => {
   }
 };
 
-// Unpin comment
+
 export const unpinComment = async (req, res) => {
   try {
     const postId = parseInt(req.params.postId);
     const userId = req.user?.id;
 
-    // Kiểm tra bài viết tồn tại
+
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     if (posts.length === 0) {
       return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
@@ -811,12 +811,12 @@ export const unpinComment = async (req, res) => {
 
     const post = posts[0];
 
-    // Kiểm tra quyền (chỉ tác giả bài viết mới được gỡ ghim)
+
     if (post.authorId !== userId) {
       return res.status(403).json({ success: false, message: 'Bạn không có quyền gỡ ghim bình luận' });
     }
 
-    // Gỡ ghim bằng cách set pinnedCommentId = NULL
+
     await db.query('UPDATE posts SET pinnedCommentId = NULL WHERE id = ?', [postId]);
 
     res.json({ success: true, message: 'Đã gỡ ghim bình luận thành công' });
@@ -826,12 +826,12 @@ export const unpinComment = async (req, res) => {
   }
 };
 
-// Get pinned comment
+
 export const getPinnedComment = async (req, res) => {
   try {
     const postId = parseInt(req.params.postId);
 
-    // Lấy pinnedCommentId từ posts
+
     const [posts] = await db.query('SELECT pinnedCommentId FROM posts WHERE id = ?', [postId]);
     
     if (posts.length === 0) {
@@ -847,37 +847,37 @@ export const getPinnedComment = async (req, res) => {
   }
 };
 
-// Share post with user
+
 export const sharePost = async (req, res) => {
   try {
     const postId = parseInt(req.params.id);
     const { recipientId } = req.body;
     const senderId = req.user.id;
 
-    // Check if post exists
+
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     if (posts.length === 0) {
       return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
     }
 
-    // Check if recipient exists
+
     const [recipients] = await db.query('SELECT id FROM users WHERE id = ?', [recipientId]);
     if (recipients.length === 0) {
       return res.status(404).json({ success: false, message: 'Người dùng không tồn tại' });
     }
 
-    // Check if sender cannot share with themselves
+
     if (senderId === recipientId) {
       return res.status(400).json({ success: false, message: 'Không thể chia sẻ cho chính mình' });
     }
 
     const post = posts[0];
     
-    // Get sender info
+
     const [senders] = await db.query('SELECT username FROM users WHERE id = ?', [senderId]);
     const senderName = senders[0]?.username || 'Ai đó';
 
-    // Create notification
+
     const message = `${senderName} đã chia sẻ bài viết "${post.title}" với bạn`;
     await createNotification(recipientId, 'share', senderId, message, postId);
 

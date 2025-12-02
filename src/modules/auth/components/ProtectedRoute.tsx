@@ -12,7 +12,7 @@ export default function ProtectedRoute({ children, requireAdmin = false, redirec
   const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
-  // Loading state - Đồng bộ với UI của AdminPage
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -24,17 +24,17 @@ export default function ProtectedRoute({ children, requireAdmin = false, redirec
     );
   }
 
-  // Redirect to login with intended destination
+
   if (!isAuthenticated) {
     return <Navigate to={redirectTo || "/login"} state={{ from: location.pathname }} replace />;
   }
 
-  // Check admin permission
+
   if (requireAdmin && user?.role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 select-none">
         <div className="max-w-md mx-4 p-8 bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 text-center animate-fadeInUp">
-          {/* Icon with animation */}
+
           <div className="mb-6 relative">
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center animate-pulse-subtle">
               <svg className="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,7 +43,7 @@ export default function ProtectedRoute({ children, requireAdmin = false, redirec
             </div>
           </div>
 
-          {/* Title and message */}
+
           <h1 className="text-2xl font-bold text-gray-800 mb-3">
             <i className="fa-solid fa-shield-halved text-red-600 mr-2"></i>
             Truy cập bị từ chối
@@ -55,7 +55,7 @@ export default function ProtectedRoute({ children, requireAdmin = false, redirec
             Chỉ tài khoản <span className="font-semibold text-yellow-600">Admin</span> mới được phép truy cập.
           </p>
 
-          {/* Action buttons */}
+
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a 
               href="/"
@@ -73,7 +73,7 @@ export default function ProtectedRoute({ children, requireAdmin = false, redirec
             </button>
           </div>
 
-          {/* Additional info */}
+
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-xs text-gray-500">
               <i className="fa-solid fa-circle-info mr-1"></i>

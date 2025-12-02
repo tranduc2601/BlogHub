@@ -3,7 +3,7 @@ export default function TermsOfServicePage() {
     <div className="min-h-screen bg-gray-50 py-8 sm:py-12 select-none">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
-          {/* Header */}
+
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 sm:px-8 lg:px-12 py-8 sm:py-12">
             <div className="flex items-center gap-4 sm:gap-6">
               <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
@@ -20,7 +20,7 @@ export default function TermsOfServicePage() {
             </div>
           </div>
 
-          {/* Content */}
+
           <div className="px-6 sm:px-8 lg:px-12 py-8 sm:py-10 lg:py-12">
             <div className="space-y-6 sm:space-y-8 text-gray-700">
               <section className="scroll-mt-20">
@@ -192,7 +192,7 @@ export default function TermsOfServicePage() {
             </div>
           </div>
           
-          {/* Footer */}
+
           <div className="bg-gray-50 px-6 sm:px-8 lg:px-12 py-6 border-t border-gray-200">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2 text-sm text-gray-600">

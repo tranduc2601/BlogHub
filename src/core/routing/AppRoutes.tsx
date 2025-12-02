@@ -6,7 +6,6 @@ import { MainLayout } from '@/layout';
 import { LoadingSpinner } from '@/shared/ui';
 import { preloadCommonRoutes } from './routePreloader';
 
-// Lazy load pages for code splitting
 const HomePage = lazy(() => import('@/modules/posts/pages/HomePage'));
 const PostDetailPage = lazy(() => import('@/modules/posts/pages/PostDetailPage'));
 const PostsPage = lazy(() => import('@/modules/posts/pages/PostsPage'));
@@ -32,11 +31,9 @@ const ForgotPasswordPage = lazy(() => import('@/modules/auth/pages/ForgotPasswor
 const PrivacyPolicyPage = lazy(() => import('@/modules/posts/pages/PrivacyPolicyPage'));
 const TermsOfServicePage = lazy(() => import('@/modules/posts/pages/TermsOfServicePage'));
 
-// Loading fallback component
 const LoadingFallback = () => <LoadingSpinner fullScreen size="lg" message="Đang tải trang..." />;
 
 export function AppRoutes() {
-  // Preload common routes after initial render
   useEffect(() => {
     preloadCommonRoutes();
   }, []);
@@ -45,7 +42,6 @@ export function AppRoutes() {
     <ErrorBoundary>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
-          {/* Public routes with layout */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/post/:id" element={<PostDetailPage />} />
@@ -55,7 +51,6 @@ export function AppRoutes() {
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsOfServicePage />} />
 
-            {/* Protected routes */}
             <Route
               path="/create"
               element={
@@ -130,7 +125,6 @@ export function AppRoutes() {
             />
           </Route>
 
-          {/* Admin route */}
           <Route
             path="/admin/*"
             element={
@@ -140,7 +134,6 @@ export function AppRoutes() {
             }
           />
 
-          {/* Auth routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />

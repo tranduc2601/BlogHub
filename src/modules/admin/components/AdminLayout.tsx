@@ -1,8 +1,3 @@
-/**
- * AdminLayout - Layout component cho trang quản trị
- * Bao gồm sidebar và khu vực nội dung chính
- */
-
 import React, { useState } from 'react';
 
 interface AdminLayoutProps {
@@ -15,7 +10,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ sidebar, children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex font-[Inter] select-none">
-      {/* Toggle button - responsive positioning */}
+
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         className="lg:hidden fixed top-4 left-4 z-50 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 rounded-xl shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-110 active:scale-95"
@@ -24,7 +19,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ sidebar, children }) => {
         <i className={`fa-solid ${isSidebarOpen ? 'fa-times' : 'fa-bars'} text-xl`}></i>
       </button>
 
-      {/* Backdrop overlay with blur */}
+
       {isSidebarOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-fadeIn"
@@ -33,7 +28,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ sidebar, children }) => {
         ></div>
       )}
 
-      {/* Sidebar - improved mobile transitions */}
+
       <aside className={`
         w-72 sm:w-80 md:w-64 bg-white shadow-2xl fixed h-full overflow-y-auto z-40 
         transition-all duration-300 ease-in-out
@@ -43,7 +38,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ sidebar, children }) => {
         {sidebar}
       </aside>
 
-      {/* Main content - responsive padding and spacing */}
+
       <main className="flex-1 lg:ml-64 p-3 sm:p-4 md:p-6 lg:p-8 w-full min-h-screen">
         {children}
       </main>

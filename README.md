@@ -19,7 +19,7 @@ Nền tảng chia sẻ blog hiện đại với đầy đủ tính năng quản 
 ### Quản trị viên
 - 👨‍💼 Dashboard thống kê tổng quan
 - 📊 Biểu đồ thống kê theo tháng
-- ✅ Duyệt/Từ chối bài viết chờ duyệt
+- Duyệt/Từ chối bài viết chờ duyệt
 - 🔨 Quản lý người dùng (khóa/mở khóa tài khoản)
 - 🗑️ Xóa bài viết/bình luận vi phạm
 - 📝 Xử lý báo cáo từ người dùng

@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
     return "";
   };
 
-  // Start countdown timer
+
   const startCountdown = () => {
     setCountdown(60);
     const timer = setInterval(() => {
@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
     }, 1000);
   };
 
-  // Step 1: Send OTP to email
+
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -100,7 +100,7 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  // Step 2: Verify OTP
+
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -138,7 +138,7 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  // Step 3: Reset Password
+
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -193,7 +193,7 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  // Resend OTP
+
   const handleResendOTP = async () => {
     if (countdown > 0) return;
 
@@ -223,7 +223,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 select-none">
-        {/* Header */}
+
         <div className="text-center mb-6">
           <div className="inline-block p-3 bg-blue-100 rounded-full mb-4">
             <i className="fa-solid fa-key text-3xl text-blue-600"></i>
@@ -240,7 +240,7 @@ export default function ForgotPasswordPage() {
           </p>
         </div>
 
-        {/* Step 1: Email Input */}
+
         {step === "email" && (
           <form onSubmit={handleSendOTP} className="space-y-6">
             <div>
@@ -308,7 +308,7 @@ export default function ForgotPasswordPage() {
           </form>
         )}
 
-        {/* Step 2: OTP Verification */}
+
         {step === "otp" && (
           <form onSubmit={handleVerifyOTP} className="space-y-6">
             <div>
@@ -398,7 +398,7 @@ export default function ForgotPasswordPage() {
           </form>
         )}
 
-        {/* Step 3: Reset Password */}
+
         {step === "reset" && (
           <form onSubmit={handleResetPassword} className="space-y-6">
             <div>

@@ -57,7 +57,7 @@ export default function SavedPostsPage() {
   return (
     <div className="min-h-screen py-4 sm:py-6 md:py-8 px-3 sm:px-4 md:px-6 rounded-2xl">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+
         <div className="mb-6 sm:mb-8">
           <div className="mb-4">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 flex items-center gap-2 sm:gap-3">
@@ -66,7 +66,7 @@ export default function SavedPostsPage() {
           </div>
         </div>
 
-        {/* Empty State */}
+
         {bookmarks.length === 0 && !loading && (
           <div className="text-center py-12 sm:py-16 md:py-20 px-4">
             <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-gray-100 rounded-full mb-4 sm:mb-6">
@@ -89,7 +89,7 @@ export default function SavedPostsPage() {
           </div>
         )}
 
-        {/* Bookmarks Grid */}
+
         {bookmarks.length > 0 && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -103,7 +103,7 @@ export default function SavedPostsPage() {
               ))}
             </div>
 
-            {/* Load More Button */}
+
             {hasMore && (
               <div className="text-center mt-6 sm:mt-8">
                 <button
@@ -130,7 +130,7 @@ export default function SavedPostsPage() {
               </div>
             )}
 
-            {/* End Message */}
+
             {!hasMore && bookmarks.length > 0 && (
               <div className="text-center mt-6 sm:mt-8 py-4 sm:py-6">
                 <p className="text-sm sm:text-base text-gray-500 font-medium">

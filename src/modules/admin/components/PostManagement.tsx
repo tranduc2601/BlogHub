@@ -149,21 +149,21 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
       return matches;
     })
     .sort((a, b) => {
-      // Bài viết pending hiển thị trên đầu
+
       if (a.status === 'pending' && b.status !== 'pending') return -1;
       if (a.status !== 'pending' && b.status === 'pending') return 1;
       
-      // Nếu cả hai đều pending: bài tạo sau (mới hơn) ở trên, bài tạo trước (cũ hơn) ở dưới
+
       if (a.status === 'pending' && b.status === 'pending') {
         const dateA = new Date(a.createdAt || 0).getTime();
         const dateB = new Date(b.createdAt || 0).getTime();
-        return dateB - dateA; // Mới hơn trên đầu
+        return dateB - dateA;
       }
       
-      // Nếu cả hai đều đã duyệt/ẩn: bài tạo trước (cũ hơn) ở trên, bài tạo sau (mới hơn) ở dưới
+
       const dateA = new Date(a.createdAt || 0).getTime();
       const dateB = new Date(b.createdAt || 0).getTime();
-      return dateA - dateB; // Cũ hơn trên đầu
+      return dateA - dateB;
     });
 
 
@@ -171,7 +171,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
     setCurrentPage(1);
   }, [filter, searchQuery, searchDate]);
 
-  // Cập nhật URL khi state thay đổi
+
   useEffect(() => {
     const params = new URLSearchParams();
     if (filter !== 'all') params.set('filter', filter);
@@ -186,7 +186,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
   const endIndex = startIndex + POSTS_PER_PAGE;
   const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
 
-  // Tự động chuyển về trang trước nếu trang hiện tại không còn bài viết nào
+
   useEffect(() => {
     if (paginatedPosts.length === 0 && currentPage > 1 && filteredPosts.length > 0) {
       setCurrentPage(currentPage - 1);
@@ -265,7 +265,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
     setCommentReactions({}); 
     setIsLoading(true);
     
-    // Thay đổi URL
+
     navigate(`/admin/post-management/post_${post.id}`, { replace: false });
     
     try {
@@ -291,7 +291,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
       const data = await response.json();
       
       if (data.success && data.comments) {
-        // Fetch pinned comment ID
+
         let pinnedCommentId: string | null = null;
         try {
           const pinnedResponse = await fetch(getApiUrl(`posts/${post.id}/pinned-comment`), {
@@ -341,7 +341,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
           }
         });
         
-        // Sắp xếp: comment được ghim lên đầu
+
         rootComments.sort((a, b) => {
           if (a.isPinned && !b.isPinned) return -1;
           if (!a.isPinned && b.isPinned) return 1;
@@ -377,7 +377,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
         setCommentReactions(reactionsMap);
 
       } else {
-        console.warn('⚠️ No comments found or API error');
+        console.warn('No comments found or API error');
         setPostComments([]);
       }
     } catch (error) {
@@ -395,7 +395,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
     setTimeout(() => {
       setSelectedPost(null);
       setIsClosing(false);
-      // Quay lại URL gốc
+
       navigate('/admin/post-management', { replace: false });
     }, 300);
   };
@@ -419,20 +419,20 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
     return () => document.removeEventListener('click', handleClick);
   }, []);
 
-  // Xử lý khi URL thay đổi (back/forward button)
+
   useEffect(() => {
     const pathMatch = location.pathname.match(/\/admin\/post-management\/post_(\d+)/);
     if (pathMatch) {
       const postId = parseInt(pathMatch[1]);
       const post = posts.find(p => p.id === postId);
       if (post && (!selectedPost || selectedPost.id !== postId)) {
-        // Gọi handleViewPost nhưng không cần navigate lại
+
         setSelectedPost(post);
         setPostComments([]); 
         setCommentReactions({}); 
         setIsLoading(true);
         
-        // Fetch dữ liệu
+
         (async () => {
           try {
             const postResponse = await fetch(getApiUrl(`posts/${post.id}`), {
@@ -454,7 +454,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
             const data = await response.json();
             
             if (data.success && data.comments) {
-              // Fetch pinned comment ID
+
               let pinnedCommentId: string | null = null;
               try {
                 const pinnedResponse = await fetch(getApiUrl(`posts/${post.id}/pinned-comment`));
@@ -500,7 +500,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                 }
               });
               
-              // Sắp xếp: comment được ghim lên đầu
+
               rootComments.sort((a, b) => {
                 if (a.isPinned && !b.isPinned) return -1;
                 if (!a.isPinned && b.isPinned) return 1;
@@ -567,14 +567,14 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header - responsive */}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Quản lý bài viết</h2>
           <p className="text-sm sm:text-base text-gray-600 mt-1">Kiểm duyệt và quản lý nội dung bài viết</p>
         </div>
         
-        {/* Filter buttons - responsive */}
+
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <button
             onClick={() => setFilter('all')}
@@ -619,7 +619,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
         </div>
       </div>
 
-      {/* Search form - responsive */}
+
       <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
           <div>
@@ -674,7 +674,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
               }`}
             >
               <div className="flex flex-col lg:flex-row justify-between items-start gap-3 sm:gap-4">
-                {/* Post content - responsive */}
+
                 <div className="flex-1 w-full lg:w-auto">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     <h3 className="text-lg sm:text-xl font-bold text-gray-800 break-words">{post.title}</h3>
@@ -712,7 +712,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                     </div>
                   </div>
                   
-                  {/* Footer with view button - responsive */}
+
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
                     <p className="text-xs text-gray-500">
                       Ngày tạo: {formatDate(post.createdAt)}
@@ -728,7 +728,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                     </button>
                   </div>
 
-                  {/* Action buttons - responsive */}
+
                   {post.status === 'pending' && (
                     <div className="flex flex-wrap gap-2 mt-4 justify-end">
                       <button
@@ -916,23 +916,23 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                     {selectedPost.title}
                   </h3>
                   
-                  {/* Tags */}
+
                   {selectedPost.tags && (() => {
                     try {
                       let tags: string[] = [];
                       
-                      // Check if already an array
+
                       if (Array.isArray(selectedPost.tags)) {
                         tags = selectedPost.tags;
                       } else if (typeof selectedPost.tags === 'string') {
-                        // Try parsing as JSON first
+
                         try {
                           const parsed = JSON.parse(selectedPost.tags);
                           if (Array.isArray(parsed)) {
                             tags = parsed;
                           }
                         } catch {
-                          // If not JSON, treat as comma-separated string
+
                           tags = selectedPost.tags.split(',').map((t: string) => t.trim()).filter((t: string) => t);
                         }
                       }
@@ -1066,7 +1066,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                                       alt={comment.author}
                                       className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
                                       onError={(e) => {
-                                        console.error('❌ Comment avatar failed:', {
+                                        console.error('Comment avatar failed:', {
                                           url: commentAvatarUrl,
                                           author: comment.author
                                         });

@@ -8,12 +8,12 @@ const router = express.Router();
 
 router.get('/', optionalAuthMiddleware, getPosts);
 
-// Pin/Unpin comment routes
+
 router.post('/:postId/pin-comment', authMiddleware, pinComment);
 router.delete('/:postId/pin-comment', authMiddleware, unpinComment);
 router.get('/:postId/pinned-comment', getPinnedComment);
 
-// Report comment
+
 router.post('/comments/:commentId/report', authMiddleware, reportComment);
 
 router.put('/comments/:commentId', authMiddleware, updateComment);

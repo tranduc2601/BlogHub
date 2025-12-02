@@ -1,7 +1,7 @@
 import db from '../config/database.js';
 import { getFullAvatarUrl } from '../utils/urlHelper.js';
 
-// Get notifications for current user
+
 export const getNotifications = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -29,11 +29,11 @@ export const getNotifications = async (req, res) => {
       LIMIT ? OFFSET ?
     `, [userId, parseInt(limit), parseInt(offset)]);
 
-    // Convert avatar URLs and format anonymous comments
+
     const formattedNotifications = notifications.map(notif => {
       let senderName = notif.senderName;
       
-      // If senderId is null and it's a comment notification, it's anonymous
+
       if (notif.senderId === null && notif.type === 'comment' && notif.anonymousId) {
         senderName = `Người dùng ẩn danh ${notif.anonymousId}`;
       }
@@ -59,7 +59,7 @@ export const getNotifications = async (req, res) => {
   }
 };
 
-// Get unread notification count
+
 export const getUnreadCount = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -83,13 +83,13 @@ export const getUnreadCount = async (req, res) => {
   }
 };
 
-// Mark notification as read
+
 export const markAsRead = async (req, res) => {
   try {
     const notificationId = parseInt(req.params.id);
     const userId = req.user.id;
 
-    // Check if notification belongs to user
+
     const [notifications] = await db.query(
       'SELECT id FROM notifications WHERE id = ? AND userId = ?',
       [notificationId, userId]
@@ -120,7 +120,7 @@ export const markAsRead = async (req, res) => {
   }
 };
 
-// Mark all notifications as read
+
 export const markAllAsRead = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -143,10 +143,10 @@ export const markAllAsRead = async (req, res) => {
   }
 };
 
-// Create notification (helper function)
+
 export const createNotification = async (userId, type, senderId, message, postId = null, anonymousId = null) => {
   try {
-    // Don't create notification if user is notifying themselves (skip check if anonymous)
+
     if (senderId !== null && userId === senderId) {
       return true;
     }
@@ -163,7 +163,7 @@ export const createNotification = async (userId, type, senderId, message, postId
   }
 };
 
-// Delete notification
+
 export const deleteNotification = async (req, res) => {
   try {
     const notificationId = parseInt(req.params.id);

@@ -28,8 +28,8 @@ export default function RegisterPage() {
       newErrors.username = "Vui lòng nhập tên người dùng!";
     } else if (formData.username.length < 3) {
       newErrors.username = "Tên người dùng phải có ít nhất 3 ký tự!";
-    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-      newErrors.username = "Tên người dùng chỉ được chứa chữ cái (a-z, A-Z), số (0-9) và dấu gạch dưới (_)";
+    } else if (!/^[a-zA-ZÀ-ỹ0-9_\s]+$/.test(formData.username)) {
+      newErrors.username = "Tên người dùng chỉ được chứa chữ cái, số (0-9), dấu gạch dưới (_) và khoảng trắng";
     } else if (/admin/i.test(formData.username)) {
       newErrors.username = "Tên người dùng không được chứa từ 'admin'";
     }
@@ -118,9 +118,8 @@ export default function RegisterPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
-    // Chỉ cho phép a-z, A-Z, 0-9 và _ cho username
     if (name === 'username') {
-      const filteredValue = value.replace(/[^a-zA-Z0-9_]/g, '');
+      const filteredValue = value.replace(/[^a-zA-ZÀ-ỹ0-9_\s]/g, '');
       setFormData(prev => ({ ...prev, [name]: filteredValue }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
@@ -176,9 +175,10 @@ export default function RegisterPage() {
                 <div className="text-xs text-gray-500 space-y-1">
                   <div className="font-semibold">Thường cho phép:</div>
                   <ul className="list-disc list-inside pl-2">
-                    <li>Chữ cái: <span className="font-mono">a-z, A-Z</span></li>
+                    <li>Chữ cái (bao gồm tiếng Việt có dấu)</li>
                     <li>Chữ số: <span className="font-mono">0-9</span></li>
                     <li>Dấu gạch dưới: <span className="font-mono">_</span></li>
+                    <li>Khoảng trắng</li>
                     <li className="text-red-500">Không dùng ký tự đặc biệt khác</li>
                   </ul>
                 </div>

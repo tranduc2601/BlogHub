@@ -150,7 +150,7 @@ export default function FollowListPage() {
   }, [type, userId, navigate]);
 
   const handleFollowChange = async () => {
-    // Refetch the list to get accurate follower counts
+
     try {
       const endpoint = type === 'followers' 
         ? `/users/${userId}/followers`
@@ -202,7 +202,7 @@ export default function FollowListPage() {
         </p>
       </div>
 
-      {/* Search Bar */}
+
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-4 sm:p-6 mb-8">
         <div className="relative">
           <input
@@ -228,7 +228,7 @@ export default function FollowListPage() {
         </div>
       </div>
 
-      {/* Loading State */}
+
       {loading && (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -236,7 +236,7 @@ export default function FollowListPage() {
         </div>
       )}
 
-      {/* Empty State */}
+
       {!loading && filteredUsers.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-600 text-lg">
@@ -249,7 +249,7 @@ export default function FollowListPage() {
         </div>
       )}
 
-      {/* Users Grid */}
+
       {!loading && filteredUsers.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredUsers.map((user, index) => (
@@ -258,7 +258,7 @@ export default function FollowListPage() {
             className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 hover:shadow-xl transition-all duration-300 animate-fadeInUp"
             style={{ animationDelay: `${index * 100}ms` }}
           >
-            {/* User Avatar & Info */}
+
             <div className="flex items-center gap-4 mb-4">
               <div className="relative w-16 h-16">
                 {user.avatarUrl ? (
@@ -299,7 +299,7 @@ export default function FollowListPage() {
               </div>
             </div>
 
-            {/* Email */}
+
             <p className="text-gray-600 text-sm mb-4 leading-relaxed text-center flex items-center justify-center gap-2">
               <span className="inline-block w-5 h-5 align-middle">
                 <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -314,7 +314,7 @@ export default function FollowListPage() {
               {user.email}
             </p>
 
-            {/* Stats */}
+
             <div className="grid grid-cols-3 gap-4 mb-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">
@@ -336,7 +336,7 @@ export default function FollowListPage() {
               </div>
             </div>
 
-            {/* Follow Button */}
+
             <div className="flex gap-2">
               <FollowButton userId={user.id} onFollowChange={handleFollowChange} />
             </div>

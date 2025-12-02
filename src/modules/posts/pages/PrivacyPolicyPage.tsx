@@ -2,7 +2,7 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8 sm:py-12 lg:py-16 select-none">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
-        {/* Header */}
+
         <div className="text-center mb-8 sm:mb-12">
           <div className="inline-block mb-4 sm:mb-6">
             <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
@@ -17,7 +17,7 @@ export default function PrivacyPolicyPage() {
           </p>
         </div>
 
-        {/* Content Card */}
+
         <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden">
           <div className="p-6 sm:p-8 lg:p-12">
             <div className="space-y-8 sm:space-y-10 text-gray-700">
@@ -275,7 +275,7 @@ export default function PrivacyPolicyPage() {
             </div>
           </div>
           
-          {/* Footer */}
+
           <div className="bg-gray-50 px-6 sm:px-8 lg:px-12 py-6 border-t border-gray-200">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2 text-sm text-gray-600">

@@ -352,16 +352,16 @@ CREATE TABLE IF NOT EXISTS comment_replies (
 -- END OF SCHEMA
 -- ============================================================================
 -- 
--- ✅ File này AN TOÀN cho database mới hoặc cập nhật
--- ✅ Không xóa dữ liệu, chỉ tạo/cập nhật cấu trúc
--- ✅ Sử dụng IF NOT EXISTS để tránh lỗi
+-- File này AN TOÀN cho database mới hoặc cập nhật
+-- Không xóa dữ liệu, chỉ tạo/cập nhật cấu trúc
+-- Sử dụng IF NOT EXISTS để tránh lỗi
 -- 
 -- HƯỚNG DẪN SỬ DỤNG TRONG TABLEPLUS:
 -- 1. Mở TablePlus và connect vào database
 -- 2. Chọn database: bloghub_db
 -- 3. File → Import → From SQL Dump
 -- 4. Chọn file schema.sql này
--- 5. ⚠️ BỎ CHỌN "Drop existing objects" (quan trọng!)
+-- 5. BỎ CHỌN "Drop existing objects" (quan trọng!)
 -- 6. Click Import
 -- 
 -- HOẶC DÙNG COMMAND LINE:

@@ -43,7 +43,6 @@ axiosInstance.interceptors.response.use(
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('user');
         
-        // Handle session expired
         if (data.sessionExpired) {
           window.location.href = '/login?sessionExpired=true';
           return Promise.reject(data);

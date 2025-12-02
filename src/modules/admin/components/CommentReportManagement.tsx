@@ -105,13 +105,13 @@ const CommentReportManagement: React.FC = () => {
   };
 
   const filteredReports = reports.filter(report => {
-    // Lọc theo trạng thái
+
     if (filter !== 'all' && report.status !== filter) return false;
     
-    // Lọc theo lý do
+
     if (reasonFilter !== 'all' && !report.reason.toLowerCase().includes(reasonFilter.toLowerCase())) return false;
     
-    // Tìm kiếm theo nội dung, tác giả bình luận, người báo cáo
+
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       return (
@@ -125,12 +125,12 @@ const CommentReportManagement: React.FC = () => {
     return true;
   });
 
-  // Tính toán phân trang
+
   useEffect(() => {
     setCurrentPage(1);
   }, [filter, searchQuery, reasonFilter]);
 
-  // Cập nhật URL khi state thay đổi
+
   useEffect(() => {
     const params = new URLSearchParams();
     if (filter !== 'all') params.set('status', filter);
@@ -145,7 +145,7 @@ const CommentReportManagement: React.FC = () => {
   const endIndex = startIndex + REPORTS_PER_PAGE;
   const paginatedReports = filteredReports.slice(startIndex, endIndex);
 
-  // Tự động chuyển về trang trước nếu trang hiện tại không còn báo cáo nào
+
   useEffect(() => {
     if (paginatedReports.length === 0 && currentPage > 1 && filteredReports.length > 0) {
       setCurrentPage(currentPage - 1);
@@ -170,7 +170,7 @@ const CommentReportManagement: React.FC = () => {
     setAdminResponse('');
     setShowModal(true);
     setIsOpeningActionModal(false);
-    // Trigger animation after render
+
     setTimeout(() => {
       setIsOpeningActionModal(true);
     }, 10);
@@ -205,7 +205,7 @@ const CommentReportManagement: React.FC = () => {
       
       if (postResponse.data.success) {
         const post = postResponse.data.post;
-        // Normalize author to string if it's an object
+
         const normalizedPost = {
           ...post,
           author: typeof post.author === 'object' ? post.author.username || post.author.email : post.author,
@@ -216,7 +216,7 @@ const CommentReportManagement: React.FC = () => {
 
       if (commentsResponse.data.success) {
         setIsLoadingComments(false);
-        // Normalize comments author to string
+
         const normalizedComments = (commentsResponse.data.comments || []).map((comment: any) => ({
           ...comment,
           author: typeof comment.author === 'object' ? comment.author.username || comment.author.email : comment.author,
@@ -369,10 +369,10 @@ const CommentReportManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Bộ lọc và tìm kiếm - responsive */}
+
       <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-          {/* Input tìm kiếm */}
+
           <div>
             <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
               <i className="fa-solid fa-magnifying-glass mr-2 text-blue-600"></i>
@@ -393,7 +393,7 @@ const CommentReportManagement: React.FC = () => {
             )}
           </div>
 
-          {/* Select lọc theo lý do */}
+
           <div>
             <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
               <i className="fa-solid fa-list mr-2 text-blue-600"></i>
@@ -422,7 +422,7 @@ const CommentReportManagement: React.FC = () => {
           </div>
         </div>
 
-        {/* Nút reset filter */}
+
         {(searchQuery || reasonFilter !== 'all') && (
           <div className="mt-4 flex justify-end">
             <button
@@ -453,7 +453,7 @@ const CommentReportManagement: React.FC = () => {
               }`}
             >
               <div className="flex flex-col lg:flex-row justify-between items-start gap-3 sm:gap-4">
-                {/* Report content - responsive */}
+
                 <div className="flex-1 w-full lg:w-auto">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     <h3 className="text-lg sm:text-xl font-bold text-gray-800 break-words mr-1">{report.postTitle}</h3>
@@ -503,7 +503,7 @@ const CommentReportManagement: React.FC = () => {
                     </div>
                   )}
                   
-                  {/* Footer with date and view button - responsive */}
+
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
                     <p className="text-xs text-gray-500">
                       Ngày báo cáo: {formatDate(report.createdAt)}
@@ -519,7 +519,7 @@ const CommentReportManagement: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Action buttons - responsive */}
+
                   {report.status === 'pending' ? (
                     <div className="flex flex-wrap gap-2 mt-4 justify-end">
                       <button
@@ -552,7 +552,7 @@ const CommentReportManagement: React.FC = () => {
           ))
         )}
 
-        {/* Phân trang - responsive */}
+
         {totalPages > 1 && paginatedReports.length > 0 && (
           <div className="bg-white rounded-[16px] shadow-lg p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
@@ -599,7 +599,7 @@ const CommentReportManagement: React.FC = () => {
         )}
       </div>
 
-      {/* Modal xử lý báo cáo */}
+
       {showModal && selectedReport && (
         <div 
           className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
@@ -682,7 +682,7 @@ const CommentReportManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Post Detail Modal */}
+
       {selectedPost && (
         <div 
           className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
@@ -697,10 +697,10 @@ const CommentReportManagement: React.FC = () => {
             }`}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
+
             <div className="sticky top-0 z-10 bg-blue-600 flex items-center justify-between px-8 py-5 shadow-xl">
               <div className="flex items-center gap-4">
-                {/* Avatar */}
+
                 {selectedPost.authorAvatar ? (
                   <img
                     src={getAvatarUrl(selectedPost.authorAvatar)}
@@ -730,30 +730,30 @@ const CommentReportManagement: React.FC = () => {
             </div>
                   
             <div className="overflow-y-auto max-h-[calc(95vh-80px)]">
-              {/* Content */}
+
               <div className="p-8 border-b border-gray-200">
                 <div className="mb-6">
                   <h3 className="text-3xl font-bold text-blue-600 mb-2">
                     {selectedPost.title}
                   </h3>
                   
-                  {/* Tags */}
+
                   {selectedPost.tags && (() => {
                     try {
                       let tags: string[] = [];
                       
-                      // Check if already an array
+
                       if (Array.isArray(selectedPost.tags)) {
                         tags = selectedPost.tags;
                       } else if (typeof selectedPost.tags === 'string') {
-                        // Try parsing as JSON first
+
                         try {
                           const parsed = JSON.parse(selectedPost.tags);
                           if (Array.isArray(parsed)) {
                             tags = parsed;
                           }
                         } catch {
-                          // If not JSON, treat as comma-separated string
+
                           tags = selectedPost.tags.split(',').map((t: string) => t.trim()).filter((t: string) => t);
                         }
                       }
@@ -791,7 +791,7 @@ const CommentReportManagement: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Featured Image */}
+
                 {selectedPost.featuredImage && (
                   <div className="mb-6 rounded-2xl overflow-hidden shadow-lg">
                     <img 
@@ -802,14 +802,14 @@ const CommentReportManagement: React.FC = () => {
                   </div>
                 )}
 
-                {/* Excerpt */}
+
                 {selectedPost.excerpt && (
                   <div className="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
                     <p className="text-gray-700 italic">{selectedPost.excerpt}</p>
                   </div>
                 )}
 
-                {/* Content */}
+
                 <div className="prose prose-lg max-w-none">
                   <div 
                     className="text-gray-700 leading-relaxed"
@@ -818,7 +818,7 @@ const CommentReportManagement: React.FC = () => {
                 </div>
               </div>
 
-              {/* Comments Section */}
+
               <div className="p-8 bg-gray-50">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
@@ -854,7 +854,7 @@ const CommentReportManagement: React.FC = () => {
                       
                       return (
                         <div key={comment.id}>
-                          {/* Comment */}
+
                           <div
                             className={`p-5 rounded-2xl border-2 shadow-md ${
                               comment.isHidden 
@@ -864,7 +864,7 @@ const CommentReportManagement: React.FC = () => {
                           >
                             <div className="flex justify-between items-start">
                               <div className="flex gap-3 flex-1">
-                                {/* Avatar */}
+
                                 <div className="relative w-10 h-10 flex-shrink-0">
                                   {commentAvatarUrl ? (
                                     <img 
@@ -917,7 +917,7 @@ const CommentReportManagement: React.FC = () => {
                             </div>
                           </div>
 
-                          {/* Replies with indentation */}
+
                           {comment.replies && comment.replies.length > 0 && (
                             <div className="ml-4 sm:ml-8 md:ml-12 mt-3 space-y-3">
                               {comment.replies.map((reply) => {
@@ -926,7 +926,7 @@ const CommentReportManagement: React.FC = () => {
                                 
                                 return (
                                   <div key={reply.id} className="flex gap-3 group">
-                                    {/* Avatar */}
+
                                     <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mt-2">
                                       {replyAvatarUrl ? (
                                         <img 
@@ -945,7 +945,7 @@ const CommentReportManagement: React.FC = () => {
                                       </div>
                                     </div>
                                     
-                                    {/* Reply Content */}
+
                                     <div className="flex-1 min-w-0">
                                       <div className={`rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm transition-all ${
                                         reply.isHidden 

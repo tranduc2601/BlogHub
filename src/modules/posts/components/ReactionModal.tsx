@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import axios from "@/core/config/axios";
 import toast from "react-hot-toast";
@@ -56,10 +57,10 @@ export default function ReactionModal({ isOpen, onClose, postId, totalReactions 
     if (isOpen) {
       fetchReactionUsers();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [isOpen, postId, activeTab]);
 
-  // Hiệu ứng ẩn modal mượt mà
+
   const handleClose = () => {
     setIsClosing(true);
     setTimeout(() => {
@@ -103,7 +104,7 @@ export default function ReactionModal({ isOpen, onClose, postId, totalReactions 
   return (
     <div className={`fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4 transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}>
       <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[600px] flex flex-col transition-all duration-300 ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100 animate-fadeIn'}`}>
-        {/* Header with Tabs */}
+
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
           <div className="flex items-center gap-2 overflow-x-auto flex-1 mr-2">
             <button
@@ -141,7 +142,7 @@ export default function ReactionModal({ isOpen, onClose, postId, totalReactions 
           </button>
         </div>
 
-        {/* User List */}
+
         <div className="flex-1 overflow-y-auto p-4">
           {loading ? (
             <div className="flex items-center justify-center py-8">

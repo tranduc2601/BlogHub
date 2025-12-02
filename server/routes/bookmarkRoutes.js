@@ -9,7 +9,6 @@ import {
 
 const router = express.Router();
 
-// Tất cả routes đều yêu cầu authentication
 router.get('/', authMiddleware, getBookmarks);
 router.post('/', authMiddleware, addBookmark);
 router.delete('/:postId', authMiddleware, removeBookmark);

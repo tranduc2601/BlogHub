@@ -105,7 +105,7 @@ export const register = async (req, res) => {
     );
     console.log('Register - JWT token:', token);
 
-    // Store session in database (giống như login)
+
     const deviceInfo = req.headers['user-agent'] || 'Unknown Device';
     const ipAddress = req.ip || req.connection.remoteAddress;
     const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
@@ -197,7 +197,7 @@ export const login = async (req, res) => {
       });
     }
 
-    // Delete all existing sessions for this user (force logout from other devices)
+
     await db.query(
       'DELETE FROM user_sessions WHERE userId = ?',
       [user.id]
@@ -217,7 +217,7 @@ export const login = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
-    // Store session in database
+
     const deviceInfo = req.headers['user-agent'] || 'Unknown Device';
     const ipAddress = req.ip || req.connection.remoteAddress;
     const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
@@ -497,7 +497,7 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-// Verify current password only
+
 export const verifyCurrentPassword = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -510,7 +510,7 @@ export const verifyCurrentPassword = async (req, res) => {
       });
     }
 
-    // Get current user password
+
     const [users] = await db.query(
       'SELECT password FROM users WHERE id = ?',
       [userId]
@@ -525,7 +525,7 @@ export const verifyCurrentPassword = async (req, res) => {
 
     const user = users[0];
 
-    // Verify current password
+
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
     
     res.json({ 
@@ -548,7 +548,7 @@ export const changePassword = async (req, res) => {
     
     console.log('ChangePassword - userId:', userId);
 
-    // Validate input
+
     if (!currentPassword || !newPassword || !confirmPassword) {
       return res.status(400).json({ 
         success: false,
@@ -556,7 +556,7 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Check if new password matches confirm password
+
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ 
         success: false,
@@ -564,7 +564,7 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Validate new password strength
+
     if (newPassword.length < 6) {
       return res.status(400).json({ 
         success: false,
@@ -583,7 +583,7 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Get current user password
+
     const [users] = await db.query(
       'SELECT password FROM users WHERE id = ?',
       [userId]
@@ -598,7 +598,7 @@ export const changePassword = async (req, res) => {
 
     const user = users[0];
 
-    // Verify current password
+
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ 
@@ -607,7 +607,7 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Check if new password is same as current password
+
     const isSamePassword = await bcrypt.compare(newPassword, user.password);
     if (isSamePassword) {
       return res.status(400).json({ 
@@ -616,10 +616,10 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Hash new password
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update password in database
+
     await db.query(
       'UPDATE users SET password = ? WHERE id = ?',
       [hashedPassword, userId]
@@ -652,7 +652,7 @@ export const logout = async (req, res) => {
       });
     }
 
-    // Delete session from database
+
     await db.query(
       'DELETE FROM user_sessions WHERE userId = ? AND sessionToken = ?',
       [userId, token]
@@ -683,7 +683,7 @@ export const deleteAccount = async (req, res) => {
     
     console.log('DeleteAccount - userId:', userId);
 
-    // Validate password input
+
     if (!password) {
       return res.status(400).json({ 
         success: false,
@@ -691,10 +691,10 @@ export const deleteAccount = async (req, res) => {
       });
     }
 
-    // Start transaction for data integrity
+
     await connection.beginTransaction();
 
-    // Get user data
+
     const [users] = await connection.query(
       'SELECT * FROM users WHERE id = ? AND (status = "active" OR status IS NULL)',
       [userId]
@@ -710,7 +710,7 @@ export const deleteAccount = async (req, res) => {
 
     const user = users[0];
 
-    // Prevent admin from deleting their account
+
     if (user.role === 'admin') {
       await connection.rollback();
       return res.status(403).json({ 
@@ -719,7 +719,7 @@ export const deleteAccount = async (req, res) => {
       });
     }
 
-    // Verify password
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       await connection.rollback();
@@ -729,7 +729,7 @@ export const deleteAccount = async (req, res) => {
       });
     }
 
-    // Soft delete user account - mark as deleted instead of removing
+
     const deletedEmail = `deleted_${userId}_${user.email}`;
     const deletedUsername = `deleted_user_${userId}`;
     
@@ -747,20 +747,20 @@ export const deleteAccount = async (req, res) => {
       [deletedEmail, deletedUsername, userId]
     );
 
-    // Delete all user sessions (force logout from all devices)
+
     await connection.query(
       'DELETE FROM user_sessions WHERE userId = ?',
       [userId]
     );
 
-    // Hide all user's posts
+
     await connection.query(
       'UPDATE posts SET status = "hidden" WHERE authorId = ?',
       [userId]
     );
 
-    // Anonymize user's comments (keep content but remove user association)
-    // Set userId to NULL (will be handled by foreign key ON DELETE SET NULL)
+
+
     await connection.query(
       `UPDATE comments 
        SET userId = NULL, 
@@ -769,50 +769,50 @@ export const deleteAccount = async (req, res) => {
       [userId]
     );
 
-    // Delete user's reactions
+
     await connection.query(
       'DELETE FROM reactions WHERE userId = ?',
       [userId]
     );
 
-    // Delete comment reactions
+
     await connection.query(
       'DELETE FROM comment_reactions WHERE userId = ?',
       [userId]
     );
 
-    // Delete bookmarks
+
     await connection.query(
       'DELETE FROM bookmarks WHERE userId = ?',
       [userId]
     );
 
-    // Delete follows (both as follower and following)
+
     await connection.query(
       'DELETE FROM follows WHERE followerId = ? OR followingId = ?',
       [userId, userId]
     );
 
-    // Delete notifications (where user is receiver or sender)
+
     await connection.query(
       'DELETE FROM notifications WHERE userId = ? OR senderId = ?',
       [userId, userId]
     );
 
-    // Delete comment reports made by user (if table exists)
+
     try {
       await connection.query(
         'DELETE FROM comment_reports WHERE reporterId = ?',
         [userId]
       );
     } catch (error) {
-      // Ignore if table doesn't exist
+
       if (error.code !== 'ER_NO_SUCH_TABLE') {
         throw error;
       }
     }
 
-    // Commit transaction
+
     await connection.commit();
 
     console.log('DeleteAccount - Account successfully deleted for userId:', userId);
@@ -822,7 +822,7 @@ export const deleteAccount = async (req, res) => {
       message: 'Tài khoản đã được xóa thành công' 
     });
   } catch (error) {
-    // Rollback on error
+
     await connection.rollback();
     console.error('DeleteAccount error:', error);
     res.status(500).json({ 
@@ -834,7 +834,7 @@ export const deleteAccount = async (req, res) => {
   }
 };
 
-// Forgot Password - Send OTP to email
+
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -846,7 +846,7 @@ export const forgotPassword = async (req, res) => {
       });
     }
 
-    // Validate email format
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ 
@@ -855,7 +855,7 @@ export const forgotPassword = async (req, res) => {
       });
     }
 
-    // Check if user exists
+
     const [users] = await db.query(
       'SELECT id, email, status FROM users WHERE email = ?',
       [email]
@@ -870,7 +870,7 @@ export const forgotPassword = async (req, res) => {
 
     const user = users[0];
 
-    // Check if account is locked or deleted
+
     if (user.status === 'locked') {
       return res.status(403).json({ 
         success: false,
@@ -885,14 +885,14 @@ export const forgotPassword = async (req, res) => {
       });
     }
 
-    // Generate 6-digit OTP
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // Set OTP expiration time (10 minutes from now)
+
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    // Store OTP in database (create table if needed)
-    // First, check if password_resets table exists, if not create it
+
+
     await db.query(`
       CREATE TABLE IF NOT EXISTS password_resets (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -906,25 +906,25 @@ export const forgotPassword = async (req, res) => {
       )
     `);
 
-    // Delete any existing OTP for this email
+
     await db.query(
       'DELETE FROM password_resets WHERE email = ?',
       [email]
     );
 
-    // Insert new OTP
+
     await db.query(
       'INSERT INTO password_resets (userId, email, otp, expiresAt) VALUES (?, ?, ?, ?)',
       [user.id, email, otp, expiresAt]
     );
 
-    // In production, send OTP via email service (e.g., SendGrid, Nodemailer)
-    // For now, we'll just log it to console for development
+
+
     console.log(`OTP for ${email}: ${otp}`);
     console.log(`OTP expires at: ${expiresAt}`);
 
-    // TODO: Implement actual email sending here
-    // Example with nodemailer:
+
+
     /*
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -950,7 +950,7 @@ export const forgotPassword = async (req, res) => {
     res.json({ 
       success: true,
       message: 'Mã OTP đã được gửi đến email của bạn',
-      // In development, return OTP for testing
+
       ...(process.env.NODE_ENV === 'development' && { otp })
     });
   } catch (error) {
@@ -962,7 +962,7 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-// Verify OTP
+
 export const verifyOTP = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -974,7 +974,7 @@ export const verifyOTP = async (req, res) => {
       });
     }
 
-    // Check OTP in database
+
     const [resets] = await db.query(
       'SELECT * FROM password_resets WHERE email = ? AND otp = ? AND used = FALSE ORDER BY createdAt DESC LIMIT 1',
       [email, otp]
@@ -989,7 +989,7 @@ export const verifyOTP = async (req, res) => {
 
     const reset = resets[0];
 
-    // Check if OTP has expired
+
     if (new Date() > new Date(reset.expiresAt)) {
       return res.status(400).json({ 
         success: false,
@@ -1010,7 +1010,7 @@ export const verifyOTP = async (req, res) => {
   }
 };
 
-// Reset Password with OTP
+
 export const resetPassword = async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
@@ -1022,7 +1022,7 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    // Validate password
+
     if (newPassword.length < 6) {
       return res.status(400).json({ 
         success: false,
@@ -1041,7 +1041,7 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    // Verify OTP
+
     const [resets] = await db.query(
       'SELECT * FROM password_resets WHERE email = ? AND otp = ? AND used = FALSE ORDER BY createdAt DESC LIMIT 1',
       [email, otp]
@@ -1056,7 +1056,7 @@ export const resetPassword = async (req, res) => {
 
     const reset = resets[0];
 
-    // Check if OTP has expired
+
     if (new Date() > new Date(reset.expiresAt)) {
       return res.status(400).json({ 
         success: false,
@@ -1064,23 +1064,23 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    // Hash new password
+
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-    // Update user password
+
     await db.query(
       'UPDATE users SET password = ? WHERE id = ?',
       [hashedPassword, reset.userId]
     );
 
-    // Mark OTP as used
+
     await db.query(
       'UPDATE password_resets SET used = TRUE WHERE id = ?',
       [reset.id]
     );
 
-    // Delete all user sessions (force logout from all devices for security)
+
     await db.query(
       'DELETE FROM user_sessions WHERE userId = ?',
       [reset.userId]

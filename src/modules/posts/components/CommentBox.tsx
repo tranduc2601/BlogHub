@@ -50,7 +50,7 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
   const [pinnedCommentId, setPinnedCommentId] = useState<string | null>(null);
   
-  // Infinite Scroll states
+
   const [displayedComments, setDisplayedComments] = useState<Comment[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -76,16 +76,16 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
     fetchPinnedComment();
   }, [postId]);
   
-  // Simple validation
+
   const validateComment = (content: string): { valid: boolean; message?: string } => {
     const trimmedContent = content.trim();
     
-    // Check độ dài tối thiểu
+
     if (trimmedContent.length < MIN_COMMENT_LENGTH) {
       return { valid: false, message: `Bình luận phải có ít nhất ${MIN_COMMENT_LENGTH} ký tự!` };
     }
     
-    // Check độ dài tối đa
+
     if (trimmedContent.length > MAX_COMMENT_LENGTH) {
       return { valid: false, message: `Bình luận không được vượt quá ${MAX_COMMENT_LENGTH} ký tự!` };
     }
@@ -93,7 +93,7 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
     return { valid: true };
   };
 
-  // Load comments with pagination
+
   useEffect(() => {
     if (comments.length > 0) {
       const startIndex = 0;
@@ -107,7 +107,7 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
     }
   }, [comments, currentPage]);
 
-  // Intersection Observer for infinite scroll
+
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
     const target = entries[0];
     if (target.isIntersecting && hasMore && !loadingMore && !loading) {
@@ -150,7 +150,7 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
       }
     });
     
-    // Sắp xếp: bình luận được ghim lên đầu
+
     if (pinnedCommentId) {
       tree.sort((a, b) => {
         if (a.id === pinnedCommentId) return -1;
@@ -209,7 +209,7 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
     e.preventDefault();
     if (!newComment.trim() || !user) return;
 
-    // Validate anti-spam
+
     const validation = validateComment(newComment);
     if (!validation.valid) {
       toast.error(validation.message || 'Bình luận không hợp lệ!');
@@ -223,7 +223,7 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
       
       setNewComment("");
       setIsAnonymous(false);
-      // toast.success(isAnonymous ? 'Đã bình luận ẩn danh!' : 'Đã bình luận thành công!');
+
       if (onCommentAdded) onCommentAdded();
     } catch (error) {
       console.error('Error submitting comment:', error);
@@ -354,7 +354,7 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
                     {newComment.length}/{MAX_COMMENT_LENGTH} ký tự
                   </span>
                 </div>
-                {/* Anonymous Comment Toggle */}
+
                 <label className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
                   <input
                     type="checkbox"
@@ -462,7 +462,7 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
             </div>
           )}
 
-          {/* Loading more indicator */}
+
           {loadingMore && (
             <div className="flex justify-center py-4">
               <div className="flex items-center gap-2 text-blue-600">
@@ -472,12 +472,12 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
             </div>
           )}
 
-          {/* Infinite scroll observer target */}
+
           {hasMore && !loadingMore && commentTree.length > 0 && (
             <div ref={observerTarget} className="h-4"></div>
           )}
 
-          {/* End of comments indicator */}
+
           {!hasMore && commentTree.length > 0 && (
             <div className="flex flex-col items-center justify-center py-6 gap-2">
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-100">
@@ -833,7 +833,7 @@ const CommentReactionButton = ({
   });
 
   useEffect(() => {
-    // Use initial reaction from props, no need to fetch again
+
     setCurrentReaction(initialReaction || null);
   }, [initialReaction]);
 
@@ -856,16 +856,16 @@ const CommentReactionButton = ({
       
       await axios.post(`/posts/comments/${commentId}/react`, { reactionType: typeToSend });
       
-      // Update local state immediately for better UX
+
       const newCounts = { ...counts };
       
-      // Remove old reaction count
+
       if (oldReaction) {
         newCounts[oldReaction] = Math.max(0, newCounts[oldReaction] - 1);
         newCounts.total = Math.max(0, newCounts.total - 1);
       }
       
-      // Add new reaction count
+
       if (reactionType) {
         newCounts[reactionType] = newCounts[reactionType] + 1;
         newCounts.total = newCounts.total + 1;
@@ -874,15 +874,15 @@ const CommentReactionButton = ({
       setCounts(newCounts);
       setCurrentReaction(reactionType);
       
-      // if (reactionType === null) {
-      //   toast.success('Đã bỏ biểu cảm của bình luận!');
-      // } else {
-      //   toast.success('Đã thả biểu cảm của bình luận!');
-      // }
+
+
+
+
+
     } catch (error) {
       console.error('Error reacting to comment:', error);
       toast.error('Không thể thả biểu cảm!');
-      // Revert state on error
+
       setCurrentReaction(oldReaction);
     }
   };

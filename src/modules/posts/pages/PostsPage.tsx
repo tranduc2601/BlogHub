@@ -25,7 +25,7 @@ export default function PostsPage() {
 
   const POSTS_PER_PAGE = 9;
 
-  // Fetch posts từ server
+
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
@@ -45,9 +45,9 @@ export default function PostsPage() {
     fetchPosts();
   }, []);
 
-  // Xử lý tìm kiếm và lọc
+
   useEffect(() => {
-    // Hàm tính điểm engagement
+
     const calculateEngagementScore = (post: Post) => {
       const totalReactions = post.total_reactions || post.likes || 0;
       const totalComments = post.comments || 0;
@@ -56,7 +56,7 @@ export default function PostsPage() {
       return totalReactions + (totalComments * 2) + (totalViews / 10);
     };
 
-    // Hàm kiểm tra bài viết có hot không
+
     const isHotPost = (post: Post) => {
       const totalReactions = post.total_reactions || post.likes || 0;
       const totalComments = post.comments || 0;
@@ -68,7 +68,7 @@ export default function PostsPage() {
 
     let result = [...posts];
 
-    // Lọc theo tìm kiếm
+
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter(post => 
@@ -79,12 +79,12 @@ export default function PostsPage() {
       );
     }
 
-    // Lọc theo danh mục
+
     if (selectedCategory !== "all") {
       result = result.filter(post => post.category === selectedCategory);
     }
 
-    // Sắp xếp
+
     result.sort((a, b) => {
       if (sortBy === "hot") {
         const aIsHot = isHotPost(a);
@@ -107,10 +107,10 @@ export default function PostsPage() {
     });
 
     setFilteredPosts(result);
-    setPage(1); // Reset về trang 1 khi filter thay đổi
+    setPage(1);
   }, [posts, searchQuery, selectedCategory, sortBy]);
 
-  // Cập nhật displayed posts khi filteredPosts hoặc page thay đổi
+
   useEffect(() => {
     const startIndex = 0;
     const endIndex = page * POSTS_PER_PAGE;
@@ -120,7 +120,7 @@ export default function PostsPage() {
     setHasMore(endIndex < filteredPosts.length);
   }, [filteredPosts, page]);
 
-  // Infinite scroll handler
+
   useEffect(() => {
     const handleScroll = () => {
       if (loadingMore || !hasMore) return;
@@ -129,11 +129,11 @@ export default function PostsPage() {
       const scrollHeight = document.documentElement.scrollHeight;
       const clientHeight = document.documentElement.clientHeight;
 
-      // Khi scroll gần đến cuối trang (còn 300px)
+
       if (scrollTop + clientHeight >= scrollHeight - 300) {
         setLoadingMore(true);
         
-        // Simulate loading delay
+
         setTimeout(() => {
           setPage(prev => prev + 1);
           setLoadingMore(false);
@@ -145,7 +145,7 @@ export default function PostsPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [loadingMore, hasMore]);
 
-  // Cập nhật URL params khi filter thay đổi
+
   useEffect(() => {
     const params: Record<string, string> = {};
     
@@ -213,9 +213,9 @@ export default function PostsPage() {
           )}
         </div>
         
-        {/* Search và Filter Controls */}
+
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          {/* Search Input */}
+
           <div className="mb-5">
             <div className="relative group">
               <input
@@ -240,7 +240,7 @@ export default function PostsPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Category Filter */}
+
             <div className="relative">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                 <i className="fa-solid fa-layer-group text-[#2563eb]"></i>
@@ -263,7 +263,7 @@ export default function PostsPage() {
               </div>
             </div>
 
-            {/* Sort Filter */}
+
             <div className="relative">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                 <i className="fa-solid fa-arrow-down-wide-short text-[#2563eb]"></i>
@@ -287,7 +287,7 @@ export default function PostsPage() {
           </div>
         </div>
 
-        {/* Results Info */}
+
         <div className="flex items-center justify-between mb-6 px-2">
           <div className="flex items-center gap-3">
             <div className="w-1 h-6 bg-[#2563eb] rounded-full"></div>
@@ -312,7 +312,7 @@ export default function PostsPage() {
         </div>
       </div>
 
-      {/* Posts Grid */}
+
       {filteredPosts.length === 0 ? (
         <div className="text-center py-12">
           <i className="fa-solid fa-inbox text-6xl text-gray-300 mb-4"></i>
@@ -344,7 +344,7 @@ export default function PostsPage() {
             ))}
           </div>
 
-          {/* Loading More Indicator */}
+
           {loadingMore && (
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
@@ -354,7 +354,7 @@ export default function PostsPage() {
             </div>
           )}
 
-          {/* End of List Indicator */}
+
           {!hasMore && displayedPosts.length > 0 && (
             <div className="flex items-center justify-center py-8 mt-4">
               <div className="flex items-center gap-2 text-gray-500">

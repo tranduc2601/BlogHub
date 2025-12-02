@@ -83,11 +83,11 @@ export default function PostDetailPage() {
         await axios.post(`/posts/${post.id}/react`, { reactionType: typeToSend });
         setCurrentReaction(reactionType);
         
-        // if (reactionType === null) {
-        //   toast.success('Đã bỏ biểu cảm!');
-        // } else {
-        //   toast.success('Đã thả biểu cảm!');
-        // }
+
+
+
+
+
         const statsRes = await axios.get(`/posts/${post.id}/reaction-stats`);
         if (statsRes.data.success) {
           const counts = statsRes.data.counts || {};
@@ -147,15 +147,15 @@ export default function PostDetailPage() {
     fetchPost();
   }, [id]);
 
-  // Scroll to comments section if coming from PostCard comment click
+
   useEffect(() => {
     if (location.state?.scrollToComments && !loading && post) {
-      // Small delay to ensure DOM is fully rendered
+
       setTimeout(() => {
         const commentsSection = document.getElementById('comments-section');
         if (commentsSection) {
           commentsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          // Clear the state after scrolling
+
           window.history.replaceState({}, document.title);
         }
       }, 300);
@@ -176,7 +176,7 @@ export default function PostDetailPage() {
 
     const fetchCommentsCount = async () => {
       try {
-        // Add timestamp to bypass cache and always get fresh data
+
         const response = await axios.get(`/posts/${post?.id}/comments?_t=${Date.now()}`);
         if (response.data.success) {
 
@@ -262,7 +262,7 @@ export default function PostDetailPage() {
     };
   }, [showMenu]);
 
-  // Scroll to top button visibility
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 400) {
@@ -276,7 +276,7 @@ export default function PostDetailPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Scroll to top function
+
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -476,7 +476,7 @@ export default function PostDetailPage() {
       console.error('Error reporting comment:', error);
       const err = error as { response?: { status?: number; data?: { success?: boolean; message?: string } } };
       
-      // Hiển thị message từ server nếu có
+
       const errorMessage = err.response?.data?.message;
       
       if (errorMessage) {
@@ -639,7 +639,7 @@ export default function PostDetailPage() {
         
         <div className="bg-blue-700 p-4 md:p-8 text-white">
           
-          {/* Back Button */}
+
           <button
             onClick={() => window.location.href = '/posts'}
             className="group mb-4 md:mb-6 flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 cursor-pointer border-2 border-white/40 hover:border-white/60 hover:shadow-2xl hover:shadow-white/20 hover:scale-110 active:scale-95"
@@ -658,7 +658,7 @@ export default function PostDetailPage() {
             </div>
           )}
           
-          {/* Privacy Notice */}
+
           {post.privacy === 'followers' && (
             <div className="mb-4 md:mb-6 bg-indigo-500 text-white px-4 md:px-6 py-3 md:py-4 rounded-xl shadow-lg flex items-center gap-2 md:gap-3">
               <i className="fa-solid fa-user-group text-xl md:text-2xl"></i>
@@ -734,7 +734,7 @@ export default function PostDetailPage() {
               {post.category}
             </span>
             
-            {/* Privacy Badge */}
+
             {post.privacy && post.privacy !== 'public' && (
               <span className={`inline-flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium ${
                 post.privacy === 'private' ? 'bg-gray-600' : 'bg-indigo-600'
@@ -767,7 +767,7 @@ export default function PostDetailPage() {
           {post.status !== 'pending' && (
             <div className="flex flex-col gap-3 py-4 md:py-6 border-t border-gray-200">
               
-              {/* Row 1: Reactions và Stats - gọn gàng trên mobile */}
+
               <div className="flex items-center gap-2 md:gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
                   <ReactionPicker 
@@ -786,7 +786,7 @@ export default function PostDetailPage() {
                 )}
                 </div>
                 
-                {/* Reaction stats - ẩn chi tiết trên mobile nhỏ */}
+
               {reactionStats && reactionStats.total_reactions > 0 && (
                 <button
                   onClick={() => setIsReactionModalOpen(true)}
@@ -831,7 +831,7 @@ export default function PostDetailPage() {
                 </button>
               )}
               
-              {/* Comments và Views - compact trên mobile */}
+
               <div 
                 className="flex items-center gap-1.5 text-gray-600 text-xs sm:text-sm cursor-pointer hover:text-blue-600 transition-colors"
                 onClick={() => {
@@ -856,7 +856,7 @@ export default function PostDetailPage() {
               </div>
               </div>
               
-              {/* Row 2: Action buttons - responsive layout */}
+
               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap text-sm">
 
               
@@ -1001,7 +1001,7 @@ export default function PostDetailPage() {
         confirmText="Đóng"
       />
 
-      {/* Report Comment Modal */}
+
       <ReportCommentModal
         isOpen={reportCommentModalOpen}
         onClose={() => {
@@ -1013,7 +1013,7 @@ export default function PostDetailPage() {
         commentAuthor={commentToReport?.author || ''}
       />
 
-      {/* Reaction Modal */}
+
       <ReactionModal
         isOpen={isReactionModalOpen}
         onClose={() => setIsReactionModalOpen(false)}
@@ -1021,7 +1021,7 @@ export default function PostDetailPage() {
         totalReactions={reactionStats.total_reactions}
       />
 
-      {/* Scroll to Top Button */}
+
       <button
         onClick={scrollToTop}
         className={`fixed bottom-8 right-8 w-12 h-12 rounded-full bg-[#2664eb] text-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-xl z-50 cursor-pointer ${

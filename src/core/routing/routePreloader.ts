@@ -1,9 +1,3 @@
-/**
- * Route preloader utility
- * Preload specific routes for better user experience
- */
-
-// Import lazy-loaded routes for preloading
 const preloadableRoutes = {
   home: () => import('@/modules/posts/pages/HomePage'),
   posts: () => import('@/modules/posts/pages/PostsPage'),
@@ -19,9 +13,6 @@ const preloadableRoutes = {
 
 type RouteKey = keyof typeof preloadableRoutes;
 
-/**
- * Preload a specific route
- */
 export const preloadRoute = (route: RouteKey) => {
   const loader = preloadableRoutes[route];
   if (loader) {
@@ -31,26 +22,16 @@ export const preloadRoute = (route: RouteKey) => {
   }
 };
 
-/**
- * Preload multiple routes
- */
 export const preloadRoutes = (routes: RouteKey[]) => {
   routes.forEach((route) => preloadRoute(route));
 };
 
-/**
- * Preload commonly accessed routes after initial page load
- */
 export const preloadCommonRoutes = () => {
-  // Delay preloading to not interfere with initial load
   setTimeout(() => {
     preloadRoutes(['posts', 'users', 'createPost']);
   }, 2000);
 };
 
-/**
- * Hook to preload route on hover (for link optimization)
- */
 export const useRoutePreloader = () => {
   return {
     onMouseEnter: (route: RouteKey) => () => preloadRoute(route),

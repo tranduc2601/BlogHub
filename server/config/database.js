@@ -13,8 +13,8 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  timezone: 'Z', // Use UTC timezone for consistent date handling
-  dateStrings: false // Return Date objects, not strings
+  timezone: 'Z', 
+  dateStrings: false 
 });
 
 

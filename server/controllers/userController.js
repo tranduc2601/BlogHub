@@ -44,7 +44,7 @@ export const followUser = async (req, res) => {
       [followerId, followingId]
     );
 
-    // Create notification for the followed user
+
     try {
       const [follower] = await db.query('SELECT username FROM users WHERE id = ?', [followerId]);
       const followerName = follower.length > 0 ? follower[0].username : 'Ai đó';

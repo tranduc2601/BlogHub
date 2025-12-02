@@ -14,26 +14,26 @@ export default function PostEditor() {
   const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
     
-    // Chỉ cho phép chữ cái, số, dấu phẩy và khoảng trắng
+
     value = value.replace(/[^a-zA-Z0-9\sàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ,]/g, '');
     
-    // Xử lý format: sau dấu phẩy phải có đúng 1 khoảng trắng
+
     const parts = value.split(',');
     const formattedParts = parts.map((part, index) => {
-      // Trim khoảng trắng thừa
+
       part = part.trim();
-      // Nếu không phải phần cuối, thêm dấu phẩy và khoảng trắng
+
       return index < parts.length - 1 ? part + ', ' : part;
     });
     
     value = formattedParts.join('');
     
-    // Không cho phép bắt đầu bằng dấu phẩy hoặc khoảng trắng
+
     if (value.startsWith(',') || value.startsWith(' ')) {
       value = value.trimStart().replace(/^,+/, '');
     }
     
-    // Không cho phép nhiều dấu phẩy liên tiếp
+
     value = value.replace(/,+/g, ',');
     
     setTags(value);
@@ -62,7 +62,7 @@ export default function PostEditor() {
     };
   }, [showPrivacyMenu]);
 
-  // Image upload handler for React Quill
+
   const imageHandler = () => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
@@ -73,13 +73,13 @@ export default function PostEditor() {
       const file = input.files?.[0];
       if (!file) return;
 
-      // Validate file size (5MB)
+
       if (file.size > 5 * 1024 * 1024) {
         toast.error('Kích thước ảnh không được vượt quá 5MB!');
         return;
       }
 
-      // Validate file type
+
       if (!file.type.startsWith('image/')) {
         toast.error('Chỉ chấp nhận file ảnh!');
         return;
@@ -102,7 +102,7 @@ export default function PostEditor() {
         if (data.success) {
           const imageUrl = data.url;
           
-          // Insert image into Quill editor
+
           const quill = quillRef.current?.getEditor();
           if (quill) {
             const range = quill.getSelection(true);
@@ -121,7 +121,7 @@ export default function PostEditor() {
     };
   };
 
-  // Quill modules configuration
+
   const modules = useMemo(() => ({
     toolbar: {
       container: [
@@ -220,7 +220,7 @@ export default function PostEditor() {
             <p className="text-gray-600">Hãy chia sẻ ý tưởng và câu chuyện của bạn với cộng đồng!</p>
           </div>
           
-          {/* Privacy Menu */}
+
           <div className="relative" ref={privacyMenuRef}>
             <button
               type="button"

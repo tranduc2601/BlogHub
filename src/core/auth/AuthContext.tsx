@@ -24,7 +24,6 @@ export interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Export AuthContext for useAuth hook
 export { AuthContext };
 
 interface AuthProviderProps {

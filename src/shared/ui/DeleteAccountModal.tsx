@@ -46,7 +46,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
   };
 
   const handleClose = () => {
-    if (isLoading) return; // Ngăn đóng khi đang loading
+
     setIsClosing(true);
     setTimeout(() => {
       setPassword('');
@@ -75,7 +75,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
         onClick={(e) => e.stopPropagation()}
       >
       <div className="p-6 md:p-8 select-none">
-        {/* Header */}
+
         <div className="flex items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
@@ -96,7 +96,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
           </button>
         </div>
 
-        {/* Warning Message */}
+
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
           <div className="flex gap-3">
             <i className="fa-solid fa-circle-exclamation text-red-600 mt-1"></i>
@@ -113,7 +113,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
           </div>
         </div>
 
-        {/* Password Input */}
+
         <div className="mb-4">
           <label className="block font-semibold mb-2 text-gray-700">
             <i className="fa-solid fa-lock mr-2"></i>
@@ -144,7 +144,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
           </div>
         </div>
 
-        {/* Confirmation Text Input */}
+
         <div className="mb-4">
           <label className="block font-semibold mb-2 text-gray-700">
             <i className="fa-solid fa-keyboard mr-2"></i>
@@ -167,7 +167,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
           )}
         </div>
 
-        {/* Agreement Checkbox */}
+
         <div className="mb-6">
           <label className="flex items-start gap-3 cursor-pointer group">
             <input
@@ -183,7 +183,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
           </label>
         </div>
 
-        {/* Action Buttons */}
+
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             className="group flex-1 px-6 py-3 rounded-lg font-semibold transition-all duration-200 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"

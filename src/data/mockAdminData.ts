@@ -1,8 +1,3 @@
-/**
- * Mock data cho Admin Dashboard
- * Dữ liệu giả lập cho bài viết, bình luận cần kiểm duyệt và người dùng
- */
-
 export interface AdminPost {
   id: number;
   title: string;

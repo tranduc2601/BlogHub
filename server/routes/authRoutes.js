@@ -36,7 +36,6 @@ router.post('/verify-current-password', authMiddleware, verifyCurrentPassword);
 router.post('/change-password', authMiddleware, changePassword);
 router.delete('/delete-account', authMiddleware, deleteAccount);
 
-// Forgot Password Routes
 router.post('/forgot-password', forgotPassword);
 router.post('/verify-otp', verifyOTP);
 router.post('/reset-password', resetPassword);

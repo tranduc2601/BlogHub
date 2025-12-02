@@ -103,7 +103,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Cập nhật URL khi state thay đổi
+
   useEffect(() => {
     const params = new URLSearchParams();
     if (filter !== 'all') params.set('status', filter);
@@ -201,14 +201,14 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
       setPostComments([]);
       setIsLoadingComments(true);
       
-      // Fetch post detail
+
       const postResponse = await axios.get(`/posts/${postId}`);
       if (postResponse.data.success) {
         setSelectedPost(postResponse.data.post);
         setCurrentPostAuthorId(postResponse.data.post.authorId);
       }
 
-      // Fetch comments
+
       const response = await fetch(getApiUrl(`posts/${postId}/comments`), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
@@ -218,7 +218,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
       const data = await response.json();
       
       if (data.success && data.comments) {
-        // Fetch pinned comment ID
+
         let pinnedCommentId: string | null = null;
         try {
           const pinnedResponse = await fetch(getApiUrl(`posts/${postId}/pinned-comment`), {
@@ -266,7 +266,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
           }
         });
         
-        // Sort: pinned comments first
+
         rootComments.sort((a, b) => {
           if (a.isPinned && !b.isPinned) return -1;
           if (!a.isPinned && b.isPinned) return 1;
@@ -301,16 +301,16 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
       return matchesFilter && matchesSearch && matchesReason;
     })
     .sort((a, b) => {
-      // Báo cáo pending hiển thị trên đầu
+
       if (a.status === 'pending' && b.status !== 'pending') return -1;
       if (a.status !== 'pending' && b.status === 'pending') return 1;
       
-      // Nếu cả hai đều pending, sắp xếp theo thời gian tạo (mới nhất trên đầu)
+
       if (a.status === 'pending' && b.status === 'pending') {
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
       
-      // Nếu cả hai đều đã xử lý, sắp xếp theo thời gian xử lý (xử lý sau cùng ở dưới cùng)
+
       if (a.reviewedAt && b.reviewedAt) {
         return new Date(a.reviewedAt).getTime() - new Date(b.reviewedAt).getTime();
       }
@@ -323,12 +323,12 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
   const endIndex = startIndex + REPORTS_PER_PAGE;
   const paginatedReports = filteredReports.slice(startIndex, endIndex);
 
-  // Reset về trang 1 khi thay đổi filter
+
   useEffect(() => {
     setCurrentPage(1);
   }, [filter, searchQuery, reasonFilter]);
 
-  // Tự động chuyển về trang trước nếu trang hiện tại không còn báo cáo nào
+
   useEffect(() => {
     if (paginatedReports.length === 0 && currentPage > 1 && filteredReports.length > 0) {
       setCurrentPage(currentPage - 1);
@@ -379,14 +379,14 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header - responsive */}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Quản lý báo cáo bài viết</h2>
           <p className="text-sm sm:text-base text-gray-600 mt-1">Xử lý báo cáo bài viết vi phạm từ người dùng</p>
         </div>
         
-        {/* Filter buttons - responsive */}
+
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <button
             onClick={() => setFilter('all')}
@@ -431,9 +431,9 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
         </div>
       </div>
 
-      {/* Search form - responsive */}
+
       <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-        {/* Search input */}
+
         <div>
           <label htmlFor="search" className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
             <i className="fa-solid fa-magnifying-glass mr-2"></i>Tìm kiếm bài viết
@@ -448,7 +448,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
           />
         </div>
 
-        {/* Reason filter */}
+
         <div>
           <label htmlFor="reasonFilter" className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
             <i className="fa-solid fa-filter mr-2"></i>Lọc theo lý do
@@ -482,7 +482,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
               }`}
             >
               <div className="flex flex-col lg:flex-row justify-between items-start gap-3 sm:gap-4">
-                {/* Report content - responsive */}
+
                 <div className="flex-1 w-full lg:w-auto">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     <h3 className="text-lg sm:text-xl font-bold text-gray-800 break-words mr-1">{report.postTitle}</h3>
@@ -515,7 +515,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                     </div>
                   </div>
                   
-                  {/* Footer with date and view button - responsive */}
+
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
                     <p className="text-xs text-gray-500">
                       Ngày báo cáo: {formatDate(report.createdAt)}
@@ -531,7 +531,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                     </button>
                   </div>
 
-                  {/* Action buttons - responsive */}
+
                   {report.status === 'pending' ? (
                     <div className="flex flex-wrap gap-2 mt-4 justify-end">
                       <button
@@ -569,7 +569,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
           ))
         )}
 
-        {/* Pagination - responsive */}
+
         {totalPages > 1 && paginatedReports.length > 0 && (
           <div className="bg-white rounded-[16px] shadow-lg p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
@@ -626,7 +626,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
         type={modal.type}
       />
 
-      {/* Post Detail Modal */}
+
       {selectedPost && (
         <div 
           className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
@@ -641,10 +641,10 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
             }`}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
+
             <div className="sticky top-0 z-10 bg-blue-600 flex items-center justify-between px-8 py-5 shadow-xl">
               <div className="flex items-center gap-4">
-                {/* Avatar */}
+
                 {selectedPost.authorAvatar ? (
                   <img
                     src={getAvatarUrl(selectedPost.authorAvatar)}
@@ -674,30 +674,30 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
             </div>
                   
             <div className="overflow-y-auto max-h-[calc(95vh-80px)]">
-              {/* Content */}
+
               <div className="p-8 border-b border-gray-200">
                 <div className="mb-6">
                   <h3 className="text-3xl font-bold text-blue-600 mb-2">
                     {selectedPost.title}
                   </h3>
                   
-                  {/* Tags */}
+
                   {selectedPost.tags && (() => {
                     try {
                       let tags: string[] = [];
                       
-                      // Check if already an array
+
                       if (Array.isArray(selectedPost.tags)) {
                         tags = selectedPost.tags;
                       } else if (typeof selectedPost.tags === 'string') {
-                        // Try parsing as JSON first
+
                         try {
                           const parsed = JSON.parse(selectedPost.tags);
                           if (Array.isArray(parsed)) {
                             tags = parsed;
                           }
                         } catch {
-                          // If not JSON, treat as comma-separated string
+
                           tags = selectedPost.tags.split(',').map((t: string) => t.trim()).filter((t: string) => t);
                         }
                       }
@@ -735,7 +735,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                   </div>
                 </div>
 
-                {/* Featured Image */}
+
                 {selectedPost.featuredImage && (
                   <div className="mb-6 rounded-2xl overflow-hidden shadow-lg">
                     <img 
@@ -746,14 +746,14 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                   </div>
                 )}
 
-                {/* Excerpt */}
+
                 {selectedPost.excerpt && (
                   <div className="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
                     <p className="text-gray-700 italic">{selectedPost.excerpt}</p>
                   </div>
                 )}
 
-                {/* Content */}
+
                 <div className="prose prose-lg max-w-none">
                   <div 
                     className="text-gray-700 leading-relaxed"
@@ -762,7 +762,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                 </div>
               </div>
 
-              {/* Comments Section */}
+
               <div className="p-8 bg-gray-50">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
@@ -798,7 +798,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                       
                       return (
                         <div key={comment.id}>
-                          {/* Comment */}
+
                           <div
                             className={`p-5 rounded-2xl border-2 shadow-md ${
                               comment.isHidden 
@@ -808,7 +808,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                           >
                             <div className="flex justify-between items-start">
                               <div className="flex gap-3 flex-1">
-                                {/* Avatar */}
+
                                 <div className="relative w-10 h-10 flex-shrink-0">
                                   {commentAvatarUrl ? (
                                     <img 
@@ -866,7 +866,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                             </div>
                           </div>
 
-                          {/* Replies */}
+
                           {comment.replies && comment.replies.length > 0 && (
                             <div className="ml-4 sm:ml-8 md:ml-12 mt-3 space-y-3">
                               {comment.replies.map((reply) => {
@@ -875,7 +875,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                                 
                                 return (
                                   <div key={reply.id} className="flex gap-3 group">
-                                    {/* Avatar */}
+
                                     <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mt-2">
                                       {replyAvatarUrl ? (
                                         <img 
@@ -894,7 +894,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                                       </div>
                                     </div>
                                     
-                                    {/* Reply Content */}
+
                                     <div className="flex-1 min-w-0">
                                       <div className={`rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm transition-all ${
                                         reply.isHidden 

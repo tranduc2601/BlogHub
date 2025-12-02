@@ -4,7 +4,6 @@ export const config = {
   appVersion: '1.0.0',
 } as const;
 
-// Validate API URL has protocol
 if (config.apiBaseUrl && !config.apiBaseUrl.startsWith('http')) {
   console.warn('API URL missing protocol, adding https://');
 }

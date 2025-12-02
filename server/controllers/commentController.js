@@ -36,18 +36,18 @@ export const getCommentsByPostId = async (req, res) => {
 
     let likedCommentIds = [];
     let commentReactions = {};
-    let reactionCounts = {}; // Store reaction counts for each comment
+
     
     if (comments.length > 0) {
       const commentIds = comments.map(c => c.id);
       
-      // Get all reactions for statistics
+
       const [allReactions] = await db.query(
         'SELECT commentId, reactionType FROM comment_reactions WHERE commentId IN (?)',
         [commentIds]
       );
       
-      // Calculate reaction counts for each comment
+
       allReactions.forEach(r => {
         if (!reactionCounts[r.commentId]) {
           reactionCounts[r.commentId] = {
@@ -64,7 +64,7 @@ export const getCommentsByPostId = async (req, res) => {
         reactionCounts[r.commentId].total++;
       });
       
-      // Get current user's reactions
+
       if (userId) {
         const [reactions] = await db.query(
           'SELECT commentId, reactionType FROM comment_reactions WHERE userId = ? AND commentId IN (?)',
@@ -179,7 +179,7 @@ export const createComment = async (req, res) => {
     }
     
 
-    // Generate anonymousId if comment is anonymous
+
     const anonymousId = isAnonymous ? Math.floor(Math.random() * 900) + 100 : null;
     
     const [result] = await db.query(
@@ -238,16 +238,16 @@ export const createComment = async (req, res) => {
       isOwner: true
     };
     
-    // Create notification for post author
+
     try {
       const [post] = await db.query('SELECT authorId, title FROM posts WHERE id = ?', [postId]);
       if (post.length > 0) {
         const postAuthorId = post[0].authorId;
         const postTitle = post[0].title;
         
-        // Don't create notification if user is commenting on their own post
+
         if (postAuthorId !== userId) {
-          // If comment is anonymous, use null as senderId and pass anonymousId
+
           await createNotification(
             postAuthorId,
             'comment',
@@ -707,14 +707,14 @@ export const deleteReply = async (req, res) => {
   }
 };
 
-// Report a comment
+
 export const reportComment = async (req, res) => {
   try {
     const { commentId } = req.params;
     const { reason } = req.body;
     const reporterId = req.user.id;
 
-    // Check if comment exists
+
     const [comments] = await db.query(
       'SELECT c.*, u.username as authorUsername FROM comments c JOIN users u ON c.userId = u.id WHERE c.id = ?',
       [commentId]
@@ -729,7 +729,7 @@ export const reportComment = async (req, res) => {
 
     const comment = comments[0];
 
-    // Check if user is trying to report their own comment
+
     if (comment.userId === reporterId) {
       return res.status(400).json({
         success: false,
@@ -737,7 +737,7 @@ export const reportComment = async (req, res) => {
       });
     }
 
-    // Check if user has already reported this comment
+
     const [existingReports] = await db.query(
       'SELECT id FROM comment_reports WHERE commentId = ? AND reporterId = ?',
       [commentId, reporterId]
@@ -750,24 +750,24 @@ export const reportComment = async (req, res) => {
       });
     }
 
-    // Create report
+
     await db.query(
       'INSERT INTO comment_reports (commentId, reporterId, reason) VALUES (?, ?, ?)',
       [commentId, reporterId, reason]
     );
 
-    // Update report count
+
     await db.query(
       'UPDATE comments SET reportCount = reportCount + 1 WHERE id = ?',
       [commentId]
     );
 
-    // Get all admins
+
     const [admins] = await db.query(
       "SELECT id FROM users WHERE role = 'admin'"
     );
 
-    // Send notification to all admins
+
     const notificationPromises = admins.map(admin => 
       createNotification(
         admin.id,

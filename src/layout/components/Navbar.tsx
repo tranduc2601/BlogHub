@@ -52,9 +52,8 @@ export default function Navbar() {
     };
   }, [showDropdown, setActiveDropdown]);
 
-  // Ngăn scroll khi mobile menu mở
   useEffect(() => {
-    if (showMobileMenu) {
+    if (showMobileMenu || showDropdown) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -63,12 +62,12 @@ export default function Navbar() {
     return () => {
       document.body.style.overflow = '';
     };
-  }, [showMobileMenu]);
+  }, [showMobileMenu, showDropdown]);
 
   const handleLogout = () => {
     logout();
     toast.success('Đã đăng xuất thành công!', {
-      icon: '👋',
+      icon: <i className="fa-solid fa-check-circle"></i>,
       duration: 3000,
     });
     navigate("/login");

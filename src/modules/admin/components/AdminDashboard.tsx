@@ -98,15 +98,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header - responsive text sizing */}
+
       <div className="mb-4 sm:mb-6">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Thống kê tổng quan</h2>
         <p className="text-sm sm:text-base text-gray-600 mt-1">Dashboard quản trị BlogHub</p>
       </div>
 
-      {/* Stats Cards - responsive grid */}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
-        {/* Tổng bài viết */}
+
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
@@ -122,7 +122,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </div>
 
-        {/* Tổng người dùng */}
+
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
@@ -138,7 +138,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </div>
 
-        {/* Bài viết Hot */}
+
         <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
@@ -154,7 +154,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </div>
 
-        {/* Bình luận */}
+
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
@@ -170,7 +170,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </div>
 
-        {/* Báo cáo vi phạm */}
+
         <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
@@ -187,7 +187,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       </div>
 
-      {/* Chi tiết hoạt động - responsive */}
+
       <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
         <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Chi tiết hoạt động</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
@@ -208,7 +208,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       </div>
 
-      {/* Thống kê báo cáo - responsive */}
+
       <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
         <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Thống kê báo cáo vi phạm</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -231,9 +231,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       </div>
 
-      {/* Charts - responsive layout */}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Chart bài viết */}
+
         <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
           <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Xu hướng bài viết theo tháng</h3>
           {monthlyStats.length === 0 || monthlyStats.every(m => m.posts === 0) ? (
@@ -254,7 +254,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           )}
         </div>
 
-        {/* Chart người dùng */}
+
         <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
           <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Người dùng mới theo tháng</h3>
           {monthlyStats.length === 0 || monthlyStats.every(m => m.users === 0) ? (
@@ -276,9 +276,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       </div>
 
-      {/* Top Posts & Top Users - responsive grid */}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Top Posts */}
+
         <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -342,7 +342,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           )}
         </div>
 
-        {/* Top Users */}
+
         <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -403,7 +403,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       </div>
 
-      {/* Activity History */}
+
       <div className="bg-white rounded-[16px] p-4 sm:p-6 shadow-lg">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">

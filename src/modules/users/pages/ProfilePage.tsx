@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useAuth } from "@/core/auth";
@@ -66,7 +67,7 @@ export default function ProfilePage() {
           const response = await axios.get(`/users/${userId}`);
           if (response.data.success && response.data.user) {
             const userData = response.data.user;
-            // API returns 'name' field, not 'username'
+
             const userName = userData.username || userData.name || '';
             const userObj: ExtendedUser = {
               id: userData.id,
@@ -85,7 +86,7 @@ export default function ProfilePage() {
             fetchFollowerCounts(Number(userId));
           }
         } catch (error) {
-          console.error('❌ Error fetching user data:', error);
+          console.error('Error fetching user data:', error);
           toast.error('Không thể tải thông tin người dùng');
         }
       } else {
@@ -108,20 +109,20 @@ export default function ProfilePage() {
     if ((token && currentUser?.id) || userId) {
       fetchUserData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [userId]);
 
-  // Refresh follower counts when returning to this page
+
   useEffect(() => {
     const targetUserId = userId ? Number(userId) : currentUser?.id;
     if (targetUserId) {
       fetchFollowerCounts(targetUserId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [currentUser?.id, userId]);
 
   useEffect(() => {
-    // Only update state from currentUser when viewing own profile and not when userId changes
+
     if (isViewingOwnProfile && currentUser && !userId) {
       const userName = currentUser.username;
       const userEmail = currentUser.email || "";
@@ -252,7 +253,7 @@ export default function ProfilePage() {
           icon: '✅'
         });
         
-        // Clear local storage and redirect to home
+
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         sessionStorage.removeItem('token');
@@ -417,7 +418,7 @@ export default function ProfilePage() {
               </button>
             </div>
 
-            {/* Delete Account Section */}
+
             <div className="mt-8 pt-6 border-t-2 border-gray-200">
               <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 md:p-6">
                 <div className="flex items-start gap-3 mb-4">
@@ -444,7 +445,7 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Delete Account Modal */}
+
       <DeleteAccountModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}

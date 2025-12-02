@@ -5,15 +5,15 @@ import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Configure multer to use memory storage
+
 const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+
   },
   fileFilter: (req, file, cb) => {
-    // Accept images only
+
     if (!file.mimetype.startsWith('image/')) {
       cb(new Error('Only image files are allowed!'), false);
       return;
@@ -22,7 +22,7 @@ const upload = multer({
   },
 });
 
-// Upload image to Cloudinary
+
 router.post('/image', authMiddleware, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
@@ -32,7 +32,7 @@ router.post('/image', authMiddleware, upload.single('image'), async (req, res) =
       });
     }
 
-    // Upload to Cloudinary using upload_stream
+
     const uploadPromise = new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -53,7 +53,7 @@ router.post('/image', authMiddleware, upload.single('image'), async (req, res) =
         }
       );
 
-      // Write the buffer to the stream
+
       uploadStream.end(req.file.buffer);
     });
 

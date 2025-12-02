@@ -73,35 +73,35 @@ export default function ChangePasswordPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Kiểm tra form có hợp lệ để enable/disable nút submit
+
   const isFormValid = (): boolean => {
-    // Kiểm tra tất cả trường đã được điền
+
     if (!formData.currentPassword || !formData.newPassword || !formData.confirmPassword) {
       return false;
     }
 
-    // Kiểm tra mật khẩu hiện tại có đúng không
+
     if (isCurrentPasswordValid !== true) {
       return false;
     }
 
-    // Kiểm tra mật khẩu mới hợp lệ
+
     if (validatePassword(formData.newPassword) !== "") {
       return false;
     }
 
-    // Kiểm tra mật khẩu xác nhận khớp với mật khẩu mới
+
     if (formData.newPassword !== formData.confirmPassword) {
       return false;
     }
 
-    // Không kiểm tra mật khẩu hiện tại === mật khẩu mới ở đây
-    // vì backend sẽ so sánh với hash trong database
+
+
     
     return true;
   };
 
-  // Verify current password with backend
+
   const verifyCurrentPassword = async (password: string) => {
     if (!password) {
       setIsCurrentPasswordValid(null);
@@ -128,22 +128,22 @@ export default function ChangePasswordPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error for this field when user starts typing
+
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
 
-    // Verify current password when user types
+
     if (name === "currentPassword") {
-      // Clear previous timeout
+
       if (debounceTimeout) {
         clearTimeout(debounceTimeout);
       }
       
-      // Reset validation state
+
       setIsCurrentPasswordValid(null);
       
-      // Debounce the verification
+
       if (value) {
         const timeoutId = setTimeout(() => {
           verifyCurrentPassword(value);
@@ -198,7 +198,7 @@ export default function ChangePasswordPage() {
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Hidden username field for password managers */}
+
         <input
           type="text"
           name="username"
@@ -419,7 +419,7 @@ export default function ChangePasswordPage() {
         </button>
       </div>
 
-      {/* Confirmation Modal */}
+
       <Modal
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}

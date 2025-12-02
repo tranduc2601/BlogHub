@@ -59,7 +59,6 @@ router.get('/reports', getReports);
 router.put('/reports/:id/approve', approveReport);
 router.put('/reports/:id/reject', rejectReport);
 
-// Comment Reports
 router.get('/comment-reports', getCommentReports);
 router.put('/comment-reports/:id/handle', handleCommentReport);
 

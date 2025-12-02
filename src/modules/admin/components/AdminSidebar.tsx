@@ -51,7 +51,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
   return (
     <div className="h-full flex flex-col bg-white">
-      {/* Header - responsive text sizing */}
+
       <div className="p-4 sm:p-5 md:p-6 border-b border-gray-200">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
           <i className="fa-solid fa-shield-halved"></i>
@@ -63,7 +63,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         </p>
       </div>
 
-      {/* Navigation - improved mobile spacing */}
+
       <nav className="flex-1 p-3 sm:p-4 overflow-y-auto">
         <ul className="space-y-1.5 sm:space-y-2">
           {menuItems.map((item) => (
@@ -95,7 +95,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         </ul>
       </nav>
 
-      {/* Footer - responsive layout */}
+
       <div className="p-3 sm:p-4 border-t border-gray-200 space-y-2">
         <Link
           to="/"

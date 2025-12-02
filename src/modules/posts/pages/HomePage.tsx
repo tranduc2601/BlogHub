@@ -10,7 +10,7 @@ export default function HomePage() {
   const [typedText, setTypedText] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
   
-  // Lấy giá trị từ URL query params
+
   const [activeTab, setActiveTab] = useState<"recent" | "popular">(
     (searchParams.get("tab") as "recent" | "popular") || "recent"
   );
@@ -45,7 +45,7 @@ export default function HomePage() {
     fetchStats();
   }, []);
 
-  // Cập nhật URL khi state thay đổi
+
   useEffect(() => {
     const params = new URLSearchParams();
     if (activeTab !== "recent") {
@@ -59,7 +59,7 @@ export default function HomePage() {
     }
     setSearchParams(params, { replace: true });
   }, [activeTab, search, searchTag, setSearchParams]);
-  // Helper function để xác định bài viết có "hot" không (giống logic trong PostCard)
+
   const isHotPost = (post: typeof posts[0]) => {
     const totalReactions = post.total_reactions || 0;
     const totalComments = post.comments || 0;
@@ -79,13 +79,13 @@ export default function HomePage() {
       return matchTitle && matchTag;
     })
     .sort((a, b) => {
-      // Sắp xếp bài viết Hot lên trên đầu
+
       const aIsHot = isHotPost(a);
       const bIsHot = isHotPost(b);
       
-      if (aIsHot && !bIsHot) return -1; // a lên trước
-      if (!aIsHot && bIsHot) return 1;  // b lên trước
-      return 0; // giữ nguyên thứ tự ban đầu
+      if (aIsHot && !bIsHot) return -1; 
+      if (!aIsHot && bIsHot) return 1;  
+      return 0; 
     });
 
   const handleOpenReactionModal = (postId: number, totalReactions: number) => {
@@ -96,7 +96,7 @@ export default function HomePage() {
     setReactionModalState({ isOpen: false, postId: 0, totalReactions: 0 });
   };
 
-  // Scroll to top button visibility
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 400) {
@@ -110,7 +110,7 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Scroll to top function
+
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -118,7 +118,7 @@ export default function HomePage() {
     });
   };
 
-  // Typing animation effect
+
   useEffect(() => {
     const text = "Chào mừng đến với BlogHub";
     let currentIndex = 0;
@@ -127,30 +127,30 @@ export default function HomePage() {
 
     const type = () => {
       if (!isDeleting) {
-        // Typing phase
+
         if (currentIndex <= text.length) {
           setTypedText(text.substring(0, currentIndex));
           currentIndex++;
-          timeoutId = setTimeout(type, 100); // Typing speed
+          timeoutId = setTimeout(type, 80); 
         } else {
-          // Pause before deleting
+
           timeoutId = setTimeout(() => {
             isDeleting = true;
             type();
-          }, 2000); // Pause duration
+          }, 2000); 
         }
       } else {
-        // Deleting phase
+
         if (currentIndex > 0) {
           currentIndex--;
           setTypedText(text.substring(0, currentIndex));
-          timeoutId = setTimeout(type, 50); // Deleting speed
+          timeoutId = setTimeout(type, 50); 
         } else {
-          // Pause before typing again
+
           timeoutId = setTimeout(() => {
             isDeleting = false;
             type();
-          }, 500); // Pause before restart
+          }, 500);
         }
       }
     };
@@ -399,7 +399,6 @@ export default function HomePage() {
         totalReactions={reactionModalState.totalReactions}
       />
 
-      {/* Scroll to Top Button */}
       <button
         onClick={scrollToTop}
         className={`fixed bottom-8 right-8 w-12 h-12 rounded-full bg-[#2664eb] text-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-xl z-50 cursor-pointer ${

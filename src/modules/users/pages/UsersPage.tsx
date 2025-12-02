@@ -113,7 +113,7 @@ export default function UsersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   
-  // Lấy giá trị từ URL query params
+
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
   const [sortBy, setSortBy] = useState<"name" | "posts" | "comments" | "followers" | "likes" | "joinedEarliest" | "joinedLatest">(
     (searchParams.get("sortBy") as "name" | "posts" | "comments" | "followers" | "likes" | "joinedEarliest" | "joinedLatest") || "followers"
@@ -129,7 +129,7 @@ export default function UsersPage() {
   
   const USERS_PER_PAGE = 9;
   
-  // Modal state
+
   const [showModal, setShowModal] = useState(false);
   const [isClosingModal, setIsClosingModal] = useState(false);
   const [modalType, setModalType] = useState<'followers' | 'following'>('followers');
@@ -140,7 +140,7 @@ export default function UsersPage() {
     setLocalUsers(users);
   }, [users]);
 
-  // Lọc và sắp xếp users với useMemo để tránh re-render vô hạn
+
   const filteredAndSortedUsers = useMemo(() => {
     return localUsers
       .filter(
@@ -172,12 +172,12 @@ export default function UsersPage() {
           case "joinedEarliest": {
             const aDate = new Date(a.joinedAt).getTime();
             const bDate = new Date(b.joinedAt).getTime();
-            return aDate - bDate; // Sớm nhất đến muộn nhất
+            return aDate - bDate; 
           }
           case "joinedLatest": {
             const aDate = new Date(a.joinedAt).getTime();
             const bDate = new Date(b.joinedAt).getTime();
-            return bDate - aDate; // Mới nhất đến cũ nhất
+            return bDate - aDate;
           }
           default:
             return 0;
@@ -185,12 +185,12 @@ export default function UsersPage() {
       });
   }, [localUsers, searchTerm, sortBy, currentUser?.id]);
 
-  // Reset page khi filter thay đổi
+
   useEffect(() => {
     setPage(1);
   }, [searchTerm, sortBy]);
 
-  // Cập nhật displayed users khi filteredUsers hoặc page thay đổi
+
   useEffect(() => {
     const startIndex = 0;
     const endIndex = page * USERS_PER_PAGE;
@@ -201,7 +201,7 @@ export default function UsersPage() {
     setHasMore(hasMoreUsers);
   }, [filteredAndSortedUsers, page]);
 
-  // Infinite scroll handler
+
   useEffect(() => {
     const handleScroll = () => {
       if (loadingMore || !hasMore) return;
@@ -210,11 +210,11 @@ export default function UsersPage() {
       const scrollHeight = document.documentElement.scrollHeight;
       const clientHeight = document.documentElement.clientHeight;
 
-      // Khi scroll gần đến cuối trang (còn 300px)
+
       if (scrollTop + clientHeight >= scrollHeight - 300) {
         setLoadingMore(true);
         
-        // Simulate loading delay
+
         setTimeout(() => {
           setPage(prev => prev + 1);
           setLoadingMore(false);
@@ -226,7 +226,7 @@ export default function UsersPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [loadingMore, hasMore]);
 
-  // Cập nhật URL khi searchTerm hoặc sortBy thay đổi
+
   useEffect(() => {
     const params = new URLSearchParams();
     if (searchTerm) {
@@ -238,7 +238,7 @@ export default function UsersPage() {
     setSearchParams(params, { replace: true });
   }, [searchTerm, sortBy, setSearchParams]);
 
-  // Ngăn scroll khi modal mở
+
   useEffect(() => {
     if (showModal) {
       document.body.style.overflow = 'hidden';
@@ -252,7 +252,7 @@ export default function UsersPage() {
   }, [showModal]);
 
   const handleFollowChange = async () => {
-    // Refetch users list to get accurate follower counts
+
     try {
       const response = await axios.get('/users');
       if (response.data.success) {
@@ -460,7 +460,7 @@ export default function UsersPage() {
                     <span className="truncate">{user.email}</span>
                   </p>
 
-                  {/* Stats */}
+
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     <div className="text-center mt-2">
                   <div className="text-2xl font-bold text-blue-600">
@@ -497,7 +497,7 @@ export default function UsersPage() {
             ))}
           </div>
 
-          {/* Loading More Indicator */}
+
           {loadingMore && (
             <div className="flex items-center justify-center py-8 mt-6">
               <div className="text-center">
@@ -507,7 +507,7 @@ export default function UsersPage() {
             </div>
           )}
 
-          {/* End of List Indicator */}
+
           {!hasMore && displayedUsers.length > 0 && (
             <div className="flex items-center justify-center py-8 mt-6">
               <div className="flex items-center gap-2 text-gray-500">
@@ -521,7 +521,7 @@ export default function UsersPage() {
         </>
       )}
       
-      {/* Followers/Following Modal */}
+
       {showModal && (
         <div 
           className={`fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4 transition-all duration-300 ${
@@ -535,7 +535,7 @@ export default function UsersPage() {
             }`}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
+
             <div className="bg-[#2664eb] text-white p-6 flex items-center justify-between">
               <h2 className="text-2xl font-bold flex items-center gap-2">
                 <i className={`fa-solid ${modalType === 'followers' ? 'fa-users' : 'fa-user-check'} mr-2`}></i>
@@ -549,7 +549,7 @@ export default function UsersPage() {
               </button>
             </div>
 
-            {/* Modal Content */}
+
             <div className="p-6 overflow-y-auto max-h-[calc(80vh-88px)]">
               {modalLoading ? (
                 <div className="text-center py-12">

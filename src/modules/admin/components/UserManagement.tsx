@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Modal } from '@/shared/ui';
@@ -20,7 +21,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   
-  // Lấy giá trị từ URL query params
+
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'locked'>(
     (searchParams.get('status') as 'all' | 'active' | 'locked') || 'all'
   );
@@ -29,13 +30,13 @@ const UserManagement: React.FC<UserManagementProps> = ({
   );
   const USERS_PER_PAGE = 5;
 
-  // Sync search query từ URL khi component mount
+
   useEffect(() => {
     const searchFromUrl = searchParams.get('search');
     if (searchFromUrl && searchFromUrl !== searchQuery) {
       onSearchChange(searchFromUrl);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
   const filteredUsers = users
@@ -51,7 +52,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
   const endIndex = startIndex + USERS_PER_PAGE;
   const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
 
-  // Cập nhật URL khi state thay đổi
+
   useEffect(() => {
     const params = new URLSearchParams();
     if (statusFilter !== 'all') {
@@ -66,7 +67,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
     setSearchParams(params, { replace: true });
   }, [statusFilter, currentPage, searchQuery, setSearchParams]);
 
-  // Tự động chuyển về trang trước nếu trang hiện tại không còn user nào
+
   useEffect(() => {
     if (paginatedUsers.length === 0 && currentPage > 1 && filteredUsers.length > 0) {
       setCurrentPage(currentPage - 1);
@@ -142,7 +143,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header - responsive */}
+
       <div>
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Quản lý người dùng</h2>
         <p className="text-sm sm:text-base text-gray-600 mt-1">Quản lý tài khoản và trạng thái người dùng</p>
@@ -219,7 +220,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
         </div>
       </div>
 
-      {/* Stats cards - responsive */}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
           <p className="text-blue-100 text-sm font-medium">Tổng người dùng</p>
@@ -239,7 +240,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
         </div>
       </div>
 
-      {/* Table - responsive with horizontal scroll */}
+
       <div className="bg-white rounded-[16px] shadow-lg overflow-hidden">
         <div className="overflow-x-auto -mx-4 sm:mx-0">
           <table className="w-full min-w-[800px]">
@@ -362,7 +363,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
           </table>
         </div>
 
-        {/* Pagination - responsive */}
+
         {totalPages > 1 && (
           <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-200 gap-3 sm:gap-0">
             <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">

@@ -1,6 +1,6 @@
 import db from '../config/database.js';
 
-// Lấy danh sách bài viết đã lưu của user
+
 export const getBookmarks = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -8,7 +8,7 @@ export const getBookmarks = async (req, res) => {
     const limit = parseInt(req.query.limit) || 9;
     const offset = (page - 1) * limit;
 
-    // Lấy danh sách bookmarks với thông tin bài viết
+
     const [bookmarks] = await db.query(
       `SELECT 
         b.id as bookmarkId,
@@ -37,7 +37,7 @@ export const getBookmarks = async (req, res) => {
       [userId, limit, offset]
     );
 
-    // Đếm tổng số bookmarks
+
     const [countResult] = await db.query(
       `SELECT COUNT(*) as total 
        FROM bookmarks b
@@ -48,7 +48,7 @@ export const getBookmarks = async (req, res) => {
 
     const total = countResult[0].total;
 
-    // Parse tags
+
     const formattedBookmarks = bookmarks.map(post => ({
       ...post,
       tags: post.tags ? (typeof post.tags === 'string' ? JSON.parse(post.tags) : post.tags) : []
@@ -73,7 +73,7 @@ export const getBookmarks = async (req, res) => {
   }
 };
 
-// Thêm bookmark
+
 export const addBookmark = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -86,7 +86,7 @@ export const addBookmark = async (req, res) => {
       });
     }
 
-    // Kiểm tra bài viết có tồn tại không
+
     const [posts] = await db.query(
       'SELECT id, status FROM posts WHERE id = ?',
       [postId]
@@ -99,7 +99,7 @@ export const addBookmark = async (req, res) => {
       });
     }
 
-    // Kiểm tra đã bookmark chưa
+
     const [existing] = await db.query(
       'SELECT id FROM bookmarks WHERE userId = ? AND postId = ?',
       [userId, postId]
@@ -112,7 +112,7 @@ export const addBookmark = async (req, res) => {
       });
     }
 
-    // Thêm bookmark
+
     await db.query(
       'INSERT INTO bookmarks (userId, postId) VALUES (?, ?)',
       [userId, postId]
@@ -131,7 +131,7 @@ export const addBookmark = async (req, res) => {
   }
 };
 
-// Xóa bookmark
+
 export const removeBookmark = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -144,7 +144,7 @@ export const removeBookmark = async (req, res) => {
       });
     }
 
-    // Xóa bookmark
+
     const [result] = await db.query(
       'DELETE FROM bookmarks WHERE userId = ? AND postId = ?',
       [userId, postId]
@@ -170,7 +170,7 @@ export const removeBookmark = async (req, res) => {
   }
 };
 
-// Kiểm tra bài viết đã được bookmark chưa
+
 export const checkBookmark = async (req, res) => {
   try {
     const userId = req.user.id;
