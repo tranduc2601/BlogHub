@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, logout, getMe, updateProfile, changePassword, verifyCurrentPassword, deleteAccount } from '../controllers/authController.js';
+import { register, login, logout, getMe, updateProfile, changePassword, verifyCurrentPassword, deleteAccount, forgotPassword, verifyOTP, resetPassword } from '../controllers/authController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import multer from 'multer';
 
@@ -35,5 +35,10 @@ router.put('/me', authMiddleware, upload.single('avatar'), updateProfile);
 router.post('/verify-current-password', authMiddleware, verifyCurrentPassword);
 router.post('/change-password', authMiddleware, changePassword);
 router.delete('/delete-account', authMiddleware, deleteAccount);
+
+// Forgot Password Routes
+router.post('/forgot-password', forgotPassword);
+router.post('/verify-otp', verifyOTP);
+router.post('/reset-password', resetPassword);
 
 export default router;

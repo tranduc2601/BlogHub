@@ -833,3 +833,270 @@ export const deleteAccount = async (req, res) => {
     connection.release();
   }
 };
+
+// Forgot Password - Send OTP to email
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Vui lòng nhập email' 
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Email không hợp lệ' 
+      });
+    }
+
+    // Check if user exists
+    const [users] = await db.query(
+      'SELECT id, email, status FROM users WHERE email = ?',
+      [email]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Email không tồn tại trong hệ thống' 
+      });
+    }
+
+    const user = users[0];
+
+    // Check if account is locked or deleted
+    if (user.status === 'locked') {
+      return res.status(403).json({ 
+        success: false,
+        message: 'Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên' 
+      });
+    }
+
+    if (user.status === 'deleted') {
+      return res.status(403).json({ 
+        success: false,
+        message: 'Tài khoản đã bị xóa' 
+      });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Set OTP expiration time (10 minutes from now)
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    // Store OTP in database (create table if needed)
+    // First, check if password_resets table exists, if not create it
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS password_resets (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        userId INT NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        otp VARCHAR(6) NOT NULL,
+        expiresAt DATETIME NOT NULL,
+        used BOOLEAN DEFAULT FALSE,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Delete any existing OTP for this email
+    await db.query(
+      'DELETE FROM password_resets WHERE email = ?',
+      [email]
+    );
+
+    // Insert new OTP
+    await db.query(
+      'INSERT INTO password_resets (userId, email, otp, expiresAt) VALUES (?, ?, ?, ?)',
+      [user.id, email, otp, expiresAt]
+    );
+
+    // In production, send OTP via email service (e.g., SendGrid, Nodemailer)
+    // For now, we'll just log it to console for development
+    console.log(`OTP for ${email}: ${otp}`);
+    console.log(`OTP expires at: ${expiresAt}`);
+
+    // TODO: Implement actual email sending here
+    // Example with nodemailer:
+    /*
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+      }
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Mã OTP đặt lại mật khẩu - BlogHub',
+      html: `
+        <h2>Đặt lại mật khẩu</h2>
+        <p>Mã OTP của bạn là: <strong>${otp}</strong></p>
+        <p>Mã này sẽ hết hạn sau 10 phút.</p>
+        <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
+      `
+    });
+    */
+
+    res.json({ 
+      success: true,
+      message: 'Mã OTP đã được gửi đến email của bạn',
+      // In development, return OTP for testing
+      ...(process.env.NODE_ENV === 'development' && { otp })
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi server khi xử lý yêu cầu' 
+    });
+  }
+};
+
+// Verify OTP
+export const verifyOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Vui lòng nhập đầy đủ thông tin' 
+      });
+    }
+
+    // Check OTP in database
+    const [resets] = await db.query(
+      'SELECT * FROM password_resets WHERE email = ? AND otp = ? AND used = FALSE ORDER BY createdAt DESC LIMIT 1',
+      [email, otp]
+    );
+
+    if (resets.length === 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Mã OTP không đúng hoặc đã được sử dụng' 
+      });
+    }
+
+    const reset = resets[0];
+
+    // Check if OTP has expired
+    if (new Date() > new Date(reset.expiresAt)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới' 
+      });
+    }
+
+    res.json({ 
+      success: true,
+      message: 'Xác thực OTP thành công' 
+    });
+  } catch (error) {
+    console.error('Verify OTP error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi server khi xác thực OTP' 
+    });
+  }
+};
+
+// Reset Password with OTP
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Vui lòng nhập đầy đủ thông tin' 
+      });
+    }
+
+    // Validate password
+    if (newPassword.length < 6) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Mật khẩu phải có ít nhất 6 ký tự' 
+      });
+    }
+
+    const hasUpperCase = /[A-Z]/.test(newPassword);
+    const hasNumber = /[0-9]/.test(newPassword);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
+    
+    if (!hasUpperCase || !hasNumber || !hasSpecialChar) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 số và 1 ký tự đặc biệt' 
+      });
+    }
+
+    // Verify OTP
+    const [resets] = await db.query(
+      'SELECT * FROM password_resets WHERE email = ? AND otp = ? AND used = FALSE ORDER BY createdAt DESC LIMIT 1',
+      [email, otp]
+    );
+
+    if (resets.length === 0) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Mã OTP không đúng hoặc đã được sử dụng' 
+      });
+    }
+
+    const reset = resets[0];
+
+    // Check if OTP has expired
+    if (new Date() > new Date(reset.expiresAt)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới' 
+      });
+    }
+
+    // Hash new password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update user password
+    await db.query(
+      'UPDATE users SET password = ? WHERE id = ?',
+      [hashedPassword, reset.userId]
+    );
+
+    // Mark OTP as used
+    await db.query(
+      'UPDATE password_resets SET used = TRUE WHERE id = ?',
+      [reset.id]
+    );
+
+    // Delete all user sessions (force logout from all devices for security)
+    await db.query(
+      'DELETE FROM user_sessions WHERE userId = ?',
+      [reset.userId]
+    );
+
+    console.log(`Password reset successfully for user ID: ${reset.userId}`);
+
+    res.json({ 
+      success: true,
+      message: 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại' 
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi server khi đặt lại mật khẩu' 
+    });
+  }
+};

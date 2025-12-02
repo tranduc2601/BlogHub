@@ -253,9 +253,9 @@ export default function LoginPage() {
                 />
                 <span className="font-medium">Ghi nhớ đăng nhập</span>
               </label>
-              {/* <a href="#" className="text-sm text-blue-600 hover:text-blue-700 transition-colors">
+              <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
                 Quên mật khẩu?
-              </a> */}
+              </Link>
             </div>
 
             <button

@@ -388,6 +388,16 @@ export default function ChangePasswordPage() {
         </div>
       </form>
 
+      <div className="mt-6 text-center">
+        <button
+          onClick={() => navigate("/forgot-password")}
+          className="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2 transition-colors cursor-pointer"
+        >
+          <i className="fa-solid fa-question-circle"></i>
+          Quên mật khẩu?
+        </button>
+      </div>
+
       {/* Confirmation Modal */}
       <Modal
         isOpen={showConfirmModal}

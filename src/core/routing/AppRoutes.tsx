@@ -27,6 +27,7 @@ const AdminPage = lazy(() => import('@/modules/admin/pages/AdminPage'));
 
 const LoginPage = lazy(() => import('@/modules/auth/pages/LoginPage'));
 const RegisterPage = lazy(() => import('@/modules/auth/pages/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('@/modules/auth/pages/ForgotPasswordPage'));
 
 const PrivacyPolicyPage = lazy(() => import('@/modules/posts/pages/PrivacyPolicyPage'));
 const TermsOfServicePage = lazy(() => import('@/modules/posts/pages/TermsOfServicePage'));
@@ -142,6 +143,7 @@ export function AppRoutes() {
           {/* Auth routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>
