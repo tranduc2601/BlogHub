@@ -67,7 +67,6 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     toast.success('Đã đăng xuất thành công!', {
-      icon: <i className="fa-solid fa-check-circle"></i>,
       duration: 3000,
     });
     navigate("/login");

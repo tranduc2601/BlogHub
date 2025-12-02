@@ -305,7 +305,7 @@ export const getComments = async (req, res) => {
       success: true, 
       comments: comments.map(c => ({
         ...c,
-        createdAt: c.createdAt?.toISOString().slice(0, 10) || '',
+        createdAt: c.createdAt?.toISOString() || '',
 
       }))
     });
@@ -654,7 +654,7 @@ export const getTopPosts = async (req, res) => {
       topPosts: topPosts.map(post => ({
         ...post,
         authorAvatar: getFullAvatarUrl(post.authorAvatar),
-        createdAt: post.createdAt?.toISOString().slice(0, 10) || ''
+        createdAt: post.createdAt?.toISOString() || ''
       }))
     });
   } catch (error) {
@@ -801,8 +801,8 @@ export const getReports = async (req, res) => {
       success: true, 
       reports: reports.map(r => ({
         ...r,
-        createdAt: r.createdAt?.toISOString().slice(0, 10) || '',
-        reviewedAt: r.reviewedAt?.toISOString().slice(0, 10) || null
+        createdAt: r.createdAt?.toISOString() || '',
+        reviewedAt: r.reviewedAt?.toISOString() || null
       }))
     });
   } catch (error) {
