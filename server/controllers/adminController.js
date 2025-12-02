@@ -30,7 +30,7 @@ export const getPosts = async (req, res) => {
       success: true, 
       posts: posts.map(p => ({
         ...p,
-        createdAt: p.createdAt?.toISOString().slice(0, 10) || '',
+        createdAt: p.createdAt?.toISOString() || '',
         needsReview: p.status === 'pending',
         hasReports: false,
         reportCount: 0
