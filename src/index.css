@@ -534,3 +534,37 @@ body {
 .rgb-border:hover {
   animation: rgbShadowRotate 2.5s linear infinite;
 }
+
+/* Underline hover animation for 'Quên mật khẩu?' */
+.underline-animate {
+  cursor: pointer;
+}
+.underline-animate span {
+  pointer-events: none;
+}
+button:hover .underline-animate > span,
+button:focus .underline-animate > span {
+  transform: scaleX(1);
+}
+button .underline-animate > span {
+  transform: scaleX(0);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  transform-origin: left;
+}
+
+/* Underline hover animation for 'Quay lại đăng nhập' */
+.login-back-btn .login-back-underline {
+  cursor: pointer;
+}
+.login-back-btn .login-back-underline span {
+  pointer-events: none;
+}
+.login-back-btn:hover .login-back-underline > span,
+.login-back-btn:focus .login-back-underline > span {
+  transform: scaleX(1);
+}
+.login-back-btn .login-back-underline > span {
+  transform: scaleX(0);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  transform-origin: left;
+}

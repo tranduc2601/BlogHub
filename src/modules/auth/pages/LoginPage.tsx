@@ -253,7 +253,7 @@ export default function LoginPage() {
                 />
                 <span className="font-medium">Ghi nhớ đăng nhập</span>
               </label>
-              <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+              <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-all duration-300 hover:scale-105 active:scale-95 focus:outline-none">
                 Quên mật khẩu?
               </Link>
             </div>

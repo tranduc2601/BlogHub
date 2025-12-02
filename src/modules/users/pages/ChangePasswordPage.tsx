@@ -390,11 +390,32 @@ export default function ChangePasswordPage() {
 
       <div className="mt-6 text-center">
         <button
-          onClick={() => navigate("/forgot-password")}
-          className="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2 transition-colors cursor-pointer"
+          onClick={() => navigate("/forgot-password", { state: { from: "change-password" } })}
+          className="relative text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2 transition-colors cursor-pointer focus:outline-none"
+          style={{
+            background: "none",
+            border: "none",
+            padding: 0,
+            outline: "none"
+          }}
         >
           <i className="fa-solid fa-question-circle"></i>
-          Quên mật khẩu?
+          <span
+            className="relative underline-animate"
+            style={{
+              position: "relative",
+              display: "inline-block"
+            }}
+          >
+            Quên mật khẩu?
+            <span
+              className="absolute left-0 bottom-0 w-full h-[2px] bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
+              style={{
+                transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
+                transformOrigin: "left"
+              }}
+            ></span>
+          </span>
         </button>
       </div>
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import axios from "@/core/config/axios";
 import toast from "react-hot-toast";
 
@@ -7,6 +7,8 @@ type Step = "email" | "otp" | "reset";
 
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromChangePassword = (location.state as { from?: string })?.from === "change-password";
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -290,11 +292,17 @@ export default function ForgotPasswordPage() {
 
             <div className="text-center space-y-2">
               <Link
-                to="/login"
-                className="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2"
+                to={fromChangePassword ? "/profile" : "/login"}
+                className="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95 focus:outline-none cursor-pointer"
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  outline: "none"
+                }}
               >
                 <i className="fa-solid fa-arrow-left"></i>
-                Quay lại đăng nhập
+                {fromChangePassword ? "Quay lại hồ sơ" : "Quay lại đăng nhập"}
               </Link>
             </div>
           </form>
