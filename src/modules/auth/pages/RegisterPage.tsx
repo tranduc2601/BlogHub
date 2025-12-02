@@ -171,7 +171,7 @@ export default function RegisterPage() {
                 </svg>
               </div>
               {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
-              {!errors.username && formData.username && (
+              {/* {!errors.username && formData.username && (
                 <div className="text-xs text-gray-500 space-y-1">
                   <div className="font-semibold">Thường cho phép:</div>
                   <ul className="list-disc list-inside pl-2">
@@ -182,7 +182,7 @@ export default function RegisterPage() {
                     <li className="text-red-500">Không dùng ký tự đặc biệt khác</li>
                   </ul>
                 </div>
-              )}
+              )} */}
             </div>
 
             <div className="space-y-2">
