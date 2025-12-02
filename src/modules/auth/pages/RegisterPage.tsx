@@ -137,7 +137,15 @@ export default function RegisterPage() {
     >
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"></div>
       <div className="max-w-md w-full mx-4 relative z-10">
-        <div className="bg-white backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8">
+        <div className="bg-white backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 relative">
+          {isLoading && (
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] rounded-3xl z-50 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
+                <p className="text-blue-600 font-semibold">Đang xử lý...</p>
+              </div>
+            </div>
+          )}
           
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-blue-700 mb-2">
@@ -164,7 +172,8 @@ export default function RegisterPage() {
                   value={formData.username}
                   onChange={handleChange}
                   placeholder="Nhập tên người dùng"
-                  className={`w-full p-4 pl-12 border-3 ${errors.username ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300`}
+                  disabled={isLoading}
+                  className={`w-full p-4 pl-12 border-3 ${errors.username ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed`}
                 />
                 <svg className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -195,7 +204,8 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   placeholder="Nhập email của bạn"
                   autoComplete="email"
-                  className={`w-full p-4 pl-12 border-3 ${errors.email ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300`}
+                  disabled={isLoading}
+                  className={`w-full p-4 pl-12 border-3 ${errors.email ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed`}
                 />
                 <svg className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
@@ -214,7 +224,8 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   autoComplete="new-password"
                   placeholder="Tạo mật khẩu mạnh"
-                  className={`w-full p-4 pl-12 pr-12 border-3 ${errors.password ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300`}
+                  disabled={isLoading}
+                  className={`w-full p-4 pl-12 pr-12 border-3 ${errors.password ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed`}
                 />
                 <svg className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -222,16 +233,17 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-200 
-                    ${formData.password
+                    ${formData.password && !isLoading
                       ? 'text-gray-400 hover:text-blue-500 cursor-pointer opacity-100'
                       : 'text-gray-200 cursor-default opacity-50 pointer-events-none'}
                   `}
-                  tabIndex={formData.password ? 0 : -1}
-                  onClick={formData.password ? () => setShowPassword(v => !v) : undefined}
+                  tabIndex={formData.password && !isLoading ? 0 : -1}
+                  onClick={formData.password && !isLoading ? () => setShowPassword(v => !v) : undefined}
                   aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                  aria-disabled={!formData.password}
+                  aria-disabled={!formData.password || isLoading}
+                  disabled={isLoading}
                 >
-                  <i className={`fa-solid ${formData.password ? 'cursor-pointer' : 'cursor-default'} ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                  <i className={`fa-solid ${formData.password && !isLoading ? 'cursor-pointer' : 'cursor-default'} ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
                 </button>
               </div>
               {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
@@ -258,7 +270,8 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   placeholder="Nhập lại mật khẩu"
                   autoComplete="new-password"
-                  className={`w-full p-4 pl-12 pr-12 border-3 ${errors.confirmPassword ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300`}
+                  disabled={isLoading}
+                  className={`w-full p-4 pl-12 pr-12 border-3 ${errors.confirmPassword ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed`}
                 />
                 <svg className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -266,16 +279,17 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-200 
-                    ${formData.confirmPassword
+                    ${formData.confirmPassword && !isLoading
                       ? 'text-gray-400 hover:text-blue-500 cursor-pointer opacity-100'
                       : 'text-gray-200 cursor-default opacity-50 pointer-events-none'}
                   `}
-                  tabIndex={formData.confirmPassword ? 0 : -1}
-                  onClick={formData.confirmPassword ? () => setShowConfirmPassword(v => !v) : undefined}
+                  tabIndex={formData.confirmPassword && !isLoading ? 0 : -1}
+                  onClick={formData.confirmPassword && !isLoading ? () => setShowConfirmPassword(v => !v) : undefined}
                   aria-label={showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                  aria-disabled={!formData.confirmPassword}
+                  aria-disabled={!formData.confirmPassword || isLoading}
+                  disabled={isLoading}
                 >
-                  <i className={`fa-solid ${formData.confirmPassword ? 'cursor-pointer' : 'cursor-default'} ${showConfirmPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                  <i className={`fa-solid ${formData.confirmPassword && !isLoading ? 'cursor-pointer' : 'cursor-default'} ${showConfirmPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
                 </button>
               </div>
               {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
@@ -290,9 +304,10 @@ export default function RegisterPage() {
                     setAgreeTerms(e.target.checked);
                     if (errors.terms) setErrors(prev => ({ ...prev, terms: "" }));
                   }}
-                  className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" 
+                  disabled={isLoading}
+                  className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60" 
                 />
-                <label className="text-sm text-gray-600 cursor-pointer">
+                <label className={`text-sm text-gray-600 ${isLoading ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
                   Tôi đồng ý với{" "}
                   <Link to="/terms" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-300" target="_blank">Điều khoản sử dụng</Link>
                   {" "}và{" "}

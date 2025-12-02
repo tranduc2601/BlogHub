@@ -180,7 +180,15 @@ export default function LoginPage() {
     >
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"></div>
       <div className="max-w-md w-full mx-4 relative z-10">
-        <div className="bg-white backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8">
+        <div className="bg-white backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 relative">
+          {isLoading && (
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] rounded-3xl z-50 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
+                <p className="text-blue-600 font-semibold">Đang xử lý...</p>
+              </div>
+            </div>
+          )}
           
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-blue-700 flex items-center justify-center gap-2 mb-2">
@@ -201,7 +209,8 @@ export default function LoginPage() {
                   onChange={handleChange}
                   placeholder="Nhập email của bạn"
                   autoComplete="email"
-                  className={`w-full p-4 pl-12 border-3 ${errors.email ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300`}
+                  disabled={isLoading}
+                  className={`w-full p-4 pl-12 border-3 ${errors.email ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed`}
                 />
                 <svg className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
@@ -220,7 +229,8 @@ export default function LoginPage() {
                   onChange={handleChange}
                   placeholder="Nhập mật khẩu"
                   autoComplete="current-password"
-                  className={`w-full p-4 pl-12 pr-12 border-3 ${errors.password ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300`}
+                  disabled={isLoading}
+                  className={`w-full p-4 pl-12 pr-12 border-3 ${errors.password ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed`}
                 />
                 <svg className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -228,14 +238,15 @@ export default function LoginPage() {
                 <button
                   type="button"
                   className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-200 
-                    ${formData.password
+                    ${formData.password && !isLoading
                       ? 'text-gray-400 hover:text-blue-500 cursor-pointer opacity-100'
                       : 'text-gray-200 cursor-default opacity-50 pointer-events-none'}
                   `}
-                  tabIndex={formData.password ? 0 : -1}
-                  onClick={formData.password ? () => setShowPassword(v => !v) : undefined}
+                  tabIndex={formData.password && !isLoading ? 0 : -1}
+                  onClick={formData.password && !isLoading ? () => setShowPassword(v => !v) : undefined}
                   aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                  aria-disabled={!formData.password}
+                  aria-disabled={!formData.password || isLoading}
+                  disabled={isLoading}
                 >
                   <i className={`fa-solid ${formData.password ? 'cursor-pointer' : 'cursor-default'} ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
                 </button>
@@ -244,12 +255,13 @@ export default function LoginPage() {
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+              <label className={`flex items-center gap-3 text-sm text-gray-700 ${isLoading ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
                 <input 
                   type="checkbox" 
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 cursor-pointer" 
+                  disabled={isLoading}
+                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60" 
                 />
                 <span className="font-medium">Ghi nhớ đăng nhập</span>
               </label>
