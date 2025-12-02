@@ -59,13 +59,34 @@ export default function HomePage() {
     }
     setSearchParams(params, { replace: true });
   }, [activeTab, search, searchTag, setSearchParams]);
-  const filteredPosts = posts.filter(post => {
-    const matchTitle = post.title.toLowerCase().includes(search.toLowerCase());
-    const matchTag = searchTag
-      ? post.tags.some(tag => tag.toLowerCase().includes(searchTag.toLowerCase()))
-      : true;
-    return matchTitle && matchTag;
-  });
+  // Helper function để xác định bài viết có "hot" không (giống logic trong PostCard)
+  const isHotPost = (post: typeof posts[0]) => {
+    const totalReactions = post.total_reactions || 0;
+    const totalComments = post.comments || 0;
+    const totalViews = post.views || 0;
+    
+    const engagementScore = totalReactions + (totalComments * 2) + (totalViews / 10);
+    
+    return totalReactions >= 10 || totalComments >= 5 || totalViews >= 100 || engagementScore >= 15;
+  };
+
+  const filteredPosts = posts
+    .filter(post => {
+      const matchTitle = post.title.toLowerCase().includes(search.toLowerCase());
+      const matchTag = searchTag
+        ? post.tags.some(tag => tag.toLowerCase().includes(searchTag.toLowerCase()))
+        : true;
+      return matchTitle && matchTag;
+    })
+    .sort((a, b) => {
+      // Sắp xếp bài viết Hot lên trên đầu
+      const aIsHot = isHotPost(a);
+      const bIsHot = isHotPost(b);
+      
+      if (aIsHot && !bIsHot) return -1; // a lên trước
+      if (!aIsHot && bIsHot) return 1;  // b lên trước
+      return 0; // giữ nguyên thứ tự ban đầu
+    });
 
   const handleOpenReactionModal = (postId: number, totalReactions: number) => {
     setReactionModalState({ isOpen: true, postId, totalReactions });
