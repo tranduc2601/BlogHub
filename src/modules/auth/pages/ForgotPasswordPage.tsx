@@ -81,22 +81,30 @@ export default function ForgotPasswordPage() {
     try {
       // Gọi API backend để tạo OTP và lưu vào database
       const response = await axios.post("/auth/forgot-password", { email });
+      console.log("🔵 Backend response:", response.data);
 
       if (response.data.success) {
         // Lấy OTP từ backend (development mode)
         const backendOTP = response.data.otp;
+        console.log("🔑 Backend OTP:", backendOTP);
         
         // Gửi email qua EmailJS với OTP từ backend (nếu có)
         if (backendOTP) {
+          console.log("📨 Attempting to send email via EmailJS...");
           const emailResult = await emailService.sendOTPEmail(email, backendOTP);
+          console.log("📬 EmailJS result:", emailResult);
 
           if (!emailResult.success) {
+            console.error("❌ Email send failed:", emailResult.message);
             toast.error(emailResult.message, {
               duration: 4000,
               position: "top-right",
             });
             return;
           }
+          console.log("✅ Email sent successfully!");
+        } else {
+          console.warn("⚠️ Backend did not return OTP (production mode)");
         }
         
         // Hiển thị thông báo thành công và chuyển sang bước nhập OTP
