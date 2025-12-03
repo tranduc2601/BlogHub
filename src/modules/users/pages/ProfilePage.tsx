@@ -250,7 +250,7 @@ export default function ProfilePage() {
       if (response.data.success) {
         toast.success('Tài khoản đã được xóa thành công!', {
           duration: 3000,
-          icon: '✅'
+          icon: ''
         });
         
 
@@ -270,12 +270,12 @@ export default function ProfilePage() {
         const errorMsg = axiosError.response?.data?.message || 'Lỗi khi xóa tài khoản';
         toast.error(errorMsg, {
           duration: 4000,
-          icon: '❌'
+          icon: ''
         });
       } else {
         toast.error('Lỗi khi xóa tài khoản', {
           duration: 4000,
-          icon: '❌'
+          icon: ''
         });
       }
       throw error;

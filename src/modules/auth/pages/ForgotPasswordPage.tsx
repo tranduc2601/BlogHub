@@ -79,35 +79,26 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     try {
-      // Gọi API backend để tạo OTP và lưu vào database
       const response = await axios.post("/auth/forgot-password", { email });
-      console.log("🔵 Backend response:", response.data);
 
       if (response.data.success) {
-        // Lấy OTP từ backend (development mode)
         const backendOTP = response.data.otp;
-        console.log("🔑 Backend OTP:", backendOTP);
-        
-        // Gửi email qua EmailJS với OTP từ backend (nếu có)
+
         if (backendOTP) {
-          console.log("📨 Attempting to send email via EmailJS...");
           const emailResult = await emailService.sendOTPEmail(email, backendOTP);
-          console.log("📬 EmailJS result:", emailResult);
 
           if (!emailResult.success) {
-            console.error("❌ Email send failed:", emailResult.message);
+            console.error("Email send failed:", emailResult.message);
             toast.error(emailResult.message, {
               duration: 4000,
               position: "top-right",
             });
             return;
           }
-          console.log("✅ Email sent successfully!");
         } else {
-          console.warn("⚠️ Backend did not return OTP (production mode)");
+          console.warn("Backend did not return OTP (production mode)");
         }
         
-        // Hiển thị thông báo thành công và chuyển sang bước nhập OTP
         toast.success("Mã OTP đã được gửi đến email của bạn!", {
           duration: 4000,
           position: "top-right",
@@ -144,7 +135,6 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     try {
-      // Xác thực OTP với backend
       const response = await axios.post("/auth/verify-otp", { email, otp });
 
       if (response.data.success) {
@@ -227,14 +217,14 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     try {
-      // Gọi API backend để tạo OTP mới
+
       const response = await axios.post("/auth/forgot-password", { email });
 
       if (response.data.success) {
-        // Lấy OTP từ backend
+
         const backendOTP = response.data.otp;
         
-        // Gửi email qua EmailJS với OTP từ backend (nếu có)
+
         if (backendOTP) {
           const emailResult = await emailService.sendOTPEmail(email, backendOTP);
 
@@ -247,7 +237,7 @@ export default function ForgotPasswordPage() {
           }
         }
         
-        // Hiển thị thông báo thành công
+
         toast.success("Mã OTP mới đã được gửi!", {
           duration: 3000,
           position: "top-right",
@@ -381,7 +371,7 @@ export default function ForgotPasswordPage() {
                   {errors.otp}
                 </p>
               )}
-              <p className="text-gray-500 text-sm mt-2 text-center">
+              <p className="text-gray-500 text-sm mt-4 text-center">
                 Mã OTP đã được gửi đến: <strong>{email}</strong>
               </p>
             </div>
@@ -413,20 +403,21 @@ export default function ForgotPasswordPage() {
                 type="button"
                 onClick={handleResendOTP}
                 disabled={countdown > 0 || isLoading}
-                className={`font-medium ${
+                className={`font-medium inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${
                   countdown > 0 || isLoading
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-blue-600 hover:text-blue-700 cursor-pointer"
+                    ? "text-gray-400 cursor-not-allowed bg-gray-50"
+                    : "text-blue-600 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-500 hover:shadow-lg hover:scale-105 active:scale-95 cursor-pointer bg-blue-50 hover:-translate-y-0.5"
                 }`}
               >
                 {countdown > 0 ? (
                   <>
-                    Gửi lại sau {countdown}s
+                    <i className="fa-solid fa-clock"></i>
+                    <span>Gửi lại sau {countdown}s</span>
                   </>
                 ) : (
                   <>
-                    <i className="fa-solid fa-rotate-right mr-1"></i>
-                    Gửi lại mã OTP
+                    <i className="fa-solid fa-rotate-right"></i>
+                    <span>Gửi lại mã OTP</span>
                   </>
                 )}
               </button>
@@ -434,10 +425,10 @@ export default function ForgotPasswordPage() {
                 <button
                   type="button"
                   onClick={() => setStep("email")}
-                  className="text-gray-600 hover:text-gray-700 font-medium cursor-pointer"
+                  className="text-gray-600 font-medium cursor-pointer mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 hover:text-white hover:bg-gradient-to-r hover:from-gray-600 hover:to-gray-500 hover:shadow-lg hover:scale-105 active:scale-95 bg-gray-100 hover:-translate-y-0.5"
                 >
-                  <i className="fa-solid fa-arrow-left mr-1"></i>
-                  Thay đổi email
+                  <i className="fa-solid fa-arrow-left"></i>
+                  <span>Thay đổi email</span>
                 </button>
               </div>
             </div>

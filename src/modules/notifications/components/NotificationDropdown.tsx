@@ -33,15 +33,17 @@ export default function NotificationDropdown() {
     const interval = setInterval(fetchUnreadCount, 30000);
     
 
-    const handleNotificationDeleted = () => {
+    const handleNotificationChanged = () => {
       fetchUnreadCount();
     };
     
-    window.addEventListener('notification-deleted', handleNotificationDeleted);
+    window.addEventListener('notification-deleted', handleNotificationChanged);
+    window.addEventListener('notification-read', handleNotificationChanged);
     
     return () => {
       clearInterval(interval);
-      window.removeEventListener('notification-deleted', handleNotificationDeleted);
+      window.removeEventListener('notification-deleted', handleNotificationChanged);
+      window.removeEventListener('notification-read', handleNotificationChanged);
     };
 
   }, []);

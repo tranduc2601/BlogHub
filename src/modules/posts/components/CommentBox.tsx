@@ -395,7 +395,7 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
         <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-blue-100 rounded-lg sm:rounded-xl text-center border-2 border-blue-200">
           <p className="text-sm sm:text-base text-gray-700 mb-2 sm:mb-3 font-medium">Hãy đăng nhập để bình luận!</p>
           <a href="/login" className="inline-block bg-blue-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base rounded-lg sm:rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 hover:scale-105 hover:shadow-xl transition-transform duration-300 shadow-lg">
-            <i className="fa-solid fa-right-to-bracket mr-1 sm:mr-2"></i>Đăng nhập ngay
+            <i className="fa-solid fa-right-to-bracket mr-2 sm:mr-3"></i>Đăng nhập ngay
           </a>
         </div>
       )}

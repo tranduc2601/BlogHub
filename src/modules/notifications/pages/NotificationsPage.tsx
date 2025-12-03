@@ -109,6 +109,8 @@ export default function NotificationsPage() {
         setNotifications(prev =>
           prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
         );
+        // Dispatch event để cập nhật notification count
+        window.dispatchEvent(new CustomEvent('notification-read'));
       }
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -123,7 +125,7 @@ export default function NotificationsPage() {
       await axios.put('/notifications/read-all');
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
 
-      window.dispatchEvent(new CustomEvent('notification-deleted'));
+      window.dispatchEvent(new CustomEvent('notification-read'));
       toast.success('Đã đánh dấu tất cả đã đọc!');
     } catch (error) {
       console.error('Error marking all as read:', error);
