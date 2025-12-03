@@ -21,7 +21,8 @@ import {
   rejectReport,
   deleteReport,
   getCommentReports,
-  handleCommentReport
+  handleCommentReport,
+  deleteCommentReport
 } from '../controllers/adminController.js';
 import { authMiddleware, adminMiddleware } from '../middleware/authMiddleware.js';
 
@@ -63,5 +64,6 @@ router.delete('/reports/:id', deleteReport);
 
 router.get('/comment-reports', getCommentReports);
 router.put('/comment-reports/:id/handle', handleCommentReport);
+router.delete('/comment-reports/:id', deleteCommentReport);
 
 export default router;

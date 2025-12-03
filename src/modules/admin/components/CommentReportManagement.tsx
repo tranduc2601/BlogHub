@@ -85,6 +85,11 @@ const CommentReportManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [reasonFilter, setReasonFilter] = useState<string>(searchParams.get('reason') || 'all');
   const REPORTS_PER_PAGE = 5;
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    reportId: number | null;
+  }>({ isOpen: false, reportId: null });
+  const [isClosingDeleteModal, setIsClosingDeleteModal] = useState(false);
 
   useEffect(() => {
     fetchReports();
@@ -256,16 +261,27 @@ const CommentReportManagement: React.FC = () => {
     }, 300);
   };
 
-  const handleDeleteReport = async (reportId: number) => {
-    if (!window.confirm('Bạn có chắc muốn xóa báo cáo này? Báo cáo sẽ được lưu vào lịch sử.')) {
-      return;
-    }
+  const handleOpenDeleteModal = (reportId: number) => {
+    setDeleteModal({ isOpen: true, reportId });
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsClosingDeleteModal(true);
+    setTimeout(() => {
+      setDeleteModal({ isOpen: false, reportId: null });
+      setIsClosingDeleteModal(false);
+    }, 300);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteModal.reportId) return;
 
     try {
-      const response = await axios.delete(`/admin/comment-reports/${reportId}`);
+      const response = await axios.delete(`/admin/comment-reports/${deleteModal.reportId}`);
       if (response.data.success) {
-        toast.success('Đã xóa báo cáo và lưu vào lịch sử!');
+        toast.success('Đã xóa báo cáo thành công!');
         fetchReports();
+        handleCloseDeleteModal();
       }
     } catch (error) {
       console.error('Error deleting comment report:', error);
@@ -538,7 +554,7 @@ const CommentReportManagement: React.FC = () => {
                   ) : (
                     <div className="flex flex-wrap gap-2 mt-4 justify-end">
                       <button
-                        onClick={() => handleDeleteReport(report.id)}
+                        onClick={() => handleOpenDeleteModal(report.id)}
                         className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 group cursor-pointer"
                         title="Xóa báo cáo và thêm vào lịch sử"
                       >
@@ -988,8 +1004,45 @@ const CommentReportManagement: React.FC = () => {
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
 
+      
+      {deleteModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div 
+            className={`bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 ${
+              isClosingDeleteModal ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
+            }`}
+          >
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <i className="fa-solid fa-trash-can text-red-600 text-xl"></i>
+                </div>
+                <h3 className="text-xl font-bold text-gray-800">Xác nhận xóa báo cáo</h3>
+              </div>
+              
+              <p className="text-gray-600 mb-6">
+                Bạn có chắc chắn muốn xóa báo cáo này? Hành động này không thể hoàn tác.
+              </p>
 
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCloseDeleteModal}
+                  className="flex-1 px-4 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
+                >
+                  Xóa báo cáo
+                </button>
+              </div>
             </div>
           </div>
         </div>

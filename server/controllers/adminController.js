@@ -1169,3 +1169,39 @@ export const handleCommentReport = async (req, res) => {
     });
   }
 };
+
+export const deleteCommentReport = async (req, res) => {
+  try {
+    const reportId = parseInt(req.params.id);
+    const adminId = req.user?.id;
+
+    // Kiểm tra báo cáo có tồn tại không
+    const [reports] = await db.query(`
+      SELECT cr.*, c.content as commentContent
+      FROM comment_reports cr
+      LEFT JOIN comments c ON cr.commentId = c.id
+      WHERE cr.id = ?
+    `, [reportId]);
+    
+    if (reports.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Báo cáo không tồn tại!' 
+      });
+    }
+
+    // Xóa báo cáo khỏi database
+    await db.query('DELETE FROM comment_reports WHERE id = ?', [reportId]);
+
+    res.json({ 
+      success: true, 
+      message: 'Đã xóa báo cáo thành công!'
+    });
+  } catch (error) {
+    console.error('Delete comment report error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi khi xóa báo cáo!' 
+    });
+  }
+};
