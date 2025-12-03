@@ -20,7 +20,6 @@ export default function ForgotPasswordPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [countdown, setCountdown] = useState(0);
-  const [generatedOTP, setGeneratedOTP] = useState<string>("");
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -80,29 +79,38 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     try {
-      // Kiểm tra email có tồn tại trong hệ thống không
-      const checkResponse = await axios.post("/auth/forgot-password", { email });
+      // Gọi API backend để tạo OTP và lưu vào database
+      const response = await axios.post("/auth/forgot-password", { email });
 
-      if (checkResponse.data.success) {
-        // Tạo mã OTP ngẫu nhiên
-        const otpCode = emailService.generateOTP();
-        setGeneratedOTP(otpCode);
+      if (response.data.success) {
+        // Lấy OTP từ backend (chỉ có trong development mode)
+        const backendOTP = response.data.otp;
+        
+        if (backendOTP) {
+          // Gửi email qua EmailJS với OTP từ backend
+          const emailResult = await emailService.sendOTPEmail(email, backendOTP);
 
-        // Gửi email qua EmailJS
-        const emailResult = await emailService.sendOTPEmail(email, otpCode);
-
-        if (emailResult.success) {
+          if (emailResult.success) {
+            toast.success("Mã OTP đã được gửi đến email của bạn!", {
+              duration: 4000,
+              position: "top-right",
+            });
+            setStep("otp");
+            startCountdown();
+          } else {
+            toast.error(emailResult.message, {
+              duration: 4000,
+              position: "top-right",
+            });
+          }
+        } else {
+          // Fallback: Nếu backend không trả OTP (production mode)
           toast.success("Mã OTP đã được gửi đến email của bạn!", {
             duration: 4000,
             position: "top-right",
           });
           setStep("otp");
           startCountdown();
-        } else {
-          toast.error(emailResult.message, {
-            duration: 4000,
-            position: "top-right",
-          });
         }
       }
     } catch (error: unknown) {
@@ -134,18 +142,15 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     try {
-      // Xác thực OTP cục bộ (kiểm tra với mã đã tạo)
-      if (otp === generatedOTP) {
+      // Xác thực OTP với backend
+      const response = await axios.post("/auth/verify-otp", { email, otp });
+
+      if (response.data.success) {
         toast.success("Xác thực thành công!", {
           duration: 3000,
           position: "top-right",
         });
         setStep("reset");
-      } else {
-        toast.error("Mã OTP không đúng hoặc đã hết hạn!", {
-          duration: 4000,
-          position: "top-right",
-        });
       }
     } catch (error: unknown) {
       console.error("Verify OTP error:", error);
@@ -220,24 +225,36 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     try {
-      // Tạo mã OTP mới
-      const otpCode = emailService.generateOTP();
-      setGeneratedOTP(otpCode);
+      // Gọi API backend để tạo OTP mới
+      const response = await axios.post("/auth/forgot-password", { email });
 
-      // Gửi email qua EmailJS
-      const emailResult = await emailService.sendOTPEmail(email, otpCode);
+      if (response.data.success) {
+        // Lấy OTP từ backend
+        const backendOTP = response.data.otp;
+        
+        if (backendOTP) {
+          // Gửi email qua EmailJS
+          const emailResult = await emailService.sendOTPEmail(email, backendOTP);
 
-      if (emailResult.success) {
-        toast.success("Mã OTP mới đã được gửi!", {
-          duration: 3000,
-          position: "top-right",
-        });
-        startCountdown();
-      } else {
-        toast.error(emailResult.message, {
-          duration: 4000,
-          position: "top-right",
-        });
+          if (emailResult.success) {
+            toast.success("Mã OTP mới đã được gửi!", {
+              duration: 3000,
+              position: "top-right",
+            });
+            startCountdown();
+          } else {
+            toast.error(emailResult.message, {
+              duration: 4000,
+              position: "top-right",
+            });
+          }
+        } else {
+          toast.success("Mã OTP mới đã được gửi!", {
+            duration: 3000,
+            position: "top-right",
+          });
+          startCountdown();
+        }
       }
     } catch (error: unknown) {
       console.error("Resend OTP error:", error);
