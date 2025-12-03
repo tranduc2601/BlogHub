@@ -19,6 +19,7 @@ import {
   getReports,
   approveReport,
   rejectReport,
+  deleteReport,
   getCommentReports,
   handleCommentReport
 } from '../controllers/adminController.js';
@@ -58,6 +59,7 @@ router.get('/stats/activity-history', getActivityHistory);
 router.get('/reports', getReports);
 router.put('/reports/:id/approve', approveReport);
 router.put('/reports/:id/reject', rejectReport);
+router.delete('/reports/:id', deleteReport);
 
 router.get('/comment-reports', getCommentReports);
 router.put('/comment-reports/:id/handle', handleCommentReport);

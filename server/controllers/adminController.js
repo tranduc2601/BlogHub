@@ -966,6 +966,44 @@ export const rejectReport = async (req, res) => {
   }
 };
 
+export const deleteReport = async (req, res) => {
+  try {
+    const reportId = parseInt(req.params.id);
+    const adminId = req.user?.id;
+
+
+    const [reports] = await db.query(`
+      SELECT r.*, p.title as postTitle
+      FROM reports r
+      LEFT JOIN posts p ON r.postId = p.id
+      WHERE r.id = ?
+    `, [reportId]);
+    
+    if (reports.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Báo cáo không tồn tại!' 
+      });
+    }
+
+    const report = reports[0];
+
+
+    await db.query('DELETE FROM reports WHERE id = ?', [reportId]);
+
+    res.json({ 
+      success: true, 
+      message: 'Đã xóa báo cáo thành công!'
+    });
+  } catch (error) {
+    console.error('Delete report error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi khi xóa báo cáo!' 
+    });
+  }
+};
+
 
 export const getCommentReports = async (req, res) => {
   try {
