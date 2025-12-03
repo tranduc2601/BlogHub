@@ -950,8 +950,7 @@ export const forgotPassword = async (req, res) => {
     res.json({ 
       success: true,
       message: 'Mã OTP đã được gửi đến email của bạn',
-
-      ...(process.env.NODE_ENV === 'development' && { otp })
+      otp: otp // Luôn trả OTP để frontend gửi qua EmailJS
     });
   } catch (error) {
     console.error('Forgot password error:', error);
