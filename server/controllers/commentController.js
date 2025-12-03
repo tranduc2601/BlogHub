@@ -36,6 +36,7 @@ export const getCommentsByPostId = async (req, res) => {
 
     let likedCommentIds = [];
     let commentReactions = {};
+    let reactionCounts = {};
 
     
     if (comments.length > 0) {
