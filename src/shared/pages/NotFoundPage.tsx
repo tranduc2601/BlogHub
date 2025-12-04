@@ -42,11 +42,11 @@ export default function NotFoundPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#2664eb] flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8 select-none">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8 select-none">
       <div className="max-w-4xl w-full">
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
           
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-12 sm:px-8 sm:py-16 text-center relative overflow-hidden">
+          <div className="bg-[#2664eb] px-6 py-12 sm:px-8 sm:py-16 text-center relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full opacity-10">
               <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
               <div className="absolute bottom-10 right-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
