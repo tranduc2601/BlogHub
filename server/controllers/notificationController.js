@@ -54,7 +54,7 @@ export const getNotifications = async (req, res) => {
     console.error('Get notifications error:', error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi lấy thông báo'
+      message: 'Lỗi khi lấy thông báo!'
     });
   }
 };
@@ -78,7 +78,7 @@ export const getUnreadCount = async (req, res) => {
     console.error('Get unread count error:', error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi đếm thông báo chưa đọc'
+      message: 'Lỗi khi đếm thông báo chưa đọc!'
     });
   }
 };
@@ -98,7 +98,7 @@ export const markAsRead = async (req, res) => {
     if (notifications.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Không tìm thấy thông báo'
+        message: 'Không tìm thấy thông báo!'
       });
     }
 
@@ -109,13 +109,13 @@ export const markAsRead = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Đã đánh dấu đã đọc'
+      message: 'Đã đánh dấu đã đọc!'
     });
   } catch (error) {
     console.error('Mark as read error:', error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi đánh dấu đã đọc'
+      message: 'Lỗi khi đánh dấu đã đọc!'
     });
   }
 };
@@ -132,13 +132,13 @@ export const markAllAsRead = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Đã đánh dấu tất cả đã đọc'
+      message: 'Đã đánh dấu tất cả đã đọc!'
     });
   } catch (error) {
     console.error('Mark all as read error:', error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi đánh dấu tất cả đã đọc'
+      message: 'Lỗi khi đánh dấu tất cả đã đọc!'
     });
   }
 };
@@ -177,19 +177,19 @@ export const deleteNotification = async (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Không tìm thấy thông báo'
+        message: 'Không tìm thấy thông báo!'
       });
     }
 
     res.json({
       success: true,
-      message: 'Đã xóa thông báo'
+      message: 'Đã xóa thông báo!'
     });
   } catch (error) {
     console.error('Delete notification error:', error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi xóa thông báo'
+      message: 'Lỗi khi xóa thông báo!'
     });
   }
 };

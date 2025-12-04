@@ -4,94 +4,77 @@ import db from '../config/database.js';
 import cloudinary from '../config/cloudinary.js';
 import { Readable } from 'stream';
 
-
 export const register = async (req, res) => {
   try {
     const { username, email, password, confirmPassword } = req.body;
-    console.log('Register - req.body:', req.body);
-
 
     if (!username || !email || !password || !confirmPassword) {
       return res.status(400).json({ 
         success: false,
-        message: 'Vui lòng điền đầy đủ thông tin' 
+        message: 'Vui lòng điền đầy đủ thông tin!' 
       });
     }
-
 
     if (password !== confirmPassword) {
       return res.status(400).json({ 
         success: false,
-        message: 'Mật khẩu không khớp' 
+        message: 'Mật khẩu không khớp!' 
       });
     }
-
 
     if (password.length < 6) {
       return res.status(400).json({ 
         success: false,
-        message: 'Mật khẩu phải có ít nhất 6 ký tự' 
+        message: 'Mật khẩu phải có ít nhất 6 ký tự!' 
       });
     }
-
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ 
         success: false,
-        message: 'Email không hợp lệ' 
+        message: 'Email không hợp lệ!' 
       });
     }
-
 
     const [existingUsers] = await db.query(
       'SELECT * FROM users WHERE email = ? OR username = ?',
       [email, username]
     );
-    console.log('Register - existingUsers:', existingUsers);
 
     if (existingUsers.length > 0) {
       const existingUser = existingUsers[0];
-      console.log('Register - existingUser:', existingUser);
       
 
       if (existingUser.email === email && existingUser.status === 'locked') {
-        console.log('Register - Email đã bị khóa:', email);
         return res.status(403).json({ 
           success: false,
-          message: 'Email đã bị khóa',
+          message: 'Email đã bị khóa!',
           locked: true
         });
       }
       
       if (existingUser.email === email) {
-        console.log('Register - Email đã được đăng ký:', email);
         return res.status(409).json({ 
           success: false,
-          message: 'Email đã được đăng ký' 
+          message: 'Email đã được đăng ký!' 
         });
       }
       if (existingUser.username === username) {
-        console.log('Register - Tên người dùng đã tồn tại:', username);
         return res.status(409).json({ 
           success: false,
-          message: 'Tên người dùng đã tồn tại' 
+          message: 'Tên người dùng đã tồn tại!' 
         });
       }
     }
 
-
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    console.log('Register - hashedPassword:', hashedPassword);
-
 
     const [result] = await db.query(
       'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
       [username, email, hashedPassword]
     );
-    console.log('Register - Insert result:', result);
-
 
     const token = jwt.sign(
       { 
@@ -103,8 +86,6 @@ export const register = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
-    console.log('Register - JWT token:', token);
-
 
     const deviceInfo = req.headers['user-agent'] || 'Unknown Device';
     const ipAddress = req.ip || req.connection.remoteAddress;
@@ -119,11 +100,9 @@ export const register = async (req, res) => {
       [result.insertId, token, deviceInfo, ipAddress, expiresAt]
     );
 
-    console.log('Register - Session created for userId:', result.insertId);
-
     res.status(201).json({
       success: true,
-      message: 'Đăng ký thành công',
+      message: 'Đăng ký thành công!',
       token,
       user: {
         id: result.insertId,
@@ -138,7 +117,7 @@ export const register = async (req, res) => {
     console.error('Register error:', error);
     res.status(500).json({ 
       success: false,
-      message: 'Lỗi server, vui lòng thử lại sau' 
+      message: 'Lỗi server, vui lòng thử lại sau!' 
     });
   }
 };
@@ -147,25 +126,20 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
   const { email, password } = req.body;
-  console.log('Login - req.body:', req.body);
-
 
     if (!email || !password) {
       return res.status(400).json({ 
         success: false,
-        message: 'Vui lòng nhập email và mật khẩu' 
+        message: 'Vui lòng nhập email và mật khẩu!' 
       });
     }
-
 
     const [users] = await db.query(
       'SELECT * FROM users WHERE email = ?',
       [email]
     );
-    console.log('Login - users from DB:', users);
 
     if (users.length === 0) {
-      console.log('Login - Không tìm thấy user với email:', email);
       return res.status(401).json({ 
         success: false,
         message: 'Email hoặc mật khẩu không đúng!' 
@@ -173,11 +147,8 @@ export const login = async (req, res) => {
     }
 
     const user = users[0];
-    console.log('Login - user:', user);
-
 
     if (user.status === 'locked') {
-      console.log('Login - Tài khoản bị khóa:', email);
       return res.status(403).json({ 
         success: false,
         message: 'Bạn đã bị khóa tài khoản!',
@@ -185,26 +156,19 @@ export const login = async (req, res) => {
       });
     }
 
-
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log('Login - isPasswordValid:', isPasswordValid);
     
     if (!isPasswordValid) {
-      console.log('Login - Mật khẩu không đúng cho email:', email);
       return res.status(401).json({ 
         success: false,
         message: 'Email hoặc mật khẩu không đúng!' 
       });
     }
 
-
     await db.query(
       'DELETE FROM user_sessions WHERE userId = ?',
       [user.id]
     );
-
-    console.log('Login - Cleared all existing sessions for userId:', user.id);
-
 
     const token = jwt.sign(
       { 
@@ -216,7 +180,6 @@ export const login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
-
 
     const deviceInfo = req.headers['user-agent'] || 'Unknown Device';
     const ipAddress = req.ip || req.connection.remoteAddress;
@@ -231,11 +194,9 @@ export const login = async (req, res) => {
       [user.id, token, deviceInfo, ipAddress, expiresAt]
     );
 
-    console.log('Login - Session created for userId:', user.id);
-
     res.status(200).json({
       success: true,
-      message: 'Đăng nhập thành công',
+      message: 'Đăng nhập thành công!',
       token,
       user: {
         id: user.id,
@@ -295,21 +256,15 @@ export const getMe = async (req, res) => {
     console.error('Get user error:', error);
     res.status(500).json({ 
       success: false,
-      message: 'Lỗi server, vui lòng thử lại sau' 
+      message: 'Lỗi server, vui lòng thử lại sau!' 
     });
   }
 };
-
 
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
     const { username, email, about, password } = req.body;
-    
-    console.log('UpdateProfile - userId:', userId);
-    console.log('UpdateProfile - body:', req.body);
-    console.log('UpdateProfile - file:', req.file);
-    
 
     if (email) {
 
@@ -317,11 +272,10 @@ export const updateProfile = async (req, res) => {
       if (!emailRegex.test(email)) {
         return res.status(400).json({ 
           success: false,
-          message: 'Email không hợp lệ' 
+          message: 'Email không hợp lệ!' 
         });
       }
       
-
       const [existingEmail] = await db.query(
         'SELECT id FROM users WHERE email = ? AND id != ?',
         [email, userId]
@@ -330,40 +284,32 @@ export const updateProfile = async (req, res) => {
       if (existingEmail.length > 0) {
         return res.status(409).json({ 
           success: false,
-          message: 'Email đã được sử dụng bởi tài khoản khác' 
+          message: 'Email này đã được sử dụng bởi tài khoản khác!' 
         });
       }
     }
     
-
     const websites = Object.keys(req.body)
       .filter(k => k.startsWith('websites['))
       .map(k => req.body[k]);
     
-    console.log('UpdateProfile - websites:', websites);
-    
-
     const [currentUsers] = await db.query(
       'SELECT password, avatarUrl FROM users WHERE id = ?',
       [userId]
     );
     
-    console.log('UpdateProfile - currentUser:', currentUsers);
-    
     const currentUser = currentUsers[0];
     let avatarUrl = currentUser?.avatarUrl || null;
-    
 
     if (password && password.trim().length > 0) {
 
       if (password.length < 6) {
         return res.status(400).json({ 
           success: false,
-          message: 'Mật khẩu phải có ít nhất 6 ký tự' 
+          message: 'Mật khẩu phải có ít nhất 6 ký tự!' 
         });
       }
       
-
       const hasUpperCase = /[A-Z]/.test(password);
       const hasNumber = /[0-9]/.test(password);
       const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
@@ -371,26 +317,23 @@ export const updateProfile = async (req, res) => {
       if (!hasUpperCase || !hasNumber || !hasSpecialChar) {
         return res.status(400).json({ 
           success: false,
-          message: 'Mật khẩu phải có ít nhất 1 ký tự hoa, 1 chữ số và 1 ký tự đặc biệt' 
+          message: 'Mật khẩu phải có ít nhất 1 ký tự hoa, 1 chữ số và 1 ký tự đặc biệt!' 
         });
       }
       
-
       if (currentUser && currentUser.password) {
         const isSamePassword = await bcrypt.compare(password, currentUser.password);
         if (isSamePassword) {
           return res.status(400).json({ 
             success: false,
-            message: 'Mật khẩu mới không được trùng với mật khẩu hiện tại' 
+            message: 'Mật khẩu mới không được trùng với mật khẩu hiện tại!' 
           });
         }
       }
     }
     
-
     if (req.file) {
       try {
-
         const uploadStream = cloudinary.uploader.upload_stream(
           {
             folder: 'bloghub/avatars',
@@ -404,65 +347,50 @@ export const updateProfile = async (req, res) => {
               console.error('Cloudinary upload error:', error);
               return res.status(500).json({
                 success: false,
-                message: 'Lỗi khi upload ảnh'
+                message: 'Lỗi khi upload hình ảnh!'
               });
-            }
-            
-            avatarUrl = result.secure_url;
-            console.log('UpdateProfile - Cloudinary URL:', avatarUrl);
-            
-
+            }     
+            avatarUrl = result.secure_url;        
             await updateDatabase();
           }
         );
 
-
         const bufferStream = Readable.from(req.file.buffer);
         bufferStream.pipe(uploadStream);
         
-
         return;
       } catch (uploadError) {
         console.error('Upload error:', uploadError);
         return res.status(500).json({
           success: false,
-          message: 'Lỗi khi upload ảnh'
+          message: 'Lỗi khi upload hình ảnh!'
         });
       }
     }
     
-
     await updateDatabase();
-    
-
     async function updateDatabase() {
       try {
 
         if (password && password.trim().length > 0) {
           const hashedPassword = await bcrypt.hash(password, 10);
-          console.log('UpdateProfile - Updating with password. SQL params:', [username, email, about, avatarUrl, JSON.stringify(websites), userId]);
           await db.query(
             'UPDATE users SET username = ?, email = ?, about = ?, avatarUrl = ?, websites = ?, password = ? WHERE id = ?',
             [username, email, about, avatarUrl, JSON.stringify(websites), hashedPassword, userId]
           );
-          console.log('UpdateProfile - Password updated');
         } else {
 
-          console.log('UpdateProfile - Updating without password. SQL params:', [username, email, about, avatarUrl, JSON.stringify(websites), userId]);
           const result = await db.query(
             'UPDATE users SET username = ?, email = ?, about = ?, avatarUrl = ?, websites = ? WHERE id = ?',
             [username, email, about, avatarUrl, JSON.stringify(websites), userId]
           );
-          console.log('UpdateProfile - Update result:', result);
         }
         
-
         const [users] = await db.query(
           'SELECT id, username, email, role, about, avatarUrl, websites FROM users WHERE id = ?',
           [userId]
         );
         
-
         const updatedUser = users[0];
         if (updatedUser.websites && typeof updatedUser.websites === 'string') {
           try {
@@ -471,10 +399,6 @@ export const updateProfile = async (req, res) => {
             updatedUser.websites = [];
           }
         }
-
-
-        
-        console.log('UpdateProfile - Returning user:', updatedUser);
         
         res.json({ 
           success: true, 
@@ -484,7 +408,7 @@ export const updateProfile = async (req, res) => {
         console.error('Database update error:', dbError);
         res.status(500).json({ 
           success: false, 
-          message: 'Lỗi server khi cập nhật hồ sơ' 
+          message: 'Lỗi server khi cập nhật hồ sơ!' 
         });
       }
     }
@@ -492,7 +416,7 @@ export const updateProfile = async (req, res) => {
     console.error('UpdateProfile error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi server khi cập nhật hồ sơ' 
+      message: 'Lỗi server khi cập nhật hồ sơ!' 
     });
   }
 };
@@ -506,10 +430,9 @@ export const verifyCurrentPassword = async (req, res) => {
     if (!currentPassword) {
       return res.status(400).json({ 
         success: false,
-        message: 'Vui lòng nhập mật khẩu hiện tại' 
+        message: 'Vui lòng nhập mật khẩu hiện tại!' 
       });
     }
-
 
     const [users] = await db.query(
       'SELECT password FROM users WHERE id = ?',
@@ -519,13 +442,11 @@ export const verifyCurrentPassword = async (req, res) => {
     if (users.length === 0) {
       return res.status(404).json({ 
         success: false,
-        message: 'Người dùng không tồn tại' 
+        message: 'Người dùng không tồn tại!' 
       });
     }
 
     const user = users[0];
-
-
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
     
     res.json({ 
@@ -536,7 +457,7 @@ export const verifyCurrentPassword = async (req, res) => {
     console.error('VerifyCurrentPassword error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi server khi xác thực mật khẩu' 
+      message: 'Lỗi server khi xác thực mật khẩu!' 
     });
   }
 };
@@ -545,22 +466,18 @@ export const changePassword = async (req, res) => {
   try {
     const userId = req.user.id;
     const { currentPassword, newPassword, confirmPassword } = req.body;
-    
-    console.log('ChangePassword - userId:', userId);
-
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       return res.status(400).json({ 
         success: false,
-        message: 'Vui lòng điền đầy đủ thông tin' 
+        message: 'Vui lòng điền đầy đủ thông tin!' 
       });
     }
-
 
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ 
         success: false,
-        message: 'Mật khẩu xác nhận không khớp' 
+        message: 'Mật khẩu xác nhận không khớp!' 
       });
     }
 
@@ -616,16 +533,12 @@ export const changePassword = async (req, res) => {
       });
     }
 
-
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
 
     await db.query(
       'UPDATE users SET password = ? WHERE id = ?',
       [hashedPassword, userId]
     );
-
-    console.log('ChangePassword - Password updated successfully for userId:', userId);
 
     res.json({ 
       success: true,
@@ -635,7 +548,7 @@ export const changePassword = async (req, res) => {
     console.error('ChangePassword error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi server khi đổi mật khẩu' 
+      message: 'Lỗi server khi đổi mật khẩu!' 
     });
   }
 };
@@ -648,28 +561,25 @@ export const logout = async (req, res) => {
     if (!token || !userId) {
       return res.status(400).json({ 
         success: false,
-        message: 'Token không hợp lệ' 
+        message: 'Token không hợp lệ!' 
       });
     }
-
 
     await db.query(
       'DELETE FROM user_sessions WHERE userId = ? AND sessionToken = ?',
       [userId, token]
     );
 
-    console.log('Logout - Session deleted for userId:', userId);
-
     res.status(200).json({
       success: true,
-      message: 'Đăng xuất thành công'
+      message: 'Đăng xuất thành công!'
     });
 
   } catch (error) {
     console.error('Logout error:', error);
     res.status(500).json({ 
       success: false,
-      message: 'Lỗi server khi đăng xuất' 
+      message: 'Lỗi server khi đăng xuất!' 
     });
   }
 };
@@ -680,20 +590,15 @@ export const deleteAccount = async (req, res) => {
   try {
     const userId = req.user.id;
     const { password } = req.body;
-    
-    console.log('DeleteAccount - userId:', userId);
-
 
     if (!password) {
       return res.status(400).json({ 
         success: false,
-        message: 'Vui lòng nhập mật khẩu để xác nhận' 
+        message: 'Vui lòng nhập mật khẩu để xác nhận!' 
       });
     }
 
-
     await connection.beginTransaction();
-
 
     const [users] = await connection.query(
       'SELECT * FROM users WHERE id = ? AND (status = "active" OR status IS NULL)',
@@ -704,31 +609,28 @@ export const deleteAccount = async (req, res) => {
       await connection.rollback();
       return res.status(404).json({ 
         success: false,
-        message: 'Tài khoản không tồn tại hoặc đã bị xóa' 
+        message: 'Tài khoản không tồn tại hoặc đã bị xóa!' 
       });
     }
 
     const user = users[0];
 
-
     if (user.role === 'admin') {
       await connection.rollback();
       return res.status(403).json({ 
         success: false,
-        message: 'Tài khoản quản trị viên không thể bị xóa' 
+        message: 'Tài khoản quản trị viên không thể bị xóa!' 
       });
     }
-
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       await connection.rollback();
       return res.status(401).json({ 
         success: false,
-        message: 'Mật khẩu không đúng' 
+        message: 'Mật khẩu không đúng!' 
       });
     }
-
 
     const deletedEmail = `deleted_${userId}_${user.email}`;
     const deletedUsername = `deleted_user_${userId}`;
@@ -747,19 +649,15 @@ export const deleteAccount = async (req, res) => {
       [deletedEmail, deletedUsername, userId]
     );
 
-
     await connection.query(
       'DELETE FROM user_sessions WHERE userId = ?',
       [userId]
     );
 
-
     await connection.query(
       'UPDATE posts SET status = "hidden" WHERE authorId = ?',
       [userId]
     );
-
-
 
     await connection.query(
       `UPDATE comments 
@@ -769,36 +667,30 @@ export const deleteAccount = async (req, res) => {
       [userId]
     );
 
-
     await connection.query(
       'DELETE FROM reactions WHERE userId = ?',
       [userId]
     );
-
 
     await connection.query(
       'DELETE FROM comment_reactions WHERE userId = ?',
       [userId]
     );
 
-
     await connection.query(
       'DELETE FROM bookmarks WHERE userId = ?',
       [userId]
     );
-
 
     await connection.query(
       'DELETE FROM follows WHERE followerId = ? OR followingId = ?',
       [userId, userId]
     );
 
-
     await connection.query(
       'DELETE FROM notifications WHERE userId = ? OR senderId = ?',
       [userId, userId]
     );
-
 
     try {
       await connection.query(
@@ -812,14 +704,11 @@ export const deleteAccount = async (req, res) => {
       }
     }
 
-
     await connection.commit();
-
-    console.log('DeleteAccount - Account successfully deleted for userId:', userId);
 
     res.json({ 
       success: true,
-      message: 'Tài khoản đã được xóa thành công' 
+      message: 'Tài khoản đã được xóa thành công!' 
     });
   } catch (error) {
 
@@ -827,13 +716,12 @@ export const deleteAccount = async (req, res) => {
     console.error('DeleteAccount error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi server khi xóa tài khoản' 
+      message: 'Lỗi server khi xóa tài khoản!' 
     });
   } finally {
     connection.release();
   }
 };
-
 
 export const forgotPassword = async (req, res) => {
   try {
@@ -842,19 +730,17 @@ export const forgotPassword = async (req, res) => {
     if (!email) {
       return res.status(400).json({ 
         success: false,
-        message: 'Vui lòng nhập email' 
+        message: 'Vui lòng nhập email!' 
       });
     }
-
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ 
         success: false,
-        message: 'Email không hợp lệ' 
+        message: 'Email không hợp lệ!' 
       });
     }
-
 
     const [users] = await db.query(
       'SELECT id, email, status FROM users WHERE email = ?',
@@ -864,7 +750,7 @@ export const forgotPassword = async (req, res) => {
     if (users.length === 0) {
       return res.status(404).json({ 
         success: false,
-        message: 'Email không tồn tại trong hệ thống' 
+        message: 'Email không tồn tại trong hệ thống!' 
       });
     }
 
@@ -874,24 +760,20 @@ export const forgotPassword = async (req, res) => {
     if (user.status === 'locked') {
       return res.status(403).json({ 
         success: false,
-        message: 'Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên' 
+        message: 'Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên!' 
       });
     }
 
     if (user.status === 'deleted') {
       return res.status(403).json({ 
         success: false,
-        message: 'Tài khoản đã bị xóa' 
+        message: 'Tài khoản đã bị xóa!' 
       });
     }
 
-
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     
-
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-
-
 
     await db.query(`
       CREATE TABLE IF NOT EXISTS password_resets (
@@ -906,22 +788,15 @@ export const forgotPassword = async (req, res) => {
       )
     `);
 
-
     await db.query(
       'DELETE FROM password_resets WHERE email = ?',
       [email]
     );
 
-
     await db.query(
       'INSERT INTO password_resets (userId, email, otp, expiresAt) VALUES (?, ?, ?, ?)',
       [user.id, email, otp, expiresAt]
     );
-
-
-
-    console.log(`OTP for ${email}: ${otp}`);
-    console.log(`OTP expires at: ${expiresAt}`);
 
 
 
@@ -1084,8 +959,6 @@ export const resetPassword = async (req, res) => {
       'DELETE FROM user_sessions WHERE userId = ?',
       [reset.userId]
     );
-
-    console.log(`Password reset successfully for user ID: ${reset.userId}`);
 
     res.json({ 
       success: true,

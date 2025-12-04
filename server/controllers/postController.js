@@ -134,7 +134,7 @@ export const getPosts = async (req, res) => {
     console.error('Get posts error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi lấy danh sách bài viết' 
+      message: 'Lỗi khi lấy danh sách bài viết!' 
     });
   }
 };
@@ -169,7 +169,7 @@ export const getPostById = async (req, res) => {
     if (posts.length === 0) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Bài viết không tồn tại' 
+        message: 'Bài viết không tồn tại!' 
       });
     }
 
@@ -243,7 +243,7 @@ export const getPostById = async (req, res) => {
     console.error('Get post by ID error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi lấy bài viết' 
+      message: 'Lỗi khi lấy bài viết!' 
     });
   }
 };
@@ -260,7 +260,7 @@ export const createPost = async (req, res) => {
     if (!authorId) {
       return res.status(401).json({ 
         success: false, 
-        message: 'Vui lòng đăng nhập để đăng bài viết' 
+        message: 'Vui lòng đăng nhập để đăng bài viết!' 
       });
     }
 
@@ -295,7 +295,7 @@ export const createPost = async (req, res) => {
             admin.id,
             'post_approved',
             authorId,
-            `đã tạo bài viết "${title}" cần duyệt`,
+            `đã tạo bài viết "${title}" cần duyệt!`,
             result.insertId
           );
         }
@@ -313,7 +313,7 @@ export const createPost = async (req, res) => {
     console.error('Create post error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi đăng bài viết' 
+      message: 'Lỗi khi đăng bài viết!' 
     });
   }
 };
@@ -328,14 +328,14 @@ export const reportPost = async (req, res) => {
     if (!reportedBy) {
       return res.status(401).json({ 
         success: false, 
-        message: 'Vui lòng đăng nhập để báo cáo bài viết' 
+        message: 'Vui lòng đăng nhập để báo cáo bài viết!' 
       });
     }
 
     if (!reason || reason.trim().length === 0) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Vui lòng nhập lý do báo cáo' 
+        message: 'Vui lòng nhập lý do báo cáo!' 
       });
     }
 
@@ -344,7 +344,7 @@ export const reportPost = async (req, res) => {
     if (posts.length === 0) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Bài viết không tồn tại' 
+        message: 'Bài viết không tồn tại!' 
       });
     }
 
@@ -357,7 +357,7 @@ export const reportPost = async (req, res) => {
     if (existingReports.length > 0) {
       return res.status(409).json({ 
         success: false, 
-        message: 'Bạn đã báo cáo bài viết này rồi' 
+        message: 'Bạn đã báo cáo bài viết này rồi!' 
       });
     }
 
@@ -378,7 +378,7 @@ export const reportPost = async (req, res) => {
           admin.id,
           'post_reported',
           reportedBy,
-          `đã báo cáo bài viết "${postTitle}" cần xử lý`,
+          `đã báo cáo bài viết "${postTitle}" cần xử lý!`,
           postId
         );
       }
@@ -388,13 +388,13 @@ export const reportPost = async (req, res) => {
 
     res.json({ 
       success: true, 
-      message: 'Đã gửi báo cáo vi phạm. Admin sẽ xem xét trong thời gian sớm nhất.' 
+      message: 'Đã gửi báo cáo bài viết thành công. Admin sẽ xem xét trong thời gian sớm nhất!' 
     });
   } catch (error) {
     console.error('Report post error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi gửi báo cáo' 
+      message: 'Lỗi khi gửi báo cáo!' 
     });
   }
 };
@@ -407,19 +407,19 @@ export const reactPost = async (req, res) => {
     const { reactionType } = req.body; 
 
     if (!userId) {
-      return res.status(401).json({ success: false, message: 'Vui lòng đăng nhập để thả cảm xúc' });
+      return res.status(401).json({ success: false, message: 'Vui lòng đăng nhập để thả cảm xúc!' });
     }
 
 
     const validReactions = ['like', 'love', 'haha', 'wow', 'sad', 'angry'];
     if (!reactionType || !validReactions.includes(reactionType)) {
-      return res.status(400).json({ success: false, message: 'Loại cảm xúc không hợp lệ' });
+      return res.status(400).json({ success: false, message: 'Loại cảm xúc không hợp lệ!' });
     }
 
 
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     if (posts.length === 0) {
-      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại!' });
     }
 
 
@@ -439,7 +439,7 @@ export const reactPost = async (req, res) => {
           likes = GREATEST(likes - 1, 0)
           WHERE id = ?`, [postId]);
         
-        return res.json({ success: true, message: 'Đã bỏ cảm xúc', action: 'unreact', reactionType: null });
+        return res.json({ success: true, message: 'Đã bỏ cảm xúc!', action: 'unreact', reactionType: null });
       } else {
 
         await db.query('UPDATE reactions SET reactionType = ?, updatedAt = NOW() WHERE postId = ? AND userId = ?', 
@@ -451,7 +451,7 @@ export const reactPost = async (req, res) => {
           reaction_${reactionType} = reaction_${reactionType} + 1
           WHERE id = ?`, [postId]);
         
-        return res.json({ success: true, message: 'Đã thay đổi cảm xúc', action: 'change', reactionType });
+        return res.json({ success: true, message: 'Đã thay đổi cảm xúc!', action: 'change', reactionType });
       }
     } else {
 
@@ -488,11 +488,11 @@ export const reactPost = async (req, res) => {
         console.error('Error creating reaction notification:', notifError);
       }
       
-      return res.json({ success: true, message: 'Đã thả cảm xúc', action: 'react', reactionType });
+      return res.json({ success: true, message: 'Đã thả cảm xúc!', action: 'react', reactionType });
     }
   } catch (error) {
     console.error('React post error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi thả cảm xúc' });
+    res.status(500).json({ success: false, message: 'Lỗi khi thả cảm xúc!' });
   }
 };
 
@@ -515,7 +515,7 @@ export const getUserReaction = async (req, res) => {
     });
   } catch (error) {
     console.error('Get user reaction error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi lấy thông tin cảm xúc' });
+    res.status(500).json({ success: false, message: 'Lỗi khi lấy thông tin cảm xúc!' });
   }
 };
 
@@ -537,13 +537,13 @@ export const getReactionStats = async (req, res) => {
       WHERE id = ?`, [postId]);
 
     if (stats.length === 0) {
-      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại!' });
     }
 
     res.json({ success: true, counts: stats[0] });
   } catch (error) {
     console.error('Get reaction stats error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi lấy thống kê cảm xúc' });
+    res.status(500).json({ success: false, message: 'Lỗi khi lấy thống kê cảm xúc!' });
   }
 };
 
@@ -600,7 +600,7 @@ export const getReactionUsers = async (req, res) => {
     });
   } catch (error) {
     console.error('Get reaction users error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi lấy danh sách người dùng' });
+    res.status(500).json({ success: false, message: 'Lỗi khi lấy danh sách người dùng!' });
   }
 };
 
@@ -631,7 +631,7 @@ export const isPostLiked = async (req, res) => {
     });
   } catch (error) {
     console.error('Check like status error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi kiểm tra trạng thái like' });
+    res.status(500).json({ success: false, message: 'Lỗi khi kiểm tra trạng thái like!' });
   }
 };
 
@@ -645,17 +645,17 @@ export const updatePost = async (req, res) => {
 
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     if (posts.length === 0) {
-      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại!' });
     }
 
     const post = posts[0];
     if (post.authorId !== userId) {
-      return res.status(403).json({ success: false, message: 'Bạn không có quyền chỉnh sửa bài viết này' });
+      return res.status(403).json({ success: false, message: 'Bạn không có quyền chỉnh sửa bài viết này!' });
     }
 
 
     if (!title || !content) {
-      return res.status(400).json({ success: false, message: 'Tiêu đề và nội dung không được để trống' });
+      return res.status(400).json({ success: false, message: 'Tiêu đề và nội dung không được để trống!' });
     }
 
 
@@ -688,12 +688,12 @@ export const updatePost = async (req, res) => {
 
     res.json({ 
       success: true, 
-      message: 'Cập nhật bài viết thành công',
+      message: 'Cập nhật bài viết thành công!',
       post: updatedPosts[0]
     });
   } catch (error) {
     console.error('Update post error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi cập nhật bài viết' });
+    res.status(500).json({ success: false, message: 'Lỗi khi cập nhật bài viết!' });
   }
 };
 
@@ -707,14 +707,14 @@ export const trackPostView = async (req, res) => {
 
     const [posts] = await db.query('SELECT id, authorId FROM posts WHERE id = ?', [postId]);
     if (posts.length === 0) {
-      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại!' });
     }
     
     const post = posts[0];
     
 
     if (userId && post.authorId === userId) {
-      return res.json({ success: true, message: 'Không tính lượt xem của tác giả' });
+      return res.json({ success: true, message: 'Không tính lượt xem của tác giả!' });
     }
     
 
@@ -735,7 +735,7 @@ export const trackPostView = async (req, res) => {
     const [existingViews] = await db.query(checkQuery, checkParams);
     
     if (existingViews.length > 0) {
-      return res.json({ success: true, message: 'Đã tính lượt xem trong 1 phút qua' });
+      return res.json({ success: true, message: 'Đã tính lượt xem trong 1 phút qua!' });
     }
     
 
@@ -750,10 +750,10 @@ export const trackPostView = async (req, res) => {
       [postId, postId]
     );
     
-    res.json({ success: true, message: 'Đã ghi nhận lượt xem' });
+    res.json({ success: true, message: 'Đã ghi nhận lượt xem!' });
   } catch (error) {
     console.error('Track view error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi ghi nhận lượt xem' });
+    res.status(500).json({ success: false, message: 'Lỗi khi ghi nhận lượt xem!' });
   }
 };
 
@@ -767,14 +767,14 @@ export const pinComment = async (req, res) => {
 
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     if (posts.length === 0) {
-      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại!' });
     }
 
     const post = posts[0];
 
 
     if (post.authorId !== userId) {
-      return res.status(403).json({ success: false, message: 'Bạn không có quyền ghim bình luận' });
+      return res.status(403).json({ success: false, message: 'Bạn không có quyền ghim bình luận!' });
     }
 
 
@@ -784,16 +784,16 @@ export const pinComment = async (req, res) => {
     );
 
     if (comments.length === 0) {
-      return res.status(404).json({ success: false, message: 'Bình luận không tồn tại hoặc không phải bình luận gốc' });
+      return res.status(404).json({ success: false, message: 'Bình luận không tồn tại hoặc không phải bình luận gốc!' });
     }
 
 
     await db.query('UPDATE posts SET pinnedCommentId = ? WHERE id = ?', [commentId, postId]);
 
-    res.json({ success: true, message: 'Đã ghim bình luận thành công', pinnedCommentId: commentId });
+    res.json({ success: true, message: 'Đã ghim bình luận thành công!', pinnedCommentId: commentId });
   } catch (error) {
     console.error('Pin comment error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi ghim bình luận' });
+    res.status(500).json({ success: false, message: 'Lỗi khi ghim bình luận!' });
   }
 };
 
@@ -806,23 +806,23 @@ export const unpinComment = async (req, res) => {
 
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     if (posts.length === 0) {
-      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại!' });
     }
 
     const post = posts[0];
 
 
     if (post.authorId !== userId) {
-      return res.status(403).json({ success: false, message: 'Bạn không có quyền gỡ ghim bình luận' });
+      return res.status(403).json({ success: false, message: 'Bạn không có quyền gỡ ghim bình luận!' });
     }
 
 
     await db.query('UPDATE posts SET pinnedCommentId = NULL WHERE id = ?', [postId]);
 
-    res.json({ success: true, message: 'Đã gỡ ghim bình luận thành công' });
+    res.json({ success: true, message: 'Đã gỡ ghim bình luận thành công!' });
   } catch (error) {
     console.error('Unpin comment error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi gỡ ghim bình luận' });
+    res.status(500).json({ success: false, message: 'Lỗi khi gỡ ghim bình luận!' });
   }
 };
 
@@ -835,7 +835,7 @@ export const getPinnedComment = async (req, res) => {
     const [posts] = await db.query('SELECT pinnedCommentId FROM posts WHERE id = ?', [postId]);
     
     if (posts.length === 0) {
-      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại!' });
     }
 
     const pinnedCommentId = posts[0].pinnedCommentId;
@@ -843,7 +843,7 @@ export const getPinnedComment = async (req, res) => {
     res.json({ success: true, pinnedCommentId });
   } catch (error) {
     console.error('Get pinned comment error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi lấy thông tin bình luận ghim' });
+    res.status(500).json({ success: false, message: 'Lỗi khi lấy thông tin bình luận ghim!' });
   }
 };
 
@@ -857,18 +857,18 @@ export const sharePost = async (req, res) => {
 
     const [posts] = await db.query('SELECT * FROM posts WHERE id = ?', [postId]);
     if (posts.length === 0) {
-      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại' });
+      return res.status(404).json({ success: false, message: 'Bài viết không tồn tại!' });
     }
 
 
     const [recipients] = await db.query('SELECT id FROM users WHERE id = ?', [recipientId]);
     if (recipients.length === 0) {
-      return res.status(404).json({ success: false, message: 'Người dùng không tồn tại' });
+      return res.status(404).json({ success: false, message: 'Người dùng không tồn tại!' });
     }
 
 
     if (senderId === recipientId) {
-      return res.status(400).json({ success: false, message: 'Không thể chia sẻ cho chính mình' });
+      return res.status(400).json({ success: false, message: 'Không thể chia sẻ cho chính mình!' });
     }
 
     const post = posts[0];
@@ -878,15 +878,15 @@ export const sharePost = async (req, res) => {
     const senderName = senders[0]?.username || 'Ai đó';
 
 
-    const message = `${senderName} đã chia sẻ bài viết "${post.title}" với bạn`;
+    const message = `${senderName} đã chia sẻ bài viết "${post.title}" với bạn!`;
     await createNotification(recipientId, 'share', senderId, message, postId);
 
     res.json({ 
       success: true, 
-      message: 'Đã chia sẻ bài viết thành công' 
+      message: 'Đã chia sẻ bài viết thành công!' 
     });
   } catch (error) {
     console.error('Share post error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi chia sẻ bài viết' });
+    res.status(500).json({ success: false, message: 'Lỗi khi chia sẻ bài viết!' });
   }
 };

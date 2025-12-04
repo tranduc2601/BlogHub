@@ -12,7 +12,7 @@ export const followUser = async (req, res) => {
     if (followerId === followingId) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Bạn không thể theo dõi chính mình' 
+        message: 'Bạn không thể theo dõi chính mình!' 
       });
     }
 
@@ -21,7 +21,7 @@ export const followUser = async (req, res) => {
     if (users.length === 0) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Người dùng không tồn tại' 
+        message: 'Người dùng không tồn tại!' 
       });
     }
 
@@ -34,7 +34,7 @@ export const followUser = async (req, res) => {
     if (existing.length > 0) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Bạn đã theo dõi người dùng này' 
+        message: 'Bạn đã theo dõi người dùng này!' 
       });
     }
 
@@ -52,7 +52,7 @@ export const followUser = async (req, res) => {
         followingId,
         'follow',
         followerId,
-        `đã bắt đầu theo dõi bạn`,
+        `đã bắt đầu theo dõi bạn!`,
         null
       );
     } catch (notifError) {
@@ -61,13 +61,13 @@ export const followUser = async (req, res) => {
 
     res.json({ 
       success: true, 
-      message: 'Đã theo dõi người dùng thành công' 
+      message: 'Đã theo dõi người dùng thành công!' 
     });
   } catch (error) {
     console.error('Follow user error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi theo dõi người dùng' 
+      message: 'Lỗi khi theo dõi người dùng!' 
     });
   }
 };
@@ -87,19 +87,19 @@ export const unfollowUser = async (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Bạn chưa theo dõi người dùng này' 
+        message: 'Bạn chưa theo dõi người dùng này!' 
       });
     }
 
     res.json({ 
       success: true, 
-      message: 'Đã hủy theo dõi người dùng thành công' 
+      message: 'Đã hủy theo dõi người dùng thành công!' 
     });
   } catch (error) {
     console.error('Unfollow user error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi hủy theo dõi người dùng' 
+      message: 'Lỗi khi hủy theo dõi người dùng!' 
     });
   }
 };
@@ -127,7 +127,7 @@ export const checkFollowStatus = async (req, res) => {
     console.error('Check follow status error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi kiểm tra trạng thái theo dõi' 
+      message: 'Lỗi khi kiểm tra trạng thái theo dõi!' 
     });
   }
 };
@@ -167,7 +167,7 @@ export const getFollowers = async (req, res) => {
     console.error('Get followers error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi lấy danh sách người theo dõi' 
+      message: 'Lỗi khi lấy danh sách người theo dõi!' 
     });
   }
 };
@@ -207,7 +207,7 @@ export const getFollowing = async (req, res) => {
     console.error('Get following error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi lấy danh sách đang theo dõi' 
+      message: 'Lỗi khi lấy danh sách đang theo dõi!' 
     });
   }
 };
@@ -242,7 +242,7 @@ export const getFollowerCounts = async (req, res) => {
     console.error('Get follower counts error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi lấy số lượng người theo dõi' 
+      message: 'Lỗi khi lấy số lượng người theo dõi!' 
     });
   }
 };
@@ -274,7 +274,7 @@ export const getUserById = async (req, res) => {
     if (users.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Không tìm thấy người dùng'
+        message: 'Không tìm thấy người dùng!'
       });
     }
 
@@ -289,7 +289,7 @@ export const getUserById = async (req, res) => {
     console.error('Get user by ID error:', error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi lấy thông tin người dùng'
+      message: 'Lỗi khi lấy thông tin người dùng!'
     });
   }
 };

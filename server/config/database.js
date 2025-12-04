@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT || 3306,
@@ -17,9 +16,7 @@ const pool = mysql.createPool({
   dateStrings: false 
 });
 
-
 const promisePool = pool.promise();
-
 
 export const testConnection = async () => {
   try {

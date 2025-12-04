@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 import db from '../config/database.js';
 
-
 export const authMiddleware = async (req, res, next) => {
   try {
 
@@ -16,10 +15,8 @@ export const authMiddleware = async (req, res, next) => {
 
     const token = authHeader.substring(7); 
 
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-
     const [users] = await db.query(
       'SELECT id, username, email, role, status FROM users WHERE id = ?',
       [decoded.id]

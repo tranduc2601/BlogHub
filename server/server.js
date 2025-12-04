@@ -115,19 +115,11 @@ const startServer = async () => {
     
     if (!dbConnected) {
       console.error('Hiện tại không kết nối được đến Database. Vui lòng kiểm tra lại cấu hình MySQL.\n');
-      console.log('Hướng dẫn:\n');
-      console.log('   1. Đảm bảo MySQL đang chạy\n');
-      console.log('   2. Chạy file schema.sql để tạo database và bảng\n');
-      console.log('   3. Kiểm tra file .env với thông tin kết nối đúng\n');
       process.exit(1);
     }
 
     app.listen(PORT, () => {
-      console.log('\n' + '='.repeat(50) + '\n');
-      console.log(`Server đang chạy tại cổng: http://localhost:${PORT}\n`);
-      console.log(`Môi trường làm việc hiện tại: ${process.env.NODE_ENV || 'Phát triển dự án'}\n`);
-      console.log(`CORS đã được bật tại URL: ${process.env.CLIENT_URL}\n`);
-      console.log('='.repeat(50) + '\n');
+
     });
 
   } catch (error) {

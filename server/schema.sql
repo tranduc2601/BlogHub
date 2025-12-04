@@ -24,9 +24,6 @@ ALTER TABLE users MODIFY COLUMN status ENUM('active', 'locked', 'deleted') DEFAU
 
 ALTER TABLE users ADD COLUMN IF NOT EXISTS deletedAt TIMESTAMP NULL DEFAULT NULL;
 
-INSERT IGNORE INTO users (id, username, email, password, status, deletedAt) 
-VALUES (0, 'deleted_user_system', 'deleted@system.local', '', 'deleted', CURRENT_TIMESTAMP);
-
 CREATE TABLE IF NOT EXISTS posts (
   id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(255) NOT NULL,

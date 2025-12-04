@@ -82,7 +82,6 @@ const updateSchema = async () => {
     const [commentsAnonymousIdColumn] = await db.query('SHOW COLUMNS FROM comments LIKE "anonymousId"');
     if (commentsAnonymousIdColumn.length === 0) {
       await db.query('ALTER TABLE comments ADD COLUMN anonymousId INT DEFAULT NULL');
-      console.log('Added anonymousId column to comments table');
     }
 
     const [commentsParentIdColumn] = await db.query('SHOW COLUMNS FROM comments LIKE "parentId"');

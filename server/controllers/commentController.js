@@ -138,7 +138,7 @@ export const getCommentsByPostId = async (req, res) => {
     console.error('Error fetching comments:', error);
     res.status(500).json({
       success: false,
-      message: 'Không thể tải bình luận'
+      message: 'Không thể tải bình luận!'
     });
   }
 };
@@ -155,7 +155,7 @@ export const createComment = async (req, res) => {
     if (!content || !content.trim()) {
       return res.status(400).json({
         success: false,
-        message: 'Nội dung bình luận không được để trống'
+        message: 'Nội dung bình luận không được để trống!'
       });
     }
     
@@ -164,7 +164,7 @@ export const createComment = async (req, res) => {
     if (posts.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Bài viết không tồn tại'
+        message: 'Bài viết không tồn tại!'
       });
     }
     
@@ -174,7 +174,7 @@ export const createComment = async (req, res) => {
       if (parentComments.length === 0) {
         return res.status(404).json({
           success: false,
-          message: 'Bình luận cha không tồn tại'
+          message: 'Bình luận cha không tồn tại!'
         });
       }
     }
@@ -212,7 +212,7 @@ export const createComment = async (req, res) => {
     );
     
     if (newComment.length === 0) {
-      throw new Error('Failed to retrieve created comment');
+      throw new Error('Failed to retrieve created comment!');
     }
     
     const comment = newComment[0];
@@ -268,7 +268,7 @@ export const createComment = async (req, res) => {
     console.error('Error creating comment:', error);
     res.status(500).json({
       success: false,
-      message: 'Không thể tạo bình luận'
+      message: 'Không thể tạo bình luận mới!'
     });
   }
 };
@@ -283,7 +283,7 @@ export const updateComment = async (req, res) => {
     if (!content || !content.trim()) {
       return res.status(400).json({
         success: false,
-        message: 'Nội dung bình luận không được để trống'
+        message: 'Nội dung bình luận không được để trống!'
       });
     }
     
@@ -296,14 +296,14 @@ export const updateComment = async (req, res) => {
     if (comments.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Bình luận không tồn tại'
+        message: 'Bình luận không tồn tại!'
       });
     }
     
     if (comments[0].userId !== userId) {
       return res.status(403).json({
         success: false,
-        message: 'Bạn không có quyền chỉnh sửa bình luận này'
+        message: 'Bạn không có quyền chỉnh sửa bình luận này!'
       });
     }
     
@@ -315,13 +315,13 @@ export const updateComment = async (req, res) => {
     
     res.json({
       success: true,
-      message: 'Đã cập nhật bình luận'
+      message: 'Đã cập nhật bình luận!'
     });
   } catch (error) {
     console.error('Error updating comment:', error);
     res.status(500).json({
       success: false,
-      message: 'Không thể cập nhật bình luận'
+      message: 'Không thể cập nhật bình luận!'
     });
   }
 };
@@ -341,7 +341,7 @@ export const deleteComment = async (req, res) => {
     if (comments.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Bình luận không tồn tại'
+        message: 'Bình luận không tồn tại!'
       });
     }
     
@@ -349,7 +349,7 @@ export const deleteComment = async (req, res) => {
     if (comments[0].userId !== userId && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
-        message: 'Bạn không có quyền xóa bình luận này'
+        message: 'Bạn không có quyền xóa bình luận này!'
       });
     }
     
@@ -364,7 +364,7 @@ export const deleteComment = async (req, res) => {
     console.error('Error deleting comment:', error);
     res.status(500).json({
       success: false,
-      message: 'Không thể xóa bình luận'
+      message: 'Không thể xóa bình luận!'
     });
   }
 };
@@ -386,13 +386,13 @@ export const reactComment = async (req, res) => {
 
     const validReactions = ['like', 'love', 'haha', 'wow', 'sad', 'angry'];
     if (!reactionType || !validReactions.includes(reactionType)) {
-      return res.status(400).json({ success: false, message: 'Loại biểu cảm không hợp lệ' });
+      return res.status(400).json({ success: false, message: 'Loại biểu cảm không hợp lệ!' });
     }
     
 
     const [comments] = await db.query('SELECT id FROM comments WHERE id = ?', [commentId]);
     if (comments.length === 0) {
-      return res.status(404).json({ success: false, message: 'Bình luận không tồn tại' });
+      return res.status(404).json({ success: false, message: 'Bình luận không tồn tại!' });
     }
     
 
@@ -415,7 +415,7 @@ export const reactComment = async (req, res) => {
           likes = GREATEST(likes - 1, 0)
           WHERE id = ?`, [commentId]);
         
-        return res.json({ success: true, message: 'Đã bỏ biểu cảm', action: 'unreact', reactionType: null });
+        return res.json({ success: true, message: 'Đã bỏ biểu cảm!', action: 'unreact', reactionType: null });
       } else {
 
         await db.query(
@@ -429,7 +429,7 @@ export const reactComment = async (req, res) => {
           reaction_${reactionType} = reaction_${reactionType} + 1
           WHERE id = ?`, [commentId]);
         
-        return res.json({ success: true, message: 'Đã thay đổi biểu cảm', action: 'change', reactionType });
+        return res.json({ success: true, message: 'Đã thay đổi biểu cảm!', action: 'change', reactionType });
       }
     } else {
 
@@ -445,11 +445,11 @@ export const reactComment = async (req, res) => {
         likes = likes + 1
         WHERE id = ?`, [commentId]);
       
-      return res.json({ success: true, message: 'Đã thả biểu cảm', action: 'react', reactionType });
+      return res.json({ success: true, message: 'Đã thả biểu cảm!', action: 'react', reactionType });
     }
   } catch (error) {
     console.error('Error reacting to comment:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi thả biểu cảm' });
+    res.status(500).json({ success: false, message: 'Lỗi khi thả biểu cảm!' });
   }
 };
 
@@ -474,7 +474,7 @@ export const getUserCommentReaction = async (req, res) => {
     });
   } catch (error) {
     console.error('Get user comment reaction error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi lấy thông tin biểu cảm' });
+    res.status(500).json({ success: false, message: 'Lỗi khi lấy thông tin biểu cảm!' });
   }
 };
 
@@ -486,7 +486,7 @@ export const getCommentReactions = async (req, res) => {
 
     const [comments] = await db.query('SELECT id FROM comments WHERE id = ?', [commentId]);
     if (comments.length === 0) {
-      return res.status(404).json({ success: false, message: 'Bình luận không tồn tại' });
+      return res.status(404).json({ success: false, message: 'Bình luận không tồn tại!' });
     }
 
 
@@ -542,7 +542,7 @@ export const getCommentReactions = async (req, res) => {
     });
   } catch (error) {
     console.error('Get comment reactions error:', error);
-    res.status(500).json({ success: false, message: 'Lỗi khi lấy thông tin reactions' });
+    res.status(500).json({ success: false, message: 'Lỗi khi lấy thông tin reactions!' });
   }
 };
 
@@ -590,7 +590,7 @@ export const getRepliesByCommentId = async (req, res) => {
     console.error('Error fetching replies:', error);
     res.status(500).json({
       success: false,
-      message: 'Không thể tải phản hồi'
+      message: 'Không thể tải phản hồi!'
     });
   }
 };
@@ -605,7 +605,7 @@ export const createReply = async (req, res) => {
     if (!content || !content.trim()) {
       return res.status(400).json({
         success: false,
-        message: 'Nội dung phản hồi không được để trống'
+        message: 'Nội dung phản hồi không được để trống!'
       });
     }
     
@@ -614,7 +614,7 @@ export const createReply = async (req, res) => {
     if (comments.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Bình luận không tồn tại'
+        message: 'Bình luận không tồn tại!'
       });
     }
     
@@ -662,7 +662,7 @@ export const createReply = async (req, res) => {
     console.error('Error creating reply:', error);
     res.status(500).json({
       success: false,
-      message: 'Không thể tạo phản hồi'
+      message: 'Không thể tạo phản hồi mới!'
     });
   }
 };
@@ -682,14 +682,14 @@ export const deleteReply = async (req, res) => {
     if (replies.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Phản hồi không tồn tại'
+        message: 'Phản hồi không tồn tại!'
       });
     }
     
     if (replies[0].userId !== userId && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
-        message: 'Bạn không có quyền xóa phản hồi này'
+        message: 'Bạn không có quyền xóa phản hồi này!'
       });
     }
     
@@ -697,13 +697,13 @@ export const deleteReply = async (req, res) => {
     
     res.json({
       success: true,
-      message: 'Đã xóa phản hồi'
+      message: 'Đã xóa phản hồi!'
     });
   } catch (error) {
     console.error('Error deleting reply:', error);
     res.status(500).json({
       success: false,
-      message: 'Không thể xóa phản hồi'
+      message: 'Không thể xóa phản hồi!'
     });
   }
 };
@@ -724,7 +724,7 @@ export const reportComment = async (req, res) => {
     if (comments.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Bình luận không tồn tại'
+        message: 'Bình luận không tồn tại!'
       });
     }
 
@@ -734,7 +734,7 @@ export const reportComment = async (req, res) => {
     if (comment.userId === reporterId) {
       return res.status(400).json({
         success: false,
-        message: 'Bạn không thể báo cáo bình luận của chính mình'
+        message: 'Bạn không thể báo cáo bình luận của chính mình!'
       });
     }
 
@@ -747,7 +747,7 @@ export const reportComment = async (req, res) => {
     if (existingReports.length > 0) {
       return res.status(400).json({
         success: false,
-        message: 'Bạn đã báo cáo bình luận này rồi'
+        message: 'Bạn đã báo cáo bình luận này rồi!'
       });
     }
 
@@ -783,13 +783,13 @@ export const reportComment = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Đã gửi báo cáo thành công. Admin sẽ xem xét và phản hồi sớm.'
+      message: 'Đã gửi báo cáo bình luận thành công. Admin sẽ xem xét và phản hồi sớm!'
     });
   } catch (error) {
     console.error('Error reporting comment:', error);
     res.status(500).json({
       success: false,
-      message: 'Không thể gửi báo cáo'
+      message: 'Không thể gửi báo cáo!'
     });
   }
 };

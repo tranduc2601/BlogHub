@@ -1057,7 +1057,6 @@ export const getCommentReports = async (req, res) => {
   }
 };
 
-
 export const handleCommentReport = async (req, res) => {
   try {
     const reportId = parseInt(req.params.id);
@@ -1092,22 +1091,19 @@ export const handleCommentReport = async (req, res) => {
     const report = reports[0];
 
     if (action === 'hide') {
-
       await db.query('UPDATE comments SET status = ? WHERE id = ?', ['hidden', report.commentId]);
-
 
       await db.query(
         'UPDATE comment_reports SET status = ?, adminResponse = ?, reviewedBy = ?, reviewedAt = NOW() WHERE id = ?',
         ['action_taken', adminResponse || 'Bình luận đã bị ẩn do vi phạm quy định', adminId, reportId]
       );
 
-
       try {
         await createNotification(
           report.commentAuthorId,
           'comment_reported',
           adminId,
-          `Bình luận của bạn đã bị ẩn do vi phạm quy định. Lý do: ${adminResponse || 'Vi phạm chính sách cộng đồng'}`,
+          `Bình luận của bạn đã bị ẩn do vi phạm quy định. Lý do: ${adminResponse || 'Vi phạm chính sách cộng đồng!'}`,
           report.postId
         );
       } catch (notifError) {
@@ -1137,7 +1133,6 @@ export const handleCommentReport = async (req, res) => {
         'UPDATE comment_reports SET status = ?, adminResponse = ?, reviewedBy = ?, reviewedAt = NOW() WHERE id = ?',
         ['rejected', adminResponse || 'Bình luận không vi phạm quy định', adminId, reportId]
       );
-
 
       try {
         await createNotification(

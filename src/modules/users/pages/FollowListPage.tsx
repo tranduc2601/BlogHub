@@ -345,16 +345,7 @@ export default function FollowListPage() {
 
 
             <p className="text-gray-600 text-sm mb-4 leading-relaxed text-center flex items-center justify-center gap-2">
-              <span className="inline-block w-5 h-5 align-middle">
-                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="48" height="48" rx="8" fill="#fff"/>
-                  <path d="M6 14.5V33.5C6 35.1569 7.34315 36.5 9 36.5H39C40.6569 36.5 42 35.1569 42 33.5V14.5C42 12.8431 40.6569 11.5 39 11.5H9C7.34315 11.5 6 12.8431 6 14.5Z" fill="#EA4335"/>
-                  <path d="M42 14.5V33.5C42 35.1569 40.6569 36.5 39 36.5H9C7.34315 36.5 6 35.1569 6 33.5V14.5L24 27.5L42 14.5Z" fill="#fff"/>
-                  <path d="M6 14.5L24 27.5L42 14.5" stroke="#EA4335" strokeWidth="2"/>
-                  <path d="M6 14.5L24 27.5L42 14.5" stroke="#34A853" strokeWidth="2"/>
-                  <path d="M6 14.5V33.5C6 35.1569 7.34315 36.5 9 36.5H39C40.6569 36.5 42 35.1569 42 33.5V14.5" stroke="#4285F4" strokeWidth="2"/>
-                </svg>
-              </span>
+              <i className="fa-solid fa-envelope mr-2"></i>
               {user.email}
             </p>
 
