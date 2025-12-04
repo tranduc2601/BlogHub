@@ -31,6 +31,8 @@ const ForgotPasswordPage = lazy(() => import('@/modules/auth/pages/ForgotPasswor
 const PrivacyPolicyPage = lazy(() => import('@/modules/posts/pages/PrivacyPolicyPage'));
 const TermsOfServicePage = lazy(() => import('@/modules/posts/pages/TermsOfServicePage'));
 
+const NotFoundPage = lazy(() => import('@/shared/pages/NotFoundPage'));
+
 const LoadingFallback = () => <LoadingSpinner fullScreen size="lg" message="Đang tải trang..." />;
 
 export function AppRoutes() {
@@ -137,6 +139,9 @@ export function AppRoutes() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          
+          {/* 404 - Must be last */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>
