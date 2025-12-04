@@ -107,7 +107,7 @@ function FollowButton({ userId, onFollowChange }: { userId: number; onFollowChan
 }
 
 export default function FollowListPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   
@@ -116,7 +116,10 @@ export default function FollowListPage() {
   
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
+  const [displayCount, setDisplayCount] = useState(12);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const ITEMS_PER_LOAD = 6;
 
   useEffect(() => {
     if (!type || !userId) {
@@ -165,12 +168,52 @@ export default function FollowListPage() {
     }
   };
 
+
   const filteredUsers = (users || []).filter(
     (user) =>
       user.id !== currentUser?.id &&
       (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const displayedUsers = filteredUsers.slice(0, displayCount);
+  const hasMore = displayCount < filteredUsers.length;
+
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (searchTerm) {
+      params.set("search", searchTerm);
+    } else {
+      params.delete("search");
+    }
+    setSearchParams(params, { replace: true });
+    setDisplayCount(12);
+  }, [searchTerm, setSearchParams]);
+
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isLoadingMore) return;
+      
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = document.documentElement.clientHeight;
+      
+      if (scrollTop + clientHeight >= scrollHeight - 200) {
+        if (displayCount < filteredUsers.length) {
+          setIsLoadingMore(true);
+          setTimeout(() => {
+            setDisplayCount(prev => prev + ITEMS_PER_LOAD);
+            setIsLoadingMore(false);
+          }, 500);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [displayCount, filteredUsers.length, isLoadingMore]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -186,9 +229,9 @@ export default function FollowListPage() {
       <div className="mb-8">
         <button
           onClick={() => navigate('/profile')}
-          className="mb-4 text-blue-600 hover:text-blue-700 flex items-center gap-2 font-semibold cursor-pointer"
+          className="mb-4 text-blue-600 hover:text-blue-700 flex items-center gap-2 font-semibold cursor-pointer bg-white hover:bg-blue-50 border border-blue-200 hover:border-blue-400 transition-all duration-300 px-4 py-2 rounded-xl shadow-sm hover:shadow-lg hover:scale-105 group"
         >
-          <i className="fa-solid fa-arrow-left"></i>
+          <i className="fa-solid fa-arrow-left mr-1 transition-transform duration-300 group-hover:-translate-x-1 group-hover:scale-110"></i>
           Quay lại
         </button>
         
@@ -251,8 +294,9 @@ export default function FollowListPage() {
 
 
       {!loading && filteredUsers.length > 0 && (
+        <>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredUsers.map((user, index) => (
+          {displayedUsers.map((user, index) => (
           <div
             key={user.id}
             className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 hover:shadow-xl transition-all duration-300 animate-fadeInUp"
@@ -343,6 +387,24 @@ export default function FollowListPage() {
           </div>
           ))}
         </div>
+
+        
+        {isLoadingMore && (
+          <div className="text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+            <p className="mt-3 text-gray-600 font-medium">Đang tải thêm...</p>
+          </div>
+        )}
+
+        {!hasMore && filteredUsers.length > 12 && (
+          <div className="text-center py-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-3 animate-bounce">
+              <i className="fa-solid fa-check text-3xl text-green-600"></i>
+            </div>
+            <p className="text-gray-600 font-semibold text-lg">Đã hiển thị tất cả {filteredUsers.length} người dùng</p>
+          </div>
+        )}
+        </>
       )}
     </div>
   );

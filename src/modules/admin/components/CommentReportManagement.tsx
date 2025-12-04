@@ -90,6 +90,7 @@ const CommentReportManagement: React.FC = () => {
     reportId: number | null;
   }>({ isOpen: false, reportId: null });
   const [isClosingDeleteModal, setIsClosingDeleteModal] = useState(false);
+  const [isOpeningDeleteModal, setIsOpeningDeleteModal] = useState(false);
 
   useEffect(() => {
     fetchReports();
@@ -264,12 +265,14 @@ const CommentReportManagement: React.FC = () => {
   const handleOpenDeleteModal = (reportId: number) => {
     setDeleteModal({ isOpen: true, reportId });
     setIsClosingDeleteModal(false);
+    setIsOpeningDeleteModal(false);
     setTimeout(() => {
-      setIsClosingDeleteModal(false);
+      setIsOpeningDeleteModal(true);
     }, 10);
   };
 
   const handleCloseDeleteModal = () => {
+    setIsOpeningDeleteModal(false);
     setIsClosingDeleteModal(true);
     setTimeout(() => {
       setDeleteModal({ isOpen: false, reportId: null });
@@ -323,7 +326,13 @@ const CommentReportManagement: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('vi-VN');
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
   };
 
   if (loading) {
@@ -1017,16 +1026,18 @@ const CommentReportManagement: React.FC = () => {
       {deleteModal.isOpen && (
         <div 
           className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
-            isClosingDeleteModal ? 'opacity-0' : 'opacity-100'
+            isClosingDeleteModal ? 'opacity-0' : isOpeningDeleteModal ? 'opacity-100' : 'opacity-0'
           }`}
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
           onClick={handleCloseDeleteModal}
         >
           <div 
             className={`bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 ${
               isClosingDeleteModal 
                 ? 'scale-95 opacity-0 translate-y-4' 
-                : 'scale-100 opacity-100 translate-y-0'
+                : isOpeningDeleteModal 
+                  ? 'scale-100 opacity-100 translate-y-0' 
+                  : 'scale-95 opacity-0 translate-y-4'
             }`}
             onClick={(e) => e.stopPropagation()}
           >
