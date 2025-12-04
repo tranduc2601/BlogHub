@@ -1,15 +1,5 @@
--- ============================================================================
--- BlogHub Production Database Schema (All-in-One)
--- ============================================================================
--- File duy nhất cho mọi trường hợp (database mới hoặc cập nhật)
--- An toàn: Không xóa dữ liệu, chỉ tạo/cập nhật cấu trúc
--- ============================================================================
-
 USE bloghub_db;
 
--- ============================================================================
--- USERS TABLE
--- ============================================================================
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(50) NOT NULL UNIQUE,
@@ -30,19 +20,13 @@ CREATE TABLE IF NOT EXISTS users (
   INDEX idx_warning (warningCount)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Cập nhật ENUM status nếu bảng đã tồn tại
 ALTER TABLE users MODIFY COLUMN status ENUM('active', 'locked', 'deleted') DEFAULT 'active';
 
--- Thêm cột deletedAt nếu chưa có
 ALTER TABLE users ADD COLUMN IF NOT EXISTS deletedAt TIMESTAMP NULL DEFAULT NULL;
 
--- Tạo placeholder user cho deleted accounts
 INSERT IGNORE INTO users (id, username, email, password, status, deletedAt) 
 VALUES (0, 'deleted_user_system', 'deleted@system.local', '', 'deleted', CURRENT_TIMESTAMP);
 
--- ============================================================================
--- POSTS TABLE
--- ============================================================================
 CREATE TABLE IF NOT EXISTS posts (
   id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
@@ -72,7 +56,6 @@ CREATE TABLE IF NOT EXISTS posts (
   INDEX idx_created (createdAt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Thêm các cột mới nếu bảng đã tồn tại
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS views INT DEFAULT 0;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS category VARCHAR(100) DEFAULT NULL;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS tags TEXT DEFAULT NULL;
@@ -86,9 +69,6 @@ ALTER TABLE posts ADD COLUMN IF NOT EXISTS reaction_angry INT DEFAULT 0;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS total_reactions INT DEFAULT 0;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS pinnedCommentId INT DEFAULT NULL;
 
--- ============================================================================
--- COMMENTS TABLE (includes replies via parentId)
--- ============================================================================
 CREATE TABLE IF NOT EXISTS comments (
   id INT AUTO_INCREMENT PRIMARY KEY,
   content TEXT NOT NULL,
@@ -120,10 +100,8 @@ CREATE TABLE IF NOT EXISTS comments (
   INDEX idx_created (createdAt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Cập nhật userId cho phép NULL và thêm constraint
 ALTER TABLE comments MODIFY COLUMN userId INT NULL;
 
--- Thêm các cột mới nếu chưa có
 ALTER TABLE comments ADD COLUMN IF NOT EXISTS likes INT DEFAULT 0;
 ALTER TABLE comments ADD COLUMN IF NOT EXISTS isAnonymous BOOLEAN DEFAULT FALSE;
 ALTER TABLE comments ADD COLUMN IF NOT EXISTS anonymousId VARCHAR(255) DEFAULT NULL;
@@ -136,13 +114,9 @@ ALTER TABLE comments ADD COLUMN IF NOT EXISTS reaction_sad INT DEFAULT 0;
 ALTER TABLE comments ADD COLUMN IF NOT EXISTS reaction_angry INT DEFAULT 0;
 ALTER TABLE comments ADD COLUMN IF NOT EXISTS total_reactions INT DEFAULT 0;
 
--- Add foreign key for pinnedCommentId in posts table
 ALTER TABLE posts ADD CONSTRAINT IF NOT EXISTS fk_pinned_comment 
 FOREIGN KEY (pinnedCommentId) REFERENCES comments(id) ON DELETE SET NULL;
 
--- ============================================================================
--- REACTIONS TABLE (Post reactions with multiple types)
--- ============================================================================
 CREATE TABLE IF NOT EXISTS reactions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   postId INT NOT NULL,
@@ -157,9 +131,6 @@ CREATE TABLE IF NOT EXISTS reactions (
   INDEX idx_user (userId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- COMMENT REACTIONS TABLE (Comment reactions with multiple types)
--- ============================================================================
 CREATE TABLE IF NOT EXISTS comment_reactions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   commentId INT NOT NULL,
@@ -174,9 +145,6 @@ CREATE TABLE IF NOT EXISTS comment_reactions (
   INDEX idx_user (userId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- POST VIEWS TABLE
--- ============================================================================
 CREATE TABLE IF NOT EXISTS post_views (
   id INT AUTO_INCREMENT PRIMARY KEY,
   postId INT NOT NULL,
@@ -190,12 +158,8 @@ CREATE TABLE IF NOT EXISTS post_views (
   INDEX idx_viewed (viewedAt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Thêm cột userId nếu chưa có
 ALTER TABLE post_views ADD COLUMN IF NOT EXISTS userId INT DEFAULT NULL AFTER postId;
 
--- ============================================================================
--- FOLLOWS TABLE
--- ============================================================================
 CREATE TABLE IF NOT EXISTS follows (
   id INT AUTO_INCREMENT PRIMARY KEY,
   followerId INT NOT NULL,
@@ -208,13 +172,10 @@ CREATE TABLE IF NOT EXISTS follows (
   INDEX idx_following (followingId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- NOTIFICATIONS TABLE
--- ============================================================================
 CREATE TABLE IF NOT EXISTS notifications (
   id INT AUTO_INCREMENT PRIMARY KEY,
   userId INT NOT NULL,
-  type ENUM('share', 'like', 'comment', 'follow', 'reaction', 'post_approved', 'post_reported') NOT NULL,
+  type ENUM('share', 'like', 'comment', 'follow', 'reaction', 'post_approved', 'post_reported', 'comment_reported') NOT NULL,
   postId INT DEFAULT NULL,
   senderId INT DEFAULT NULL,
   anonymousId VARCHAR(255) DEFAULT NULL,
@@ -229,9 +190,6 @@ CREATE TABLE IF NOT EXISTS notifications (
   INDEX idx_type (type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- USER SESSIONS TABLE (Single device login enforcement)
--- ============================================================================
 CREATE TABLE IF NOT EXISTS user_sessions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   userId INT NOT NULL,
@@ -246,9 +204,6 @@ CREATE TABLE IF NOT EXISTS user_sessions (
   INDEX idx_expires (expiresAt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- REPORTS TABLE (Post reports)
--- ============================================================================
 CREATE TABLE IF NOT EXISTS reports (
   id INT AUTO_INCREMENT PRIMARY KEY,
   postId INT NOT NULL,
@@ -267,9 +222,6 @@ CREATE TABLE IF NOT EXISTS reports (
   INDEX idx_created (createdAt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- COMMENT REPORTS TABLE
--- ============================================================================
 CREATE TABLE IF NOT EXISTS comment_reports (
   id INT AUTO_INCREMENT PRIMARY KEY,
   commentId INT NOT NULL,
@@ -290,9 +242,6 @@ CREATE TABLE IF NOT EXISTS comment_reports (
   INDEX idx_created (createdAt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- BOOKMARKS TABLE (Saved posts)
--- ============================================================================
 CREATE TABLE IF NOT EXISTS bookmarks (
   id INT AUTO_INCREMENT PRIMARY KEY,
   userId INT NOT NULL,
@@ -306,11 +255,6 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   INDEX idx_created (createdAt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- LEGACY TABLES (Kept for backward compatibility)
--- ============================================================================
-
--- Legacy likes table (use reactions table instead)
 CREATE TABLE IF NOT EXISTS likes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   postId INT NOT NULL,
@@ -321,7 +265,6 @@ CREATE TABLE IF NOT EXISTS likes (
   INDEX idx_post_user (postId, userId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Legacy comment likes table (use comment_reactions table instead)
 CREATE TABLE IF NOT EXISTS comment_likes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   commentId INT NOT NULL,
@@ -334,7 +277,6 @@ CREATE TABLE IF NOT EXISTS comment_likes (
   INDEX idx_user (userId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Legacy comment replies table (use comments.parentId instead)
 CREATE TABLE IF NOT EXISTS comment_replies (
   id INT AUTO_INCREMENT PRIMARY KEY,
   content TEXT NOT NULL,
@@ -347,6 +289,22 @@ CREATE TABLE IF NOT EXISTS comment_replies (
   INDEX idx_comment (commentId),
   INDEX idx_user (userId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+- -- 1. Xóa user admin cũ (để tránh lỗi trùng email)
+-- DELETE FROM users WHERE email = 'admin@bloghub.com';
+
+-- -- 2. Tạo lại Admin với mật khẩu: m@t.|<h@u?NaY'c0'500ChU~
+-- INSERT INTO users (username, email, password, role, status, warningCount, createdAt, updatedAt)
+-- VALUES (
+--     'SuperAdmin', 
+--     'admin@bloghub.com', 
+--     '$2a$12$h6tGBitB/lWevrkeUk0cqOv0yaaBiqPwN7wJvUUd8uDtkRrb4eg4G', 
+--     'admin', 
+--     'active', 
+--     0, 
+--     NOW(), 
+--     NOW()
+-- );
 
 -- ============================================================================
 -- END OF SCHEMA

@@ -1061,7 +1061,7 @@ export const getCommentReports = async (req, res) => {
 export const handleCommentReport = async (req, res) => {
   try {
     const reportId = parseInt(req.params.id);
-
+    const { action, adminResponse } = req.body;
     const adminId = req.user?.id;
 
 
@@ -1103,26 +1103,26 @@ export const handleCommentReport = async (req, res) => {
 
 
       try {
-        await createNotification({
-          userId: report.commentAuthorId,
-          type: 'comment_reported',
-          postId: report.postId,
-          senderId: adminId,
-          message: `Bình luận của bạn đã bị ẩn do vi phạm quy định. Lý do: ${adminResponse || 'Vi phạm chính sách cộng đồng'}`
-        });
+        await createNotification(
+          report.commentAuthorId,
+          'comment_reported',
+          adminId,
+          `Bình luận của bạn đã bị ẩn do vi phạm quy định. Lý do: ${adminResponse || 'Vi phạm chính sách cộng đồng'}`,
+          report.postId
+        );
       } catch (notifError) {
         console.error('Error creating comment author notification:', notifError);
       }
 
 
       try {
-        await createNotification({
-          userId: report.reporterId,
-          type: 'post_approved',
-          postId: report.postId,
-          senderId: adminId,
-          message: `Cảm ơn báo cáo của bạn! Bình luận vi phạm từ "${report.commentAuthor}" đã được xử lý.`
-        });
+        await createNotification(
+          report.reporterId,
+          'post_approved',
+          adminId,
+          `Cảm ơn báo cáo của bạn! Bình luận vi phạm từ "${report.commentAuthor}" đã được xử lý.`,
+          report.postId
+        );
       } catch (notifError) {
         console.error('Error creating reporter notification:', notifError);
       }
@@ -1140,13 +1140,13 @@ export const handleCommentReport = async (req, res) => {
 
 
       try {
-        await createNotification({
-          userId: report.reporterId,
-          type: 'post_approved',
-          postId: report.postId,
-          senderId: adminId,
-          message: `Báo cáo của bạn về bình luận từ "${report.commentAuthor}" đã được xem xét. Bình luận không vi phạm quy định.`
-        });
+        await createNotification(
+          report.reporterId,
+          'post_approved',
+          adminId,
+          `Báo cáo của bạn về bình luận từ "${report.commentAuthor}" đã được xem xét. Bình luận không vi phạm quy định.`,
+          report.postId
+        );
       } catch (notifError) {
         console.error('Error creating reporter notification:', notifError);
       }
