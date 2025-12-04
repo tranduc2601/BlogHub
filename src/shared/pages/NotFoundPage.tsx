@@ -1,10 +1,9 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/core/auth";
 
 export default function NotFoundPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { user } = useAuth();
   const [countdown, setCountdown] = useState(10);
   const [isAutoRedirect, setIsAutoRedirect] = useState(true);
@@ -43,7 +42,7 @@ export default function NotFoundPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#2664eb] flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8 select-none">
       <div className="max-w-4xl w-full">
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
           
@@ -73,12 +72,11 @@ export default function NotFoundPage() {
           <div className="px-6 py-8 sm:px-8 sm:py-12">
             <div className="text-center mb-8">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
-                Ối! Có vẻ như bạn đã lạc đường!
+                Ối! Có vẻ như bạn đã lạc đường.
               </h2>
               
               <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
                 Trang bạn đang tìm kiếm có thể đã bị xóa, đổi tên hoặc tạm thời không khả dụng.
-                Đường dẫn hiện tại: <code className="px-2 py-1 bg-gray-100 rounded text-sm text-blue-600 font-mono">{location.pathname}</code>
               </p>
             </div>
 
@@ -95,7 +93,7 @@ export default function NotFoundPage() {
                   </p>
                   <button
                     onClick={handleCancelAutoRedirect}
-                    className="ml-2 px-3 py-1 text-sm text-blue-600 hover:text-blue-800 underline transition-colors"
+                    className="ml-2 mt-1 px-3 py-1 text-sm text-blue-600 hover:text-blue-800 underline transition-colors cursor-pointer"
                   >
                     Hủy
                   </button>
@@ -106,32 +104,32 @@ export default function NotFoundPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
               <button
                 onClick={handleGoHome}
-                className="group relative px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95 overflow-hidden"
+                className="group relative px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95 overflow-hidden cursor-pointer"
               >
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 <div className="relative flex items-center justify-center gap-2">
-                  <i className="fa-solid fa-home text-lg"></i>
+                  <i className="fa-solid fa-home text-lg mr-1"></i>
                   <span>Về trang chủ</span>
                 </div>
               </button>
 
               <button
                 onClick={handleGoBack}
-                className="group relative px-6 py-4 bg-white border-3 border-gray-300 text-gray-700 rounded-xl font-semibold transition-all duration-300 hover:border-blue-500 hover:text-blue-600 hover:shadow-lg hover:scale-105 active:scale-95"
+                className="group relative px-6 py-4 bg-white border-3 border-gray-300 text-gray-700 rounded-xl font-semibold transition-all duration-300 hover:border-blue-500 hover:text-blue-600 hover:shadow-lg hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <div className="flex items-center justify-center gap-2">
-                  <i className="fa-solid fa-arrow-left text-lg"></i>
+                  <i className="fa-solid fa-arrow-left text-lg mr-1"></i>
                   <span>Quay lại</span>
                 </div>
               </button>
 
               <button
                 onClick={handleBrowsePosts}
-                className="group relative px-6 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95 overflow-hidden"
+                className="group relative px-6 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold transition-all duration-300 hover:shadow-xl hover:scale-105 active:scale-95 overflow-hidden cursor-pointer"
               >
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 <div className="relative flex items-center justify-center gap-2">
-                  <i className="fa-solid fa-newspaper text-lg"></i>
+                  <i className="fa-solid fa-newspaper text-lg mr-1"></i>
                   <span>Xem bài viết</span>
                 </div>
               </button>
@@ -139,7 +137,7 @@ export default function NotFoundPage() {
 
             <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-6 sm:p-8 border border-gray-200">
               <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <i className="fa-solid fa-lightbulb text-yellow-500"></i>
+                <i className="fa-solid fa-lightbulb text-yellow-500 mr-2"></i>
                 Gợi ý cho bạn
               </h3>
               
@@ -237,7 +235,7 @@ export default function NotFoundPage() {
               <p className="text-gray-500 text-sm">
                 Nếu bạn cho rằng đây là lỗi, vui lòng{" "}
                 <a
-                  href="mailto:support@bloghub.com"
+                  href="mailto:duyhoangtran2006@gmail.com"
                   className="text-blue-600 hover:text-blue-800 font-medium underline"
                 >
                   liên hệ với chúng tôi
@@ -245,15 +243,6 @@ export default function NotFoundPage() {
               </p>
             </div>
           </div>
-        </div>
-
-        <div className="mt-6 text-center text-gray-500 text-sm">
-          <p className="flex items-center justify-center gap-2 flex-wrap">
-            <i className="fa-solid fa-shield-halved text-blue-600"></i>
-            <span>BlogHub - Nền tảng chia sẻ kiến thức</span>
-            <span className="hidden sm:inline">•</span>
-            <span>© 2025</span>
-          </p>
         </div>
       </div>
     </div>
