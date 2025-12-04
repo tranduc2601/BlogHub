@@ -1,8 +1,3 @@
-/**
- * AdminPage - Trang quản trị chính
- * Kết hợp tất cả components và quản lý routing nội bộ
- */
-
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';

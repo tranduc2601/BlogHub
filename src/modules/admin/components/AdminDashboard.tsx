@@ -90,7 +90,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     return `${diffDays} ngày trước`;
   };
 
-  const getAvatarInitial = (name: string) => {
+  const getAvatarInitial = (name: string | null | undefined) => {
+    if (!name) return '?';
     const words = name.trim().split(' ');
     const lastWord = words[words.length - 1];
     return lastWord.charAt(0).toUpperCase();
