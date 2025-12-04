@@ -429,11 +429,13 @@ export default function NotificationsPage() {
       )}
       
       {!hasMore && displayedNotifications.length > 0 && (
-        <div className="text-center py-6">
-          <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
-            <i className="fa-solid fa-circle-check text-green-500"></i>
-            Đã hiển thị tất cả thông báo
-          </p>
+        <div className="flex items-center justify-center py-8">
+          <div className="flex items-center gap-2 text-gray-500">
+            <div className="h-px w-16 bg-gray-300"></div>
+            <i className="fa-solid fa-check-circle text-green-500"></i>
+            <span className="text-sm font-medium">Đã hiển thị tất cả thông báo</span>
+            <div className="h-px w-16 bg-gray-300"></div>
+          </div>
         </div>
       )}
 

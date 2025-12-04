@@ -132,11 +132,13 @@ export default function SavedPostsPage() {
 
 
             {!hasMore && bookmarks.length > 0 && (
-              <div className="text-center mt-6 sm:mt-8 py-4 sm:py-6">
-                <p className="text-sm sm:text-base text-gray-500 font-medium">
-                  <i className="fa-solid fa-check-circle text-green-500 mr-2"></i>
-                  Bạn đã xem hết tất cả bài viết đã lưu
-                </p>
+              <div className="flex items-center justify-center py-8 mt-6">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <div className="h-px w-16 bg-gray-300"></div>
+                  <i className="fa-solid fa-check-circle text-green-500"></i>
+                  <span className="text-sm font-medium">Bạn đã xem hết tất cả bài viết đã lưu</span>
+                  <div className="h-px w-16 bg-gray-300"></div>
+                </div>
               </div>
             )}
           </>

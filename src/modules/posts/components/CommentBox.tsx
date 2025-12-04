@@ -479,11 +479,13 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
 
 
           {!hasMore && commentTree.length > 0 && (
-            <div className="flex flex-col items-center justify-center py-6 gap-2">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-100">
-                <i className="fa-solid fa-check text-2xl text-green-600"></i>
+            <div className="flex items-center justify-center py-8">
+              <div className="flex items-center gap-2 text-gray-500">
+                <div className="h-px w-16 bg-gray-300"></div>
+                <i className="fa-solid fa-check-circle text-green-500"></i>
+                <span className="text-sm font-medium">Đã đọc hết tất cả bình luận</span>
+                <div className="h-px w-16 bg-gray-300"></div>
               </div>
-              <p className="text-sm font-medium text-green-600">Đã đọc hết tất cả bình luận</p>
             </div>
           )}
         </div>
