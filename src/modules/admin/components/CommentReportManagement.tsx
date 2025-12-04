@@ -263,6 +263,10 @@ const CommentReportManagement: React.FC = () => {
 
   const handleOpenDeleteModal = (reportId: number) => {
     setDeleteModal({ isOpen: true, reportId });
+    setIsClosingDeleteModal(false);
+    setTimeout(() => {
+      setIsClosingDeleteModal(false);
+    }, 10);
   };
 
   const handleCloseDeleteModal = () => {
@@ -1011,11 +1015,20 @@ const CommentReportManagement: React.FC = () => {
 
       
       {deleteModal.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div 
+          className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
+            isClosingDeleteModal ? 'opacity-0' : 'opacity-100'
+          }`}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}
+          onClick={handleCloseDeleteModal}
+        >
           <div 
             className={`bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 ${
-              isClosingDeleteModal ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
+              isClosingDeleteModal 
+                ? 'scale-95 opacity-0 translate-y-4' 
+                : 'scale-100 opacity-100 translate-y-0'
             }`}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
               <div className="flex items-center gap-4 mb-4">
@@ -1032,15 +1045,15 @@ const CommentReportManagement: React.FC = () => {
               <div className="flex gap-3">
                 <button
                   onClick={handleCloseDeleteModal}
-                  className="flex-1 px-4 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors cursor-pointer"
                 >
-                  Hủy
+                  <i className="fa-solid fa-xmark mr-2"></i>Hủy
                 </button>
                 <button
                   onClick={handleConfirmDelete}
-                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors cursor-pointer"
                 >
-                  Xóa báo cáo
+                  <i className="fa-solid fa-trash-can mr-2"></i>Xóa báo cáo
                 </button>
               </div>
             </div>
