@@ -239,7 +239,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Xu hướng bài viết theo tháng</h3>
           {monthlyStats.length === 0 || monthlyStats.every(m => m.posts === 0) ? (
             <div className="h-[300px] flex items-center justify-center">
-              <p className="text-gray-500 text-center">Chưa có bài viết nào được đăng</p>
+              <p className="text-gray-500 text-center">Chưa có bài viết nào được đăng!</p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={300}>

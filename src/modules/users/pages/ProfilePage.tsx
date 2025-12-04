@@ -1,10 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect} from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useAuth } from "@/core/auth";
 import axios from "@/core/config/axios";
 import toast from "react-hot-toast";
 import DeleteAccountModal from "@/shared/ui/DeleteAccountModal";
+import { useDropzone } from "react-dropzone";
 
 interface ExtendedUser {
   id: number;
@@ -30,7 +31,6 @@ export default function ProfilePage() {
   const [websites, setWebsites] = useState<string[]>([""]);
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState(currentUser?.email || "");
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [followerCounts, setFollowerCounts] = useState({ followers: 0, following: 0 });
   const [originalValues, setOriginalValues] = useState({
     name: "",
@@ -145,15 +145,31 @@ export default function ProfilePage() {
     }
   }, [currentUser, isViewingOwnProfile, userId]);
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const onDrop = (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
     if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Kích thước ảnh không được vượt quá 5MB!');
+        return;
+      }
+      
       setAvatarFile(file);
       const reader = new FileReader();
       reader.onloadend = () => setAvatar(reader.result as string);
       reader.readAsDataURL(file);
+      toast.success('Đã chọn ảnh thành công!');
     }
   };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp']
+    },
+    maxFiles: 1,
+    multiple: false
+  });
 
   const hasChanges = () => {
     if (avatarFile) return true;
@@ -329,21 +345,33 @@ export default function ProfilePage() {
             </div>
             
             {isViewingOwnProfile && (
-              <>
-                <button
-                  className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-200 hover:cursor-pointer transition-all duration-200 shadow hover:shadow-lg hover:scale-105 w-full md:w-auto text-sm md:text-base"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <i className="fa-solid fa-upload"></i> <span>Chọn ảnh</span>
-                </button>
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={fileInputRef}
-                  style={{ display: "none" }}
-                  onChange={handleAvatarChange}
-                />
-              </>
+              <div 
+                {...getRootProps()} 
+                className={`w-full md:w-auto border-2 border-dashed rounded-xl p-4 cursor-pointer transition-all duration-300 ${
+                  isDragActive 
+                    ? 'border-blue-500 bg-blue-50 scale-105' 
+                    : 'border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50 hover:scale-105'
+                } shadow-sm hover:shadow-lg`}
+              >
+                <input {...getInputProps()} />
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                    isDragActive ? 'bg-blue-500 animate-bounce' : 'bg-blue-100'
+                  }`}>
+                    <i className={`fa-solid fa-cloud-arrow-up text-2xl ${
+                      isDragActive ? 'text-white' : 'text-blue-600'
+                    }`}></i>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-blue-700 text-sm md:text-base">
+                      {isDragActive ? 'Thả ảnh vào đây...' : 'Chọn hoặc kéo thả ảnh'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      PNG, JPG, GIF (tối đa 5MB)
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 

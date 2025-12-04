@@ -663,7 +663,7 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
       <div className="space-y-4">
         {paginatedPosts.length === 0 ? (
           <div className="bg-white rounded-[16px] p-8 text-center shadow-lg">
-            <p className="text-gray-500">Chưa có bài viết nào!</p>
+            <p className="text-gray-500">Chưa có bài viết nào hoặc không tìm thấy bài viết phù hợp!</p>
           </div>
         ) : (
           paginatedPosts.map(post => (

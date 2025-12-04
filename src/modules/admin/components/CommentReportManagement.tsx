@@ -31,6 +31,7 @@ interface PostDetail {
   excerpt: string;
   featuredImage?: string;
   author: string;
+  authorId?: number;
   authorAvatar?: string;
   category: string;
   tags?: string;
@@ -880,6 +881,7 @@ const CommentReportManagement: React.FC = () => {
                     postComments.map(comment => {
                       const commentAvatarUrl = getCommentAvatar(comment.authorAvatar);
                       const isAdmin = comment.authorRole === 'admin';
+                      const isPostAuthor = selectedPost && comment.authorId === selectedPost.authorId;
                       
                       return (
                         <div key={comment.id}>
@@ -913,21 +915,26 @@ const CommentReportManagement: React.FC = () => {
                                 </div>
                                 
                                 <div className="flex-1">
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-2 flex-wrap">
                                     <p className="font-semibold text-gray-800">{comment.author}</p>
                                     {comment.author.startsWith('Người dùng ẩn danh') && (
-                                      <span className="text-xs bg-gradient-to-r from-gray-500 to-gray-600 text-white px-2 py-1 rounded-full font-semibold">
+                                      <span className="text-xs bg-gradient-to-r from-gray-500 to-gray-600 text-white px-2 py-1 rounded-full font-semibold shadow-sm">
                                         <i className="fa-solid fa-user-secret mr-1"></i>Ẩn danh
                                       </span>
                                     )}
                                     {comment.isPinned && (
-                                      <span className="text-xs bg-yellow-500 text-white px-2 py-1 rounded-full font-semibold">
+                                      <span className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-2 py-1 rounded-full font-semibold shadow-sm">
                                         <i className="fa-solid fa-thumbtack mr-1"></i>Đã ghim
                                       </span>
                                     )}
                                     {isAdmin && (
-                                      <span className="text-xs bg-red-500 text-white px-2 py-1 rounded-full font-semibold">
+                                      <span className="text-xs bg-gradient-to-r from-red-500 to-pink-500 text-white px-2 py-1 rounded-full font-semibold shadow-sm">
                                         <i className="fa-solid fa-shield-halved mr-1"></i>Admin
+                                      </span>
+                                    )}
+                                    {isPostAuthor && !isAdmin && (
+                                      <span className="text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-2 py-1 rounded-full font-semibold shadow-sm">
+                                        <i className="fa-solid fa-pen-nib mr-1"></i>Tác giả
                                       </span>
                                     )}
                                   </div>
@@ -952,6 +959,7 @@ const CommentReportManagement: React.FC = () => {
                               {comment.replies.map((reply) => {
                                 const replyAvatarUrl = getCommentAvatar(reply.authorAvatar);
                                 const isReplyAdmin = reply.authorRole === 'admin';
+                                const isReplyPostAuthor = selectedPost && reply.authorId === selectedPost.authorId;
                                 
                                 return (
                                   <div key={reply.id} className="flex gap-3 group">
@@ -991,6 +999,11 @@ const CommentReportManagement: React.FC = () => {
                                           {isReplyAdmin && (
                                             <span className="text-[10px] sm:text-xs bg-gradient-to-r from-red-500 to-pink-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold shadow-sm">
                                               <i className="fa-solid fa-shield-halved mr-1"></i>Admin
+                                            </span>
+                                          )}
+                                          {isReplyPostAuthor && !isReplyAdmin && (
+                                            <span className="text-[10px] sm:text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold shadow-sm">
+                                              <i className="fa-solid fa-pen-nib mr-1"></i>Tác giả
                                             </span>
                                           )}
                                           {reply.isHidden && (

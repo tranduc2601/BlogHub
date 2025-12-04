@@ -46,10 +46,14 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
 
     if (showMenu) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = '';
 
       if (reactionTimeoutRef.current) {
         clearTimeout(reactionTimeoutRef.current);

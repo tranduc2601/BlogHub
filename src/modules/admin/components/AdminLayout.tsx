@@ -22,7 +22,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ sidebar, children }) => {
 
       {isSidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-fadeIn"
+          className="lg:hidden fixed inset-0 bg-black/20 z-40 animate-fadeIn"
           onClick={() => setIsSidebarOpen(false)}
           aria-hidden="true"
         ></div>
