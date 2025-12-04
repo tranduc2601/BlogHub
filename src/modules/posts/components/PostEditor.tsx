@@ -193,6 +193,7 @@ export default function PostEditor() {
       const data = response.data as { success?: boolean; message?: string };
       if (data.success) {
         toast.success(data.message || "Bài viết đã được gửi và đang chờ admin duyệt!");
+        window.dispatchEvent(new Event('admin-action-changed'));
         setTitle("");
         setCategory("");
         setTags("");

@@ -458,6 +458,7 @@ export default function PostDetailPage() {
       const response = await axios.post(`/posts/${post?.id}/report`, { reason });
       if (response.data.success) {
         setShowReportSuccessModal(true);
+        window.dispatchEvent(new Event('admin-action-changed'));
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
@@ -472,6 +473,7 @@ export default function PostDetailPage() {
       toast.success('Đã gửi báo cáo! Admin sẽ xem xét và phản hồi sớm.');
       setReportCommentModalOpen(false);
       setCommentToReport(null);
+      window.dispatchEvent(new Event('admin-action-changed'));
     } catch (error) {
       console.error('Error reporting comment:', error);
       const err = error as { response?: { status?: number; data?: { success?: boolean; message?: string } } };

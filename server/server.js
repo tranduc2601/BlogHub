@@ -22,7 +22,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Optimized CORS for Railway deployment
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.CLIENT_URL,
@@ -32,7 +31,6 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
     if (allowedOrigins.some(allowed => origin.startsWith(allowed))) {
       callback(null, true);
@@ -45,11 +43,9 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Optimized body parsing with reasonable limits for Railway
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Request logging (lightweight)
 app.use((req, res, next) => {
   if (process.env.NODE_ENV !== 'production') {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
@@ -57,7 +53,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check endpoint for Railway
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok',
@@ -90,12 +85,11 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
 
-// 404 handler
 app.use((req, res) => {
   console.error(`404 Not Found: ${req.method} ${req.originalUrl}`);
   res.status(404).json({ 
     success: false,
-    message: 'API endpoint không tồn tại',
+    message: 'API endpoint không tồn tại!',
     path: req.originalUrl,
     method: req.method
   });
@@ -105,7 +99,7 @@ app.use((err, req, res, next) => {
   console.error('Global error:', err);
   res.status(err.status || 500).json({
     success: false,
-    message: err.message || 'Lỗi server không xác định'
+    message: err.message || 'Lỗi server không xác định!'
   });
 });
 
@@ -114,7 +108,7 @@ const startServer = async () => {
     const dbConnected = await testConnection();
     
     if (!dbConnected) {
-      console.error('Hiện tại không kết nối được đến Database. Vui lòng kiểm tra lại cấu hình MySQL.\n');
+      console.error('Hiện tại không kết nối được đến Database. Vui lòng kiểm tra lại cấu hình MySQL!\n');
       process.exit(1);
     }
 
