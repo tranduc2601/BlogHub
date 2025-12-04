@@ -145,6 +145,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
           if (response.data.success) {
             toast.success(response.data.message);
             fetchReports();
+            window.dispatchEvent(new Event('admin-action-changed'));
           }
         } catch (error) {
           console.error('Failed to approve report:', error);
@@ -166,6 +167,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
           if (response.data.success) {
             toast.success(response.data.message);
             fetchReports();
+            window.dispatchEvent(new Event('admin-action-changed'));
           }
         } catch (error) {
           console.error('Failed to reject report:', error);
@@ -187,6 +189,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
           if (response.data.success) {
             toast.success('Đã xóa báo cáo và lưu vào lịch sử!');
             fetchReports();
+            window.dispatchEvent(new Event('admin-action-changed'));
           }
         } catch (error) {
           console.error('Failed to delete report:', error);
@@ -652,8 +655,10 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                     className="w-14 h-14 rounded-full object-cover ring-4 ring-white shadow-lg"
                   />
                 ) : (
-                  <div className="w-14 h-14 rounded-full bg-white/20 ring-4 ring-white shadow-lg flex items-center justify-center">
-                    <i className="fa-solid fa-user text-2xl text-white"></i>
+                  <div className="w-14 h-14 rounded-full bg-blue-500 ring-4 ring-white shadow-lg flex items-center justify-center">
+                    <span className="text-2xl font-bold text-white">
+                      {selectedPost.author.trim().split(' ').slice(-1)[0].charAt(0).toUpperCase()}
+                    </span>
                   </div>
                 )}
                 <div>

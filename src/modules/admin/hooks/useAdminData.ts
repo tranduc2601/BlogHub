@@ -119,6 +119,7 @@ export const useAdminData = () => {
         const updated = res.data.post;
         setPosts(prev => prev.map(p => p.id === updated.id ? updated : p));
         toast.success(res.data.message || 'Duyệt bài viết thành công!');
+        window.dispatchEvent(new Event('admin-action-changed'));
       }
     } catch (error: unknown) {
       console.error('Approve post failed', error);
@@ -148,6 +149,7 @@ export const useAdminData = () => {
         const updated = res.data.post;
         setPosts(prev => prev.map(p => p.id === updated.id ? updated : p));
         toast.success(res.data.message || 'Từ chối bài viết thành công');
+        window.dispatchEvent(new Event('admin-action-changed'));
       }
     } catch (error: unknown) {
       console.error('Reject post failed', error);

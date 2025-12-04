@@ -21,6 +21,11 @@ export const adminService = {
     return response.data;
   },
 
+  async getPendingActionsCount() {
+    const response = await axiosInstance.get('/admin/pending-actions-count');
+    return response.data;
+  },
+
   async getReports() {
     const response = await axiosInstance.get('/admin/reports');
     return response.data;

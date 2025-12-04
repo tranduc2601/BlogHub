@@ -1005,6 +1005,46 @@ export const deleteReport = async (req, res) => {
 };
 
 
+export const getPendingActionsCount = async (req, res) => {
+  try {
+    // Count pending post reports
+    const [postReports] = await db.query(`
+      SELECT COUNT(*) as count FROM reports WHERE status = 'pending'
+    `);
+    
+    // Count pending comment reports
+    const [commentReports] = await db.query(`
+      SELECT COUNT(*) as count FROM comment_reports WHERE status = 'pending'
+    `);
+    
+    // Count pending posts (waiting for approval)
+    const [pendingPosts] = await db.query(`
+      SELECT COUNT(*) as count FROM posts WHERE status = 'pending'
+    `);
+
+    const totalCount = 
+      (postReports[0]?.count || 0) + 
+      (commentReports[0]?.count || 0) + 
+      (pendingPosts[0]?.count || 0);
+
+    res.json({
+      success: true,
+      count: totalCount,
+      breakdown: {
+        postReports: postReports[0]?.count || 0,
+        commentReports: commentReports[0]?.count || 0,
+        pendingPosts: pendingPosts[0]?.count || 0
+      }
+    });
+  } catch (error) {
+    console.error('Get pending actions count error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi khi lấy số lượng hành động cần xử lý!'
+    });
+  }
+};
+
 export const getCommentReports = async (req, res) => {
   try {
     const [reports] = await db.query(`

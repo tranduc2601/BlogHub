@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import NotificationDropdown from "@/modules/notifications/components/NotificationDropdown";
 import { useRoutePreloader } from "@/core/routing";
 import toast from 'react-hot-toast';
+import { useAdminPendingCount } from "@/modules/admin/hooks/useAdminPendingCount";
 
 function BlogHubLogoSVG() {
   return (
@@ -35,6 +36,7 @@ export default function Navbar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const preloader = useRoutePreloader();
+  const { pendingCount, shouldAnimate } = useAdminPendingCount(isAuthenticated && user?.role === 'admin');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -129,7 +131,21 @@ export default function Navbar() {
               title="Quản lý"
             >
               <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2664eb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}>
-                <i className="fa-solid fa-shield-halved text-gray-700 group-hover:text-white text-lg transition-all duration-300" draggable="false"></i>
+                <div className="relative">
+                  <i className={`fa-solid fa-shield-halved text-gray-700 group-hover:text-white text-lg transition-all duration-300 ${pendingCount > 0 ? 'animate-bell-shake-subtle' : ''} ${shouldAnimate ? 'animate-bell-shake' : ''}`} draggable="false"></i>
+                  {pendingCount > 0 && (
+                    <span 
+                      className={`absolute -top-4 -right-4 bg-gradient-to-br from-red-500 to-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg ${
+                        shouldAnimate ? 'animate-bounce-scale' : 'animate-pulse-subtle'
+                      }`}
+                      style={{
+                        boxShadow: '0 0 10px rgba(239, 68, 68, 0.5)'
+                      }}
+                    >
+                      {pendingCount > 9 ? '9+' : pendingCount}
+                    </span>
+                  )}
+                </div>
               </div>
             </Link>
           )}
@@ -389,9 +405,21 @@ export default function Navbar() {
                 <Link 
                   to="/admin" 
                   onClick={closeMobileMenu}
-                  className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3"
+                  className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3 relative"
                 >
-                  <i className="fa-solid fa-shield-halved text-lg" draggable="false"></i>
+                  <div className="relative">
+                    <i className="fa-solid fa-shield-halved text-lg" draggable="false"></i>
+                    {pendingCount > 0 && (
+                      <span 
+                        className="absolute -top-2 -right-3 bg-gradient-to-br from-red-500 to-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg"
+                        style={{
+                          boxShadow: '0 0 10px rgba(239, 68, 68, 0.5)'
+                        }}
+                      >
+                        {pendingCount > 9 ? '9+' : pendingCount}
+                      </span>
+                    )}
+                  </div>
                   Quản lý
                 </Link>
               )}

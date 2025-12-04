@@ -196,6 +196,7 @@ const CommentReportManagement: React.FC = () => {
         toast.success(response.data.message);
         fetchReports();
         handleCloseActionModal();
+        window.dispatchEvent(new Event('admin-action-changed'));
       }
     } catch (error) {
       console.error('Error handling comment report:', error);
@@ -290,6 +291,7 @@ const CommentReportManagement: React.FC = () => {
         toast.success('Đã xóa báo cáo thành công!');
         fetchReports();
         handleCloseDeleteModal();
+        window.dispatchEvent(new Event('admin-action-changed'));
       }
     } catch (error) {
       console.error('Error deleting comment report:', error);

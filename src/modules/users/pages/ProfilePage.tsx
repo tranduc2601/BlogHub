@@ -148,7 +148,6 @@ export default function ProfilePage() {
   const onDrop = (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('Kích thước ảnh không được vượt quá 5MB!');
         return;
@@ -158,7 +157,7 @@ export default function ProfilePage() {
       const reader = new FileReader();
       reader.onloadend = () => setAvatar(reader.result as string);
       reader.readAsDataURL(file);
-      toast.success('Đã chọn ảnh thành công!');
+      toast.success('Đã tải ảnh lên thành công!');
     }
   };
 

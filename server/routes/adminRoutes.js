@@ -22,7 +22,8 @@ import {
   deleteReport,
   getCommentReports,
   handleCommentReport,
-  deleteCommentReport
+  deleteCommentReport,
+  getPendingActionsCount
 } from '../controllers/adminController.js';
 import { authMiddleware, adminMiddleware } from '../middleware/authMiddleware.js';
 
@@ -55,6 +56,7 @@ router.get('/stats', getStats);
 router.get('/stats/top-posts', getTopPosts);
 router.get('/stats/top-users', getTopUsers);
 router.get('/stats/activity-history', getActivityHistory);
+router.get('/pending-actions-count', getPendingActionsCount);
 
 
 router.get('/reports', getReports);

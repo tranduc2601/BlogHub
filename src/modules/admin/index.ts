@@ -12,6 +12,7 @@ export { default as AdminPage } from './pages/AdminPage';
 
 // Hooks
 export { useAdminData } from './hooks/useAdminData';
+export { useAdminPendingCount } from './hooks/useAdminPendingCount';
 
 // Services
 export * from './services/adminService';
