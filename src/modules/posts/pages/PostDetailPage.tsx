@@ -780,7 +780,7 @@ export default function PostDetailPage() {
               <div className="flex justify-center mt-6">
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="group relative px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-out"
+                  className="group relative px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-out cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     {isExpanded ? (

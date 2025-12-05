@@ -174,8 +174,15 @@ export default function TermsOfServicePage() {
                     <i className="fa-solid fa-envelope text-blue-600 mt-1"></i>
                     <div>
                       <strong className="text-gray-900 text-sm sm:text-base">Email:</strong>
-                      <a href="mailto:duyhoangtran2006@gmail.com" className="text-blue-600 hover:text-blue-700 ml-2 text-sm sm:text-base transition-colors">
-                        duyhoangtran2006@gmail.com
+                      <a 
+                        href="mailto:spbloghub@gmail.com" 
+                        className="text-blue-600 hover:text-blue-700 ml-2 text-sm sm:text-base transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.location.href = 'mailto:spbloghub@gmail.com';
+                        }}
+                      >
+                        spbloghub@gmail.com
                       </a>
                     </div>
                   </div>
@@ -200,8 +207,12 @@ export default function TermsOfServicePage() {
                 <span>Cập nhật lần cuối: 17/11/2025</span>
               </div>
               <a 
-                href="mailto:duyhoangtran2006@gmail.com" 
+                href="mailto:spbloghub@gmail.com" 
                 className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.href = 'mailto:spbloghub@gmail.com';
+                }}
               >
                 <i className="fa-solid fa-envelope"></i>
                 <span>Liên hệ hỗ trợ</span>

@@ -235,8 +235,12 @@ export default function NotFoundPage() {
               <p className="text-gray-500 text-sm">
                 Nếu bạn cho rằng đây là lỗi, vui lòng{" "}
                 <a
-                  href="mailto:duyhoangtran2006@gmail.com"
+                  href="mailto:spbloghub@gmail.com"
                   className="text-blue-600 hover:text-blue-800 font-medium underline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.location.href = 'mailto:spbloghub@gmail.com';
+                  }}
                 >
                   liên hệ với chúng tôi
                 </a>
