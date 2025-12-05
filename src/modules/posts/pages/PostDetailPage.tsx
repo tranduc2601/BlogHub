@@ -32,8 +32,6 @@ export default function PostDetailPage() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isBookmarking, setIsBookmarking] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [showReadMore, setShowReadMore] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const [reactionStats, setReactionStats] = useState({
     like_count: 0,
