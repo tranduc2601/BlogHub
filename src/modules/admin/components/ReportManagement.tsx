@@ -291,7 +291,6 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
         
         setPostComments(rootComments);
         
-        // Fetch reactions for all comments
         const reactionsPromises = transformedComments.map(async (comment) => {
           try {
             const reactionsResponse = await fetch(getApiUrl(`posts/comments/${comment.id}/reactions`), {
@@ -378,7 +377,6 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
     }
   }, [paginatedReports.length, currentPage, filteredReports.length]);
 
-  // Disable page scrolling when modal is open
   useEffect(() => {
     if (selectedPost) {
       document.body.style.overflow = 'hidden';
@@ -386,7 +384,6 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
       document.body.style.overflow = 'unset';
     }
     
-    // Cleanup function to restore scrolling when component unmounts
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -420,11 +417,8 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleString('vi-VN');
   };
 
   if (isLoading) {
@@ -1021,10 +1015,10 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                                         </div>
                                         <p className="text-gray-700 text-sm sm:text-base break-words mb-2">{reply.content}</p>
                                         <div className="flex items-center gap-4 mt-2">
-                                          <div className="flex items-center gap-2 text-[10px] sm:text-xs text-gray-500">
-                                            <i className="fa-solid fa-clock"></i>
-                                            <span>{formatDate(reply.createdAt)}</span>
-                                          </div>
+                                          <p className="text-gray-400 text-[10px] sm:text-xs">
+                                            <i className="fa-solid fa-calendar mr-2"></i>
+                                            {formatDate(reply.createdAt)}
+                                          </p>
                                           {commentReactions[reply.id] && commentReactions[reply.id].total > 0 && (
                                             <div className="flex items-center gap-2">
                                               {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as const).map((reactionType) => {
