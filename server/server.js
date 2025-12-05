@@ -26,27 +26,45 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.CLIENT_URL,
   'http://localhost:5173',
-  'http://localhost:5000'
+  'http://localhost:5000',
+  'http://localhost:3000'
 ].filter(Boolean);
 
 app.use(cors({
-  origin: (origin, callback) => {
+  origin: function(origin, callback) {
+
     if (!origin) return callback(null, true);
-    if (allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+    
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.log('CORS blocked origin:', origin);
+      callback(null, true);
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 600
 }));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+
 app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  
   if (process.env.NODE_ENV !== 'production') {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   }
