@@ -31,6 +31,9 @@ export default function PostDetailPage() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isBookmarking, setIsBookmarking] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showReadMore, setShowReadMore] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [reactionStats, setReactionStats] = useState({
     like_count: 0,
     love_count: 0,
@@ -82,11 +85,6 @@ export default function PostDetailPage() {
         
         await axios.post(`/posts/${post.id}/react`, { reactionType: typeToSend });
         setCurrentReaction(reactionType);
-        
-
-
-
-
 
         const statsRes = await axios.get(`/posts/${post.id}/reaction-stats`);
         if (statsRes.data.success) {
@@ -161,6 +159,15 @@ export default function PostDetailPage() {
       }, 300);
     }
   }, [location.state, loading, post]);
+
+
+  useEffect(() => {
+    if (contentRef.current && post) {
+      const contentHeight = contentRef.current.scrollHeight;
+
+      setShowReadMore(contentHeight > 600);
+    }
+  }, [post]);
 
   useEffect(() => {
     const checkIfLiked = async () => {
@@ -754,7 +761,44 @@ export default function PostDetailPage() {
 
         
         <div className="p-4 md:p-8 lg:p-12">
-          <div className="prose prose-sm md:prose-lg max-w-none text-gray-800 leading-relaxed" dangerouslySetInnerHTML={{ __html: post.content }}></div>
+          <div className="relative">
+            <div 
+              ref={contentRef}
+              className={`prose prose-sm md:prose-lg max-w-none text-gray-800 leading-relaxed overflow-hidden transition-all duration-700 ease-in-out ${
+                !isExpanded && showReadMore ? 'max-h-[600px]' : 'max-h-none'
+              }`}
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            ></div>
+            
+            
+            {!isExpanded && showReadMore && (
+              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none"></div>
+            )}
+            
+            
+            {showReadMore && (
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="group relative px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-out"
+                >
+                  <span className="flex items-center gap-2">
+                    {isExpanded ? (
+                      <>
+                        <i className="fa-solid fa-chevron-up text-sm transform group-hover:-translate-y-1 transition-transform duration-300"></i>
+                        Thu gọn
+                      </>
+                    ) : (
+                      <>
+                        Đọc thêm...
+                        <i className="fa-solid fa-chevron-down text-sm transform group-hover:translate-y-1 transition-transform duration-300"></i>
+                      </>
+                    )}
+                  </span>
+                </button>
+              </div>
+            )}
+          </div>
 
           
           <div className="flex flex-wrap gap-2 mb-6 md:mb-8 mt-6 md:mt-8">
