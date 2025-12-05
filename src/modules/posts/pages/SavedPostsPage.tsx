@@ -35,15 +35,27 @@ export default function SavedPostsPage() {
     }
   }, [page]);
 
-  // Get unique categories from all bookmarks
-  const allCategories = useMemo(() => {
-    const categories = new Set<string>();
+  // Define fixed categories like in the image
+  const predefinedCategories = [
+    'Công nghệ',
+    'Design',
+    'Marketing',
+    'Ẩm thực',
+    'Du lịch',
+    'Giáo dục',
+    'Lifestyle'
+  ];
+
+  // Get categories that exist in bookmarks
+  const availableCategories = useMemo(() => {
+    const categoriesInPosts = new Set<string>();
     bookmarks.forEach(post => {
-      if (post.tags && Array.isArray(post.tags)) {
-        post.tags.forEach(tag => categories.add(tag));
+      if (post.category) {
+        categoriesInPosts.add(post.category);
       }
     });
-    return Array.from(categories).sort();
+    // Return only predefined categories that exist in posts
+    return predefinedCategories.filter(cat => categoriesInPosts.has(cat));
   }, [bookmarks]);
 
   // Filter bookmarks based on search and category
@@ -55,7 +67,7 @@ export default function SavedPostsPage() {
         : true;
       
       const matchCategory = selectedCategory
-        ? post.tags && post.tags.some(tag => tag.toLowerCase() === selectedCategory.toLowerCase())
+        ? post.category === selectedCategory
         : true;
       
       return matchSearch && matchCategory;
@@ -132,7 +144,7 @@ export default function SavedPostsPage() {
                     className="w-full pl-12 pr-4 py-3 border-3 border-gray-300 focus:border-blue-600 rounded-xl bg-white shadow focus:shadow-lg transition-all duration-300 font-medium hover:border-gray-400 outline-none cursor-pointer appearance-none"
                   >
                     <option value="">Tất cả danh mục</option>
-                    {allCategories.map((category) => (
+                    {availableCategories.map((category) => (
                       <option key={category} value={category}>
                         {category}
                       </option>
