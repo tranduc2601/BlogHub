@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
 
@@ -58,6 +58,55 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   topUsers = [], 
   activities = [] 
 }) => {
+  const ACTIVITIES_PER_PAGE = 10;
+  const [displayedActivities, setDisplayedActivities] = useState<Activity[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+
+  useEffect(() => {
+    const initialActivities = activities.slice(0, ACTIVITIES_PER_PAGE);
+    setDisplayedActivities(initialActivities);
+    setHasMore(activities.length > ACTIVITIES_PER_PAGE);
+    setPage(1);
+  }, [activities]);
+
+
+  useEffect(() => {
+    const endIndex = page * ACTIVITIES_PER_PAGE;
+    const activitiesToDisplay = activities.slice(0, endIndex);
+    
+    setDisplayedActivities(activitiesToDisplay);
+    setHasMore(endIndex < activities.length);
+  }, [page, activities]);
+
+
+  useEffect(() => {
+    const activityContainer = document.getElementById('activity-history-container');
+    if (!activityContainer) return;
+
+    const handleScroll = () => {
+      if (loadingMore || !hasMore) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = activityContainer;
+
+
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
+        setLoadingMore(true);
+        
+
+        setTimeout(() => {
+          setPage(prev => prev + 1);
+          setLoadingMore(false);
+        }, 500);
+      }
+    };
+
+    activityContainer.addEventListener('scroll', handleScroll);
+    return () => activityContainer.removeEventListener('scroll', handleScroll);
+  }, [loadingMore, hasMore]);
+
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'post': return 'fa-blog';
@@ -420,59 +469,86 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <p>Chưa có hoạt động nào</p>
           </div>
         ) : (
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {activities.map((activity) => (
-              <div 
-                key={`${activity.type}-${activity.id}`}
-                className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
-              >
-                <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getActivityColor(activity.type)}`}>
-                  <i className={`fa-solid ${getActivityIcon(activity.type)}`}></i>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    {activity.userAvatar ? (
-                      <img 
-                        src={activity.userAvatar} 
-                        alt={activity.userName}
-                        className="w-6 h-6 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-6 h-6 rounded-full bg-[#2664eb] flex items-center justify-center">
-                        <span className="text-xs font-bold text-white">
-                          {getAvatarInitial(activity.userName)}
-                        </span>
-                      </div>
-                    )}
-                    <span className="font-semibold text-gray-800 text-sm">
-                      {activity.userName}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {activity.type === 'post' && 'đã đăng bài viết'}
-                      {activity.type === 'comment' && 'đã bình luận'}
-                      {activity.type === 'report' && 'đã báo cáo'}
-                    </span>
+          <>
+            <div 
+              id="activity-history-container"
+              className="space-y-2 max-h-96 overflow-y-auto"
+            >
+              {displayedActivities.map((activity) => (
+                <div 
+                  key={`${activity.type}-${activity.id}`}
+                  className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                >
+                  <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getActivityColor(activity.type)}`}>
+                    <i className={`fa-solid ${getActivityIcon(activity.type)}`}></i>
                   </div>
-                  <p className="text-sm text-gray-600 truncate">
-                    {activity.content}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-gray-400">
-                      {formatTimeAgo(activity.timestamp)}
-                    </span>
-                    {activity.postId && (
-                      <Link 
-                        to={`/post/${activity.postId}`}
-                        className="text-xs text-blue-500 hover:text-blue-700 hover:underline"
-                      >
-                        Xem chi tiết →
-                      </Link>
-                    )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      {activity.userAvatar ? (
+                        <img 
+                          src={activity.userAvatar} 
+                          alt={activity.userName}
+                          className="w-6 h-6 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-6 h-6 rounded-full bg-[#2664eb] flex items-center justify-center">
+                          <span className="text-xs font-bold text-white">
+                            {getAvatarInitial(activity.userName)}
+                          </span>
+                        </div>
+                      )}
+                      <span className="font-semibold text-gray-800 text-sm">
+                        {activity.userName}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {activity.type === 'post' && 'đã đăng bài viết'}
+                        {activity.type === 'comment' && 'đã bình luận'}
+                        {activity.type === 'report' && 'đã báo cáo'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 truncate">
+                      {activity.content}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-gray-400">
+                        {formatTimeAgo(activity.timestamp)}
+                      </span>
+                      {activity.postId && (
+                        <Link 
+                          to={`/post/${activity.postId}`}
+                          className="text-xs text-blue-500 hover:text-blue-700 hover:underline"
+                        >
+                          Xem chi tiết →
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+
+              
+              {loadingMore && (
+                <div className="flex items-center justify-center py-4">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-2 text-gray-600 text-xs">Đang tải thêm hoạt động...</p>
+                  </div>
+                </div>
+              )}
+
+              
+              {!hasMore && displayedActivities.length > 0 && (
+                <div className="flex items-center justify-center py-4">
+                  <div className="flex items-center gap-2 text-gray-500">
+                    <div className="h-px w-12 bg-gray-300"></div>
+                    <i className="fa-solid fa-check-circle text-green-500"></i>
+                    <span className="text-xs font-medium">Đã xem hết lịch sử hoạt động</span>
+                    <div className="h-px w-12 bg-gray-300"></div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>
