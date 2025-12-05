@@ -159,6 +159,20 @@ const CommentReportManagement: React.FC = () => {
     }
   }, [paginatedReports.length, currentPage, filteredReports.length]);
 
+  // Disable page scrolling when modal is open
+  useEffect(() => {
+    if (selectedPost) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    // Cleanup function to restore scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedPost]);
+
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -335,7 +349,7 @@ const CommentReportManagement: React.FC = () => {
     const year = date.getFullYear();
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
+    return `${hours}:${minutes} ${day}/${month}/${year}`;
   };
 
   if (loading) {
@@ -931,11 +945,11 @@ const CommentReportManagement: React.FC = () => {
                                     )}
                                     {isAdmin && (
                                       <span className="text-xs bg-gradient-to-r from-red-500 to-pink-500 text-white px-2 py-1 rounded-full font-semibold shadow-sm">
-                                        <i className="fa-solid fa-shield-halved mr-1"></i>Admin
+                                        <i className="fa-solid fa-shield-halved mr-1"></i>Quản trị viên
                                       </span>
                                     )}
                                     {isPostAuthor && !isAdmin && (
-                                      <span className="text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-2 py-1 rounded-full font-semibold shadow-sm">
+                                      <span className="text-xs bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-2 py-1 rounded-full font-semibold shadow-sm">
                                         <i className="fa-solid fa-pen-nib mr-1"></i>Tác giả
                                       </span>
                                     )}
@@ -1000,11 +1014,11 @@ const CommentReportManagement: React.FC = () => {
                                           )}
                                           {isReplyAdmin && (
                                             <span className="text-[10px] sm:text-xs bg-gradient-to-r from-red-500 to-pink-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold shadow-sm">
-                                              <i className="fa-solid fa-shield-halved mr-1"></i>Admin
+                                              <i className="fa-solid fa-shield-halved mr-1"></i>Quản trị viên
                                             </span>
                                           )}
                                           {isReplyPostAuthor && !isReplyAdmin && (
-                                            <span className="text-[10px] sm:text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold shadow-sm">
+                                            <span className="text-[10px] sm:text-xs bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold shadow-sm">
                                               <i className="fa-solid fa-pen-nib mr-1"></i>Tác giả
                                             </span>
                                           )}

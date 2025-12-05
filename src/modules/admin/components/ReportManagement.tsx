@@ -338,6 +338,20 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
     }
   }, [paginatedReports.length, currentPage, filteredReports.length]);
 
+  // Disable page scrolling when modal is open
+  useEffect(() => {
+    if (selectedPost) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    // Cleanup function to restore scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedPost]);
+
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -366,7 +380,11 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('vi-VN');
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   if (isLoading) {
