@@ -397,7 +397,7 @@ export default function UsersPage() {
             {displayedUsers.map((user, index) => (
               <div
                 key={user.id}
-                className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 hover:shadow-xl transition-all duration-300 animate-fadeInUp h-full flex flex-col cursor-pointer"
+                className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-6 border border-white/20 group hover:scale-105 hover:bg-white/90 animate-fadeInUp h-full flex flex-col cursor-pointer"
                 style={{ animationDelay: `${index * 100}ms` }}
                 onClick={() => navigate(`/userdetail/${user.id}`)}
               >

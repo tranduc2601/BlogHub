@@ -121,14 +121,14 @@ export default function UserDetailPage() {
   };
 
   const handleFollow = async () => {
-    if (followLoading) return; // Prevent spam clicking
+    if (followLoading) return;
 
     setFollowLoading(true);
     try {
       await axios.post(`/users/${userId}/follow`);
       setFollowing(true);
 
-      // Refetch user data to get accurate follower count
+
       const userResponse = await axios.get(`/users/${userId}`);
       if (userResponse.data.success) {
         setUser(userResponse.data.user);
@@ -147,14 +147,14 @@ export default function UserDetailPage() {
   };
 
   const handleUnfollow = async () => {
-    if (followLoading) return; // Prevent spam clicking
+    if (followLoading) return;
 
     setFollowLoading(true);
     try {
       await axios.delete(`/users/${userId}/follow`);
       setFollowing(false);
 
-      // Refetch user data to get accurate follower count
+
       const userResponse = await axios.get(`/users/${userId}`);
       if (userResponse.data.success) {
         setUser(userResponse.data.user);
@@ -201,10 +201,10 @@ export default function UserDetailPage() {
 
   return (
     <div className="max-w-6xl mx-auto select-none">
-      {/* User Profile Header */}
+      
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-xl border border-white/20 p-4 md:p-8 mb-6 md:mb-8 animate-fade-in">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6">
-          {/* Avatar */}
+          
           <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0">
             {user.avatarUrl ? (
               <>
@@ -246,9 +246,9 @@ export default function UserDetailPage() {
             )}
           </div>
 
-          {/* User Info */}
+          
           <div className="flex-1 min-w-0 w-full animate-slide-in-right">
-            {/* Name and Follow Button */}
+            
             <div className="flex flex-col md:flex-row items-center md:items-center justify-between gap-3 mb-4">
               <h1 className="text-2xl md:text-4xl font-bold text-gray-800 text-center md:text-left">
                 {user.name}
@@ -281,7 +281,7 @@ export default function UserDetailPage() {
               </button>
             </div>
 
-            {/* Stats */}
+            
             <div className="grid grid-cols-3 gap-3 md:gap-6">
               <div className="bg-blue-50 rounded-xl p-3 md:p-4">
                 <div className="flex flex-col items-center gap-1 mb-1">
@@ -327,7 +327,7 @@ export default function UserDetailPage() {
         </div>
       </div>
 
-      {/* Posts Section */}
+      
       <div className="mb-4 md:mb-6 animate-fade-in-delay">
         <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 text-center md:text-left">
           <i className="fa-solid fa-newspaper mr-2 md:mr-3 text-blue-600"></i>
@@ -335,7 +335,7 @@ export default function UserDetailPage() {
         </h2>
       </div>
 
-      {/* Posts List */}
+      
       {posts.length === 0 ? (
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 md:p-8 text-center">
           <p className="text-gray-600 text-base md:text-lg">
@@ -369,7 +369,7 @@ export default function UserDetailPage() {
               ))}
           </div>
 
-          {/* Load More Button */}
+          
           {hasMore && (
             <div className="mt-6 md:mt-8 text-center">
               <button
@@ -396,19 +396,19 @@ export default function UserDetailPage() {
             </div>
           )}
 
-          {/* End Message */}
           {!hasMore && posts.length > 0 && (
-            <div className="mt-6 md:mt-8 text-center py-4 md:py-6">
-              <p className="text-sm md:text-base text-gray-500 font-medium flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center py-8 mt-6">
+              <div className="flex items-center gap-2 text-gray-500">
+                <div className="h-px w-16 bg-gray-300"></div>
                 <i className="fa-solid fa-check-circle text-green-500"></i>
-                Bạn đã xem hết tất cả bài viết của {user?.name}
-              </p>
+                <span className="text-sm font-medium">Bạn đã xem hết tất cả bài viết của {user?.name}</span>
+                <div className="h-px w-16 bg-gray-300"></div>
+              </div>
             </div>
           )}
         </>
       )}
 
-      {/* Back Button */}
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-4 md:p-6 mt-6 md:mt-8">
         <button
           onClick={() => navigate("/users")}

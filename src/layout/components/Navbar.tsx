@@ -164,20 +164,6 @@ export default function Navbar() {
             </Link>
           )}
 
-          {isAuthenticated && location.pathname !== "/create" && (
-            <Link 
-              to="/create" 
-              className="relative group"
-              title="Tạo bài viết"
-              onMouseEnter={preloader.onMouseEnter('createPost')}
-              onTouchStart={preloader.onTouchStart('createPost')}
-            >
-              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:shadow-lg group-hover:scale-110 group-hover:-rotate-3" onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2664eb'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}>
-                <i className="fa-solid fa-file-alt text-gray-700 group-hover:text-white text-lg transition-all duration-300" draggable="false"></i>
-              </div>
-            </Link>
-          )}
-
           {isAuthenticated && location.pathname !== "/saved-posts" && (
             <Link 
               to="/saved-posts" 
@@ -432,17 +418,6 @@ export default function Navbar() {
                 >
                   <i className="fa-solid fa-user-pen text-lg" draggable="false"></i>
                   Người dùng
-                </Link>
-              )}
-
-              {isAuthenticated && location.pathname !== "/create" && (
-                <Link 
-                  to="/create" 
-                  onClick={closeMobileMenu}
-                  className="text-gray-700 hover:text-blue-600 font-medium transition-all duration-300 hover:bg-blue-50 p-3 rounded-lg flex items-center gap-3"
-                >
-                  <i className="fa-solid fa-file-alt text-lg" draggable="false"></i>
-                  Tạo bài viết
                 </Link>
               )}
 
