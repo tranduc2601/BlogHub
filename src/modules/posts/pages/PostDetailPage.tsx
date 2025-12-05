@@ -1,4 +1,4 @@
-import { useParams, Navigate, useLocation } from "react-router-dom";
+import { useParams, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import CommentBox from "../components/CommentBox";
 import { ReportModal, Modal } from "@/shared/ui";
@@ -14,6 +14,7 @@ import { bookmarkService } from "../services/bookmarkService";
 
 export default function PostDetailPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [currentReaction, setCurrentReaction] = useState<ReactionType>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -161,13 +162,13 @@ export default function PostDetailPage() {
   }, [location.state, loading, post]);
 
 
-  useEffect(() => {
-    if (contentRef.current && post) {
-      const contentHeight = contentRef.current.scrollHeight;
-
-      setShowReadMore(contentHeight > 600);
-    }
-  }, [post]);
+  // Removed: Show full content always, no read more button
+  // useEffect(() => {
+  //   if (contentRef.current && post) {
+  //     const contentHeight = contentRef.current.scrollHeight;
+  //     setShowReadMore(contentHeight > 600);
+  //   }
+  // }, [post]);
 
   useEffect(() => {
     const checkIfLiked = async () => {
@@ -688,7 +689,10 @@ export default function PostDetailPage() {
             </div>
           )}
           
-          <div className="flex items-center gap-3 md:gap-4 mb-4">
+          <div 
+            className="flex items-center gap-3 md:gap-4 mb-4 cursor-pointer hover:opacity-80 transition-opacity w-fit"
+            onClick={() => navigate(`/userdetail/${post.authorId}`)}
+          >
             {post.authorAvatar && post.authorAvatar !== '' ? (
               <img 
                 src={post.authorAvatar}
@@ -764,40 +768,9 @@ export default function PostDetailPage() {
           <div className="relative">
             <div 
               ref={contentRef}
-              className={`prose prose-sm md:prose-lg max-w-none text-gray-800 leading-relaxed overflow-hidden transition-all duration-700 ease-in-out ${
-                !isExpanded && showReadMore ? 'max-h-[600px]' : 'max-h-none'
-              }`}
+              className="prose prose-sm md:prose-lg max-w-none text-gray-800 leading-relaxed"
               dangerouslySetInnerHTML={{ __html: post.content }}
             ></div>
-            
-            
-            {!isExpanded && showReadMore && (
-              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none"></div>
-            )}
-            
-            
-            {showReadMore && (
-              <div className="flex justify-center mt-6">
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="group relative px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-out cursor-pointer"
-                >
-                  <span className="flex items-center gap-2">
-                    {isExpanded ? (
-                      <>
-                        <i className="fa-solid fa-chevron-up text-sm transform group-hover:-translate-y-1 transition-transform duration-300"></i>
-                        Thu gọn
-                      </>
-                    ) : (
-                      <>
-                        Đọc thêm...
-                        <i className="fa-solid fa-chevron-down text-sm transform group-hover:translate-y-1 transition-transform duration-300"></i>
-                      </>
-                    )}
-                  </span>
-                </button>
-              </div>
-            )}
           </div>
 
           

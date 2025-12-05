@@ -428,7 +428,14 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
 
         
         <div className="flex items-center gap-3 mb-4 justify-between">
-          <div className="flex items-center gap-3">
+          <div 
+            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/userdetail/${post.authorId}`);
+            }}
+            data-no-navigate
+          >
             {(post.authorAvatar || (post.author && typeof post.author === 'object' && post.author.avatar)) ? (
               <img
                 src={getAvatarUrl(
@@ -480,11 +487,16 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
       </h2>
       
       
-      {post.excerpt && (
-        <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3">
-          {post.excerpt}
+      <div className="text-gray-600 text-sm mb-4 leading-relaxed relative">
+        <p className="line-clamp-3">
+          {(() => {
+            const plainText = post.content.replace(/<[^>]*>/g, '').substring(0, 100);
+            return plainText;
+          })()}
+          <span className="text-gray-400 ml-1">... </span>
+          <span className="text-blue-500 opacity-50 italic">xem thêm</span>
         </p>
-      )}
+      </div>
 
         
         {post.tags && post.tags.length > 0 && (
@@ -562,18 +574,6 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
               />
             </div>
           )}
-      
-          <div className="mt-auto pt-4">
-            <Link 
-              to={`/post/${post.id}`} 
-              className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1 group-hover:gap-2 transition-all duration-300"
-            >
-              Đọc thêm
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
         </div>
 
       {!hideShare && location.pathname !== '/' && (
