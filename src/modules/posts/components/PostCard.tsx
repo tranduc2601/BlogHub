@@ -517,53 +517,56 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
         )}
         
         
-        <div className="flex items-center justify-between pt-4 border-t border-gray-300 mt-auto">
-        <div className="flex items-center gap-4 text-sm text-gray-500" data-no-navigate>
-          <div className="flex items-center gap-2">
-            <ReactionPicker 
-              onReact={handleReaction}
-              currentReaction={currentReaction}
-            />
-          </div>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/post/${post.id}`, { state: { scrollToComments: true } });
-            }}
-            className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer"
-            title="Xem bình luận"
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
-            </svg>
-            {commentsCount}
-          </button>
-          {!hideShare && location.pathname !== '/' && (
+        <div className="flex flex-col gap-2 pt-4 border-t border-gray-300 mt-auto">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-4 text-sm text-gray-500 flex-wrap" data-no-navigate>
+            <div className="flex items-center gap-2">
+              <ReactionPicker 
+                onReact={handleReaction}
+                currentReaction={currentReaction}
+              />
+            </div>
             <button 
-              onClick={() => setIsShareModalOpen(true)}
-              className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer" 
-              title="Chia sẻ bài viết"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/post/${post.id}`, { state: { scrollToComments: true } });
+              }}
+              className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer"
+              title="Xem bình luận"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
               </svg>
-              Chia sẻ
+              <span className="hidden xs:inline">{commentsCount}</span>
+              <span className="inline xs:hidden">{commentsCount}</span>
             </button>
-          )}
-          <span className="flex items-center gap-1 hover:text-gray-700 transition-colors" title="Số lượt xem">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-            {post.views || 0}
-          </span>
+            {!hideShare && location.pathname !== '/' && (
+              <button 
+                onClick={() => setIsShareModalOpen(true)}
+                className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer" 
+                title="Chia sẻ bài viết"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                <span className="hidden sm:inline">Chia sẻ</span>
+              </button>
+            )}
+            <span className="flex items-center gap-1 hover:text-gray-700 transition-colors" title="Số lượt xem">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              {post.views || 0}
+            </span>
           </div>
-          <div className="text-xs text-gray-400 flex items-center gap-1">
+          <div className="text-xs text-gray-400 flex items-center gap-1 flex-shrink-0 ml-2">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            {getTimeAgo(post.createdAt)}
+            <span className="whitespace-nowrap">{getTimeAgo(post.createdAt)}</span>
           </div>
+        </div>
         </div>
         
           {reactionStats && reactionStats.total_reactions > 0 && (
