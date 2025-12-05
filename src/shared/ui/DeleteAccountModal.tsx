@@ -103,10 +103,8 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
             <div className="flex-1">
               <h3 className="font-semibold text-red-900 mb-2">Cảnh báo quan trọng!</h3>
               <ul className="text-sm text-red-800 space-y-1">
-                <li>• Tất cả bài viết của bạn sẽ bị ẩn vĩnh viễn</li>
-                <li>• Tất cả bình luận của bạn sẽ hiển thị là "Người dùng đã xóa"</li>
+                <li>• Tất cả bài viết, bình luận của bạn sẽ bị xoá vĩnh viễn</li>
                 <li>• Bạn sẽ không thể đăng nhập lại với tài khoản này</li>
-                <li>• Email và username sẽ không thể được sử dụng lại</li>
                 <li>• Dữ liệu cá nhân sẽ bị xóa khỏi hệ thống</li>
               </ul>
             </div>
