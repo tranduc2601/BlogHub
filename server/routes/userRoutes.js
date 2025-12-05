@@ -14,6 +14,7 @@ router.get('/', async (req, res) => {
         u.email,
         u.role,
         u.avatarUrl,
+        u.about,
         COALESCE(u.status, 'active') as status,
         COUNT(DISTINCT p.id) as postsCount,
         COUNT(DISTINCT c.id) as commentsCount,
@@ -31,7 +32,7 @@ router.get('/', async (req, res) => {
       LEFT JOIN posts p ON u.id = p.authorId AND p.status = 'visible'
       LEFT JOIN comments c ON u.id = c.userId AND c.status = 'visible'
       WHERE (u.status = 'active' OR u.status IS NULL) AND u.role != 'admin'
-      GROUP BY u.id, u.username, u.email, u.role, u.avatarUrl, u.status, u.createdAt
+      GROUP BY u.id, u.username, u.email, u.role, u.avatarUrl, u.about, u.status, u.createdAt
       ORDER BY u.createdAt DESC
     `);
 
@@ -65,6 +66,7 @@ router.get('/:id', async (req, res) => {
         u.email,
         u.role,
         u.avatarUrl,
+        u.about,
         COALESCE(u.status, 'active') as status,
         COUNT(DISTINCT p.id) as postsCount,
         COUNT(DISTINCT c.id) as commentsCount,
@@ -81,7 +83,7 @@ router.get('/:id', async (req, res) => {
       LEFT JOIN posts p ON u.id = p.authorId AND p.status = 'visible'
       LEFT JOIN comments c ON u.id = c.userId AND c.status = 'visible'
       WHERE u.id = ? AND (u.status = 'active' OR u.status IS NULL)
-      GROUP BY u.id, u.username, u.email, u.role, u.avatarUrl, u.status, u.createdAt
+      GROUP BY u.id, u.username, u.email, u.role, u.avatarUrl, u.about, u.status, u.createdAt
     `, [userId]);
 
     if (users.length === 0) {

@@ -257,6 +257,7 @@ export const getUserById = async (req, res) => {
         u.username as name,
         u.email,
         u.avatarUrl,
+        u.about,
         u.createdAt as joinedAt,
         COUNT(DISTINCT p.id) as postsCount,
         COUNT(DISTINCT c.id) as commentsCount,

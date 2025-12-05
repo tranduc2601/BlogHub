@@ -61,7 +61,6 @@ export default function UserDetailPage() {
       try {
         const userResponse = await axios.get(`/users/${userId}`);
         if (userResponse.data.success) {
-          console.log('User data from API:', userResponse.data.user);
           setUser(userResponse.data.user);
         }
 
