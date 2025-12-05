@@ -305,7 +305,7 @@ export default function ProfilePage() {
         </h2>
         <p className="mb-6 text-sm md:text-base text-gray-600 text-center px-2">
           {isViewingOwnProfile 
-            ? 'Hồ sơ của bạn là cách mà người dùng khác nhìn thấy bạn trên toàn bộ trang web. Bạn có thể quyết định cung cấp bao nhiêu thông tin.'
+            ? 'Hồ sơ đại diện cho hình ảnh chuyên nghiệp của bạn. Hãy lựa chọn và cập nhật những thông tin bạn muốn hiển thị với người xem.'
             : 'Thông tin hồ sơ của người dùng này.'}
         </p>
 

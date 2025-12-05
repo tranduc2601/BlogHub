@@ -9,6 +9,7 @@ interface User {
   name: string;
   email: string;
   avatarUrl?: string;
+  about?: string;
   postsCount: number;
   followersCount: number;
   followingCount: number;
@@ -326,6 +327,25 @@ export default function UserDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* About Section */}
+      {user.about && (
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-xl border border-white/20 p-4 md:p-8 mb-6 md:mb-8 animate-fade-in">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <i className="fa-solid fa-user-circle text-blue-600 text-xl"></i>
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
+                Giới thiệu
+              </h2>
+              <div className="text-gray-700 text-sm md:text-base leading-relaxed whitespace-pre-line bg-gray-50 rounded-xl p-4 border border-gray-200">
+                {user.about}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       
       <div className="mb-4 md:mb-6 animate-fade-in-delay">
