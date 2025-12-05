@@ -11,8 +11,6 @@ import userRoutes from './routes/userRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import bookmarkRoutes from './routes/bookmarkRoutes.js';
-import { likeComment } from './controllers/commentController.js';
-import { authMiddleware } from './middleware/authMiddleware.js';
 
 dotenv.config();
 

@@ -138,9 +138,9 @@ BlogHub/
 
 ## 🔑 Tài khoản mặc định
 
-Sau khi setup database, tài khoản admin mặc định:
-- **Email**: duyhoangtran2006@gmail.com
-- **Password**: Duy1tran!?2006
+Tài khoản admin mặc định:
+- **Email**: 
+- **Password**: 
 
 ## 📝 Script commands
 
@@ -163,28 +163,67 @@ npm run reset-db     # Reset database
 
 ## 🌐 API Endpoints
 
-### Authentication
-- `POST /auth/register` - Đăng ký
-- `POST /auth/login` - Đăng nhập
-- `GET /auth/me` - Lấy thông tin user hiện tại
+### Authentication (`/api/auth`)
+- `POST /register` - Đăng ký tài khoản
+- `POST /login` - Đăng nhập
+- `POST /logout` - Đăng xuất
+- `GET /me` - Lấy thông tin user hiện tại
+- `PUT /me` - Cập nhật profile & avatar
+- `POST /change-password` - Đổi mật khẩu
+- `DELETE /delete-account` - Xóa tài khoản
+- `POST /forgot-password` - Quên mật khẩu
 
-### Posts
-- `GET /posts` - Lấy danh sách bài viết
-- `POST /posts` - Tạo bài viết mới
-- `PUT /posts/:id` - Cập nhật bài viết
+### Posts (`/api/posts`)
+- `GET /` - Lấy danh sách bài viết
+- `GET /:id` - Chi tiết bài viết
+- `POST /` - Tạo bài viết mới
+- `PUT /:id` - Cập nhật bài viết
+- `DELETE /:id` - Xóa bài viết
+- `POST /:id/react` - Thả cảm xúc (Like, Love, Haha, Wow, Sad, Angry)
+- `GET /:id/reaction-stats` - Thống kê cảm xúc
+- `POST /:id/view` - Tăng lượt xem
+- `POST /:id/report` - Báo cáo vi phạm
+
+### Comments (`/api/posts`)
+- `GET /:postId/comments` - Lấy bình luận
+- `POST /:postId/comments` - Tạo bình luận
+- `PUT /comments/:commentId` - Cập nhật bình luận
+- `DELETE /comments/:commentId` - Xóa bình luận
+- `POST /comments/:commentId/react` - Thả cảm xúc bình luận
+- `POST /comments/:commentId/replies` - Trả lời bình luận
+- `POST /comments/:commentId/report` - Báo cáo bình luận
+
+### Users (`/api/users`)
+- `GET /` - Danh sách người dùng
+- `GET /:id` - Thông tin chi tiết user
+- `POST /:userId/follow` - Theo dõi
+- `DELETE /:userId/follow` - Bỏ theo dõi
+- `GET /:userId/followers` - Danh sách followers
+- `GET /:userId/following` - Danh sách following
+
+### Bookmarks (`/api/bookmarks`)
+- `GET /` - Bài viết đã lưu
+- `POST /` - Lưu bài viết
+- `DELETE /:postId` - Bỏ lưu bài viết
+
+### Notifications (`/api/notifications`)
+- `GET /` - Danh sách thông báo
+- `GET /unread-count` - Số thông báo chưa đọc
+- `PUT /:id/read` - Đánh dấu đã đọc
+- `PUT /read-all` - Đọc tất cả
+
+### Upload (`/api/upload`)
+- `POST /image` - Upload ảnh (Cloudinary)
+
+### Admin (`/api/admin`)
+- `GET /stats` - Thống kê tổng quan
+- `GET /pending-actions-count` - Số hành động chờ xử lý
+- `PUT /posts/:id/approve` - Duyệt bài viết
+- `PUT /posts/:id/reject` - Từ chối bài viết
 - `DELETE /posts/:id` - Xóa bài viết
-- `POST /posts/:id/react` - Thả cảm xúc
-- `POST /posts/:id/view` - Tăng lượt xem
-
-### Comments
-- `GET /posts/:id/comments` - Lấy bình luận
-- `POST /posts/:id/comments` - Tạo bình luận
-- `POST /posts/comments/:id/react` - Thả cảm xúc bình luận
-
-### Admin
-- `GET /admin/stats` - Thống kê tổng quan
-- `GET /admin/reports` - Danh sách báo cáo
-- `PUT /admin/posts/:id/approve` - Duyệt bài viết
+- `PUT /users/:id/status` - Khóa/Mở tài khoản
+- `GET /reports` - Danh sách báo cáo
+- `PUT /reports/:id/handle` - Xử lý báo cáo
 
 ## 🙏 Đóng góp
 

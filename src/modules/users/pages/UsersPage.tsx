@@ -365,6 +365,19 @@ export default function UsersPage() {
               <option value="joinedLatest">Sắp xếp theo ngày tham gia mới đây</option>
             </select>
           </div>
+
+          {(searchTerm || sortBy !== "followers") && (
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setSortBy("followers");
+              }}
+              className="px-5 py-2.5 bg-white border-3 border-red-400 text-red-600 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 w-full md:w-auto hover:bg-red-50 hover:border-red-500 hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap"
+            >
+              <i className="fa-solid fa-filter-circle-xmark text-lg"></i>
+              <span>Xoá bộ lọc</span>
+            </button>
+          )}
         </div>
       </div>
 
