@@ -1007,17 +1007,17 @@ export const deleteReport = async (req, res) => {
 
 export const getPendingActionsCount = async (req, res) => {
   try {
-    // Count pending post reports
+
     const [postReports] = await db.query(`
       SELECT COUNT(*) as count FROM reports WHERE status = 'pending'
     `);
     
-    // Count pending comment reports
+
     const [commentReports] = await db.query(`
       SELECT COUNT(*) as count FROM comment_reports WHERE status = 'pending'
     `);
     
-    // Count pending posts (waiting for approval)
+
     const [pendingPosts] = await db.query(`
       SELECT COUNT(*) as count FROM posts WHERE status = 'pending'
     `);
@@ -1210,7 +1210,7 @@ export const deleteCommentReport = async (req, res) => {
     const reportId = parseInt(req.params.id);
     const adminId = req.user?.id;
 
-    // Kiểm tra báo cáo có tồn tại không
+
     const [reports] = await db.query(`
       SELECT cr.*, c.content as commentContent
       FROM comment_reports cr
@@ -1225,7 +1225,7 @@ export const deleteCommentReport = async (req, res) => {
       });
     }
 
-    // Xóa báo cáo khỏi database
+
     await db.query('DELETE FROM comment_reports WHERE id = ?', [reportId]);
 
     res.json({ 

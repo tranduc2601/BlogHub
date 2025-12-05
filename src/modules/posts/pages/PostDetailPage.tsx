@@ -159,15 +159,6 @@ export default function PostDetailPage() {
     }
   }, [location.state, loading, post]);
 
-
-  // Removed: Show full content always, no read more button
-  // useEffect(() => {
-  //   if (contentRef.current && post) {
-  //     const contentHeight = contentRef.current.scrollHeight;
-  //     setShowReadMore(contentHeight > 600);
-  //   }
-  // }, [post]);
-
   useEffect(() => {
     const checkIfLiked = async () => {
       try {
@@ -470,13 +461,15 @@ export default function PostDetailPage() {
       const err = error as { response?: { data?: { message?: string } } };
       const errorMessage = err.response?.data?.message || 'Gửi báo cáo thất bại!';
       
-      // Use toast notification instead of alert
+
       if (errorMessage.includes('đã báo cáo') || errorMessage.includes('already reported')) {
         toast.error('Bạn đã báo cáo bài viết này rồi!', {
           duration: 3000,
           position: 'top-right',
           icon: '⚠️',
         });
+
+        setIsReportModalOpen(false);
       } else {
         toast.error(errorMessage, {
           duration: 3000,

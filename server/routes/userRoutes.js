@@ -46,7 +46,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Specific routes must come before parameterized routes
 router.post('/:userId/follow', authMiddleware, followUser);
 router.delete('/:userId/follow', authMiddleware, unfollowUser);
 router.get('/:userId/follow-status', optionalAuthMiddleware, checkFollowStatus);
@@ -54,7 +53,6 @@ router.get('/:userId/followers', getFollowers);
 router.get('/:userId/following', getFollowing);
 router.get('/:userId/follower-counts', getFollowerCounts);
 
-// Generic :id route comes last to avoid conflicts
 router.get('/:id', async (req, res) => {
   try {
     const userId = parseInt(req.params.id);

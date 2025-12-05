@@ -35,7 +35,7 @@ export default function SavedPostsPage() {
     }
   }, [page]);
 
-  // Define fixed categories like in the image
+
   const predefinedCategories = [
     'Công nghệ',
     'Design',
@@ -46,7 +46,7 @@ export default function SavedPostsPage() {
     'Lifestyle'
   ];
 
-  // Get categories that exist in bookmarks
+
   const availableCategories = useMemo(() => {
     const categoriesInPosts = new Set<string>();
     bookmarks.forEach(post => {
@@ -54,11 +54,11 @@ export default function SavedPostsPage() {
         categoriesInPosts.add(post.category);
       }
     });
-    // Return only predefined categories that exist in posts
+
     return predefinedCategories.filter(cat => categoriesInPosts.has(cat));
   }, [bookmarks]);
 
-  // Filter bookmarks based on search and category
+
   const filteredBookmarks = useMemo(() => {
     return bookmarks.filter(post => {
       const matchSearch = searchTerm
@@ -74,13 +74,13 @@ export default function SavedPostsPage() {
     });
   }, [bookmarks, searchTerm, selectedCategory]);
 
-  // Reset filters
+
   const handleClearFilters = () => {
     setSearchTerm("");
     setSelectedCategory("");
   };
 
-  // Check if filters are active
+
   const hasActiveFilters = searchTerm || selectedCategory;
 
   useEffect(() => {
@@ -115,11 +115,11 @@ export default function SavedPostsPage() {
             </h1>
           </div>
 
-          {/* Search and Filter Section */}
+          
           {bookmarks.length > 0 && (
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-4 sm:p-6 mt-6">
               <div className="flex flex-col lg:flex-row gap-4">
-                {/* Search Input */}
+                
                 <div className="relative flex-1">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                     <i className="fa-solid fa-magnifying-glass"></i>
@@ -133,7 +133,7 @@ export default function SavedPostsPage() {
                   />
                 </div>
 
-                {/* Category Filter */}
+                
                 <div className="relative w-full lg:w-80">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10">
                     <i className="fa-solid fa-filter"></i>
@@ -155,7 +155,7 @@ export default function SavedPostsPage() {
                   </span>
                 </div>
 
-                {/* Clear Filters Button */}
+                
                 {hasActiveFilters && (
                   <button
                     onClick={handleClearFilters}
@@ -167,7 +167,7 @@ export default function SavedPostsPage() {
                 )}
               </div>
 
-              {/* Filter Results Summary */}
+              
               {hasActiveFilters && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <p className="text-sm text-gray-600">
@@ -208,7 +208,7 @@ export default function SavedPostsPage() {
 
         {bookmarks.length > 0 && (
           <>
-            {/* No Results Message */}
+            
             {filteredBookmarks.length === 0 && hasActiveFilters && (
               <div className="text-center py-12 sm:py-16 px-4">
                 <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-full mb-4 sm:mb-6">
@@ -230,7 +230,7 @@ export default function SavedPostsPage() {
               </div>
             )}
 
-            {/* Posts Grid */}
+            
             {filteredBookmarks.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredBookmarks.map((post) => (

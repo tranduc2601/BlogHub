@@ -1,5 +1,5 @@
 export const EMAILJS_CONFIG = {
-  SERVICE_ID: 'service_gg9fbsj',
-  TEMPLATE_ID: 'template_3vn154g',
+  SERVICE_ID: 'BlogHub_Service',
+  TEMPLATE_ID: 'BlogHub_Template',
   PUBLIC_KEY: 'HZ2w1dRaxvPnh7LcV',
 };

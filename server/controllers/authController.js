@@ -798,34 +798,10 @@ export const forgotPassword = async (req, res) => {
       [user.id, email, otp, expiresAt]
     );
 
-
-
-    /*
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-      }
-    });
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Mã OTP đặt lại mật khẩu - BlogHub',
-      html: `
-        <h2>Đặt lại mật khẩu</h2>
-        <p>Mã OTP của bạn là: <strong>${otp}</strong></p>
-        <p>Mã này sẽ hết hạn sau 10 phút.</p>
-        <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
-      `
-    });
-    */
-
     res.json({ 
       success: true,
       message: 'Mã OTP đã được gửi đến email của bạn',
-      otp: otp // Luôn trả OTP để frontend gửi qua EmailJS
+      otp: otp
     });
   } catch (error) {
     console.error('Forgot password error:', error);
