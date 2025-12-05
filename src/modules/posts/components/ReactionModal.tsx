@@ -103,7 +103,7 @@ export default function ReactionModal({ isOpen, onClose, postId, totalReactions 
 
   return (
     <div 
-      className={`fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
+      className={`fixed inset-0 bg-black/50 flex items-center justify-center z-[99999] p-4 transition-opacity mb-0 duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
       onClick={handleClose}
     >
       <div 
