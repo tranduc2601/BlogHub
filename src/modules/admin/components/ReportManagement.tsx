@@ -6,6 +6,17 @@ import toast from 'react-hot-toast';
 import { Modal } from '@/shared/ui';
 import { getAvatarUrl, getApiUrl } from '@/shared/utils/apiHelpers';
 
+interface ReactionCounts {
+  like: number;
+  love: number;
+  haha: number;
+  wow: number;
+  sad: number;
+  angry: number;
+  total: number;
+  [key: string]: number;
+}
+
 interface Report {
   id: number;
   postId: number;
@@ -45,6 +56,7 @@ interface Comment {
   createdAt: string;
   isHidden: boolean;
   isPinned?: boolean;
+  reactionCounts?: ReactionCounts;
   parentId?: number | null;
   replies?: Comment[];
 }
@@ -67,6 +79,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [currentPostAuthorId, setCurrentPostAuthorId] = useState<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [commentReactions, setCommentReactions] = useState<Record<number, ReactionCounts>>({});
 
   const getCommentAvatar = (avatarUrl?: string) => {
     return avatarUrl || null;
@@ -277,6 +290,33 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
         });
         
         setPostComments(rootComments);
+        
+        // Fetch reactions for all comments
+        const reactionsPromises = transformedComments.map(async (comment) => {
+          try {
+            const reactionsResponse = await fetch(getApiUrl(`posts/comments/${comment.id}/reactions`), {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
+              }
+            });
+            const reactionsData = await reactionsResponse.json();
+            if (reactionsData.success) {
+              return { commentId: comment.id, counts: reactionsData.counts };
+            }
+          } catch (err) {
+            console.error('Error fetching reactions for comment:', comment.id, err);
+          }
+          return null;
+        });
+        
+        const reactionsResults = await Promise.all(reactionsPromises);
+        const reactionsMap: Record<number, ReactionCounts> = {};
+        reactionsResults.forEach(result => {
+          if (result) {
+            reactionsMap[result.commentId] = result.counts;
+          }
+        });
+        setCommentReactions(reactionsMap);
       }
     } catch (error) {
       console.error('Failed to fetch post detail:', error);
@@ -875,10 +915,42 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                                     )}
                                   </div>
                                   <p className="text-gray-600 text-sm mt-1">{comment.content}</p>
-                                  <p className="text-gray-400 text-xs mt-2">
-                                    <i className="fa-solid fa-calendar mr-2"></i>
-                                    {formatDate(comment.createdAt)}
-                                  </p>
+                                  <div className="flex items-center gap-4 mt-2">
+                                    <p className="text-gray-400 text-xs">
+                                      <i className="fa-solid fa-calendar mr-2"></i>
+                                      {formatDate(comment.createdAt)}
+                                    </p>
+                                    
+                                    {commentReactions[comment.id] && commentReactions[comment.id].total > 0 && (
+                                      <div className="flex items-center gap-2">
+                                        {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as const).map((reactionType) => {
+                                          const reactions = commentReactions[comment.id] as Record<string, number>;
+                                          const count = reactions[reactionType] || reactions[reactionType + 's'] || 0;
+                                          if (count > 0) {
+                                            const emojis: Record<string, string> = {
+                                              like: '👍',
+                                              love: '❤️',
+                                              haha: '😂',
+                                              wow: '😮',
+                                              sad: '😢',
+                                              angry: '😠'
+                                            };
+                                            return (
+                                              <span 
+                                                key={reactionType}
+                                                className="flex items-center gap-0.5 bg-gray-50 px-2 py-1 rounded-full shadow-sm border border-gray-300 text-xs"
+                                                title={`${count} ${reactionType}`}
+                                              >
+                                                <span className="text-sm">{emojis[reactionType]}</span>
+                                                <span className="font-semibold text-gray-700">{count}</span>
+                                              </span>
+                                            );
+                                          }
+                                          return null;
+                                        })}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                               {comment.isHidden && (
@@ -948,9 +1020,40 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                                           )}
                                         </div>
                                         <p className="text-gray-700 text-sm sm:text-base break-words mb-2">{reply.content}</p>
-                                        <div className="flex items-center gap-2 text-[10px] sm:text-xs text-gray-500">
-                                          <i className="fa-solid fa-clock"></i>
-                                          <span>{formatDate(reply.createdAt)}</span>
+                                        <div className="flex items-center gap-4 mt-2">
+                                          <div className="flex items-center gap-2 text-[10px] sm:text-xs text-gray-500">
+                                            <i className="fa-solid fa-clock"></i>
+                                            <span>{formatDate(reply.createdAt)}</span>
+                                          </div>
+                                          {commentReactions[reply.id] && commentReactions[reply.id].total > 0 && (
+                                            <div className="flex items-center gap-2">
+                                              {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as const).map((reactionType) => {
+                                                const reactions = commentReactions[reply.id] as Record<string, number>;
+                                                const count = reactions[reactionType] || reactions[reactionType + 's'] || 0;
+                                                if (count > 0) {
+                                                  const emojis: Record<string, string> = {
+                                                    like: '👍',
+                                                    love: '❤️',
+                                                    haha: '😂',
+                                                    wow: '😮',
+                                                    sad: '😢',
+                                                    angry: '😠'
+                                                  };
+                                                  return (
+                                                    <span 
+                                                      key={reactionType}
+                                                      className="flex items-center gap-0.5 bg-gray-50 px-2 py-1 rounded-full shadow-sm border border-gray-300 text-xs"
+                                                      title={`${count} ${reactionType}`}
+                                                    >
+                                                      <span className="text-sm">{emojis[reactionType]}</span>
+                                                      <span className="font-semibold text-gray-700">{count}</span>
+                                                    </span>
+                                                  );
+                                                }
+                                                return null;
+                                              })}
+                                            </div>
+                                          )}
                                         </div>
                                       </div>
                                     </div>

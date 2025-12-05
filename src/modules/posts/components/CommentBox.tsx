@@ -288,7 +288,6 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
     try {
       await axios.post(`/posts/${postId}/pin-comment`, { commentId });
       setPinnedCommentId(commentId);
-      toast.success('Đã ghim bình luận!');
     } catch (error) {
       console.error('Error pinning comment:', error);
       toast.error('Không thể ghim bình luận!');
@@ -299,7 +298,6 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
     try {
       await axios.delete(`/posts/${postId}/pin-comment`);
       setPinnedCommentId(null);
-      toast.success('Đã bỏ ghim bình luận!');
     } catch (error) {
       console.error('Error unpinning comment:', error);
       toast.error('Không thể bỏ ghim bình luận!');
