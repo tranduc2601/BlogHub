@@ -23,9 +23,12 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.CLIENT_URL,
+  process.env.VERCEL_URL,
   'http://localhost:5173',
   'http://localhost:5000',
-  'http://localhost:3000'
+  'http://localhost:3000',
+
+  /https:\/\/.*\.vercel\.app$/
 ].filter(Boolean);
 
 app.use(cors({
@@ -34,10 +37,22 @@ app.use(cors({
     if (!origin) return callback(null, true);
     
 
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      if (typeof allowedOrigin === 'string') {
+        return allowedOrigin === origin;
+      }
+
+      if (allowedOrigin instanceof RegExp) {
+        return allowedOrigin.test(origin);
+      }
+      return false;
+    });
+
+    if (isAllowed) {
       callback(null, true);
     } else {
       console.log('CORS blocked origin:', origin);
+
       callback(null, true);
     }
   },
