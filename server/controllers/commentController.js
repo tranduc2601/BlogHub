@@ -314,8 +314,7 @@ export const updateComment = async (req, res) => {
     );
     
     res.json({
-      success: true,
-      message: 'Đã cập nhật bình luận!'
+      success: true
     });
   } catch (error) {
     console.error('Error updating comment:', error);
@@ -357,8 +356,7 @@ export const deleteComment = async (req, res) => {
     await db.query('DELETE FROM comments WHERE id = ?', [commentId]);
     
     res.json({
-      success: true,
-      message: 'Đã xóa bình luận'
+      success: true
     });
   } catch (error) {
     console.error('Error deleting comment:', error);

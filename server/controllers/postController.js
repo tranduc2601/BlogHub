@@ -790,7 +790,7 @@ export const pinComment = async (req, res) => {
 
     await db.query('UPDATE posts SET pinnedCommentId = ? WHERE id = ?', [commentId, postId]);
 
-    res.json({ success: true, message: 'Đã ghim bình luận thành công!', pinnedCommentId: commentId });
+    res.json({ success: true, pinnedCommentId: commentId });
   } catch (error) {
     console.error('Pin comment error:', error);
     res.status(500).json({ success: false, message: 'Lỗi khi ghim bình luận!' });

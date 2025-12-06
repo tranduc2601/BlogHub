@@ -109,7 +109,6 @@ export default function NotificationsPage() {
         setNotifications(prev =>
           prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
         );
-        // Dispatch event để cập nhật notification count
         window.dispatchEvent(new CustomEvent('notification-read'));
       }
     } catch (error) {
@@ -148,10 +147,8 @@ export default function NotificationsPage() {
       );
       setNotifications([]);
       
-
       window.dispatchEvent(new CustomEvent('notification-deleted'));
-      
-      toast.success('Đã xóa tất cả thông báo!');
+
     } catch (error) {
       console.error('Error clearing notifications:', error);
       toast.error('Có lỗi xảy ra khi xóa thông báo!');

@@ -32,6 +32,7 @@ export default function PostDetailPage() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isBookmarking, setIsBookmarking] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isAtTop, setIsAtTop] = useState(true);
   const contentRef = useRef<HTMLDivElement>(null);
   const [reactionStats, setReactionStats] = useState({
     like_count: 0,
@@ -262,23 +263,41 @@ export default function PostDetailPage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 400) {
-        setShowScrollTop(true);
+      const scrollPosition = window.scrollY;
+      
+
+      setShowScrollTop(true);
+      
+
+      if (scrollPosition < 100) {
+        setIsAtTop(true);
       } else {
-        setShowScrollTop(false);
+        setIsAtTop(false);
       }
     };
 
+
+    handleScroll();
+    
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+  const handleScrollClick = () => {
+    if (isAtTop) {
+
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth'
+      });
+    } else {
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
   };
 
   const handleFollowToggle = async () => {
@@ -1047,15 +1066,15 @@ export default function PostDetailPage() {
 
 
       <button
-        onClick={scrollToTop}
+        onClick={handleScrollClick}
         className={`fixed bottom-8 right-8 w-12 h-12 rounded-full bg-[#2664eb] text-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-xl z-50 cursor-pointer ${
           showScrollTop 
             ? "opacity-100 translate-y-0" 
             : "opacity-0 translate-y-16 pointer-events-none"
         }`}
-        aria-label="Scroll to top"
+        aria-label={isAtTop ? "Scroll to bottom" : "Scroll to top"}
       >
-        <i className="fa-solid fa-arrow-up text-lg"></i>
+        <i className={`fa-solid ${isAtTop ? 'fa-arrow-down' : 'fa-arrow-up'} text-lg transition-transform duration-300`}></i>
       </button>
     </div>
   );

@@ -3,12 +3,14 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import axios from "@/core/config/axios";
 import toast from "react-hot-toast";
 import { emailService } from "../services/emailService";
+import { useAuth } from "@/core/auth";
 
 type Step = "email" | "otp" | "reset";
 
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, isAuthenticated } = useAuth();
   const fromChangePassword = (location.state as { from?: string })?.from === "change-password";
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
@@ -75,6 +77,18 @@ export default function ForgotPasswordPage() {
     if (!validateEmail(email)) {
       setErrors({ email: "Email không hợp lệ" });
       return;
+    }
+
+    // Kiểm tra nếu người dùng đang đăng nhập
+    if (isAuthenticated && user) {
+      if (email.toLowerCase() !== user.email.toLowerCase()) {
+        setErrors({ email: "Email không khớp với tài khoản đang đăng nhập" });
+        toast.error("Email không khớp với tài khoản đang đăng nhập!", {
+          duration: 4000,
+          position: "top-right",
+        });
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -270,7 +284,7 @@ export default function ForgotPasswordPage() {
             {step === "reset" && "Đặt mật khẩu mới"}
           </h2>
           <p className="text-gray-600 mt-2">
-            {step === "email" && "Nhập email để nhận mã OTP"}
+            {step === "email" && "Nhập email của bạn để nhận mã OTP"}
             {step === "otp" && "Nhập mã OTP đã được gửi đến email"}
             {step === "reset" && "Tạo mật khẩu mới cho tài khoản"}
           </p>

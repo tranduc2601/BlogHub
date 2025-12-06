@@ -284,7 +284,7 @@ export default function FollowListPage() {
         <div className="text-center py-12">
           <p className="text-gray-600 text-lg">
             {searchTerm 
-              ? 'Không tìm thấy người dùng nào!' 
+              ? 'Không tìm thấy người dùng nào phù hợp!' 
               : type === 'followers' 
                 ? 'Chưa có người theo dõi!' 
                 : 'Chưa theo dõi ai!'}

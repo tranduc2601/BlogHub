@@ -13,11 +13,9 @@ export default function PostEditor() {
 
   const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
-    
 
     value = value.replace(/[^a-zA-Z0-9\sàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ,]/g, '');
     
-
     const parts = value.split(',');
     const formattedParts = parts.map((part, index) => {
 
@@ -31,8 +29,7 @@ export default function PostEditor() {
 
     if (value.startsWith(',') || value.startsWith(' ')) {
       value = value.trimStart().replace(/^,+/, '');
-    }
-    
+    } 
 
     value = value.replace(/,+/g, ',');
     
@@ -55,10 +52,14 @@ export default function PostEditor() {
 
     if (showPrivacyMenu) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = 'unset';
     };
   }, [showPrivacyMenu]);
 

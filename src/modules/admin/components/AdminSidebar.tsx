@@ -80,12 +80,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 }`}
                 type="button"
               >
-                <span className="text-lg sm:text-xl">{item.icon}</span>
-                <span className="font-medium flex-1 truncate">
+                <span className="text-lg sm:text-xl flex-shrink-0">{item.icon}</span>
+                <span className="font-medium flex-1 min-w-0">
                   {item.label}
                 </span>
                 {item.badge !== undefined && item.badge > 0 && (
-                  <span className="flex items-center justify-center min-w-[20px] sm:min-w-[24px] h-5 sm:h-6 px-1.5 sm:px-2 bg-red-500 text-white text-xs font-bold rounded-full animate-wiggle flex-shrink-0">
+                  <span className="flex items-center justify-center min-w-[20px] sm:min-w-[24px] h-5 sm:h-6 px-1.5 sm:px-2 bg-red-500 text-white text-xs font-bold rounded-full animate-wiggle flex-shrink-0 ml-auto">
                     {item.badge}
                   </span>
                 )}
