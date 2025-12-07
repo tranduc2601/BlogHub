@@ -367,7 +367,7 @@ export default function ChangePasswordPage() {
         <div className="flex gap-3 mt-8">
           <button
             type="button"
-            className="flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow bg-red-500 text-white-600 hover:from-gray-300 hover:to-gray-400 hover:text-gray-900 hover:shadow-xl hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-300 cursor-pointer"
+            className="flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow bg-red-500 text-white hover:bg-red-600 hover:shadow-xl hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-300 cursor-pointer"
             onClick={() => navigate("/profile")}
           >
             <i className="fa-solid fa-xmark mr-2"></i>

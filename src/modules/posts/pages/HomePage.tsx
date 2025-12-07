@@ -27,6 +27,11 @@ export default function HomePage() {
     postId: number;
     totalReactions: number;
   }>({ isOpen: false, postId: 0, totalReactions: 0 });
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     const fetchStats = async () => {
       try {

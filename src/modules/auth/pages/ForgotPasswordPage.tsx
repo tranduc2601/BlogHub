@@ -320,10 +320,10 @@ export default function ForgotPasswordPage() {
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !email.trim()}
               className={`w-full py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg ${
-                isLoading
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                isLoading || !email.trim()
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50"
                   : "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600 hover:shadow-xl hover:scale-105 active:scale-95 cursor-pointer"
               }`}
             >

@@ -84,6 +84,10 @@ export default function SavedPostsPage() {
   const hasActiveFilters = searchTerm || selectedCategory;
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     loadBookmarks();
   }, [loadBookmarks]);
 
