@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import axios from '@/core/config/axios';
 import toast from 'react-hot-toast';
 import { Modal } from '@/shared/ui';
@@ -139,7 +140,7 @@ export default function ShareModal({ isOpen, onClose, postId, postTitle }: Share
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <>
       <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/40">
         <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
@@ -257,6 +258,7 @@ export default function ShareModal({ isOpen, onClose, postId, postTitle }: Share
         confirmText="Chia sẻ"
         cancelText="Hủy"
       />
-    </>
+    </>,
+    document.body
   );
 }
