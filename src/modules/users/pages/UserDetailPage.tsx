@@ -202,7 +202,7 @@ export default function UserDetailPage() {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto select-none">
+      <div className="max-w-6xl mx-auto select-none relative" style={{ isolation: 'auto' }}>
         
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-xl border border-white/20 p-4 md:p-8 mb-6 md:mb-8 animate-fade-in">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6">
