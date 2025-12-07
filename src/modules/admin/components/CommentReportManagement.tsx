@@ -245,29 +245,64 @@ const CommentReportManagement: React.FC = () => {
         const normalizedPost = {
           ...post,
           author: typeof post.author === 'object' ? post.author.username || post.author.email : post.author,
-          authorAvatar: typeof post.author === 'object' ? post.author.avatarUrl : post.authorAvatar
+          authorAvatar: typeof post.author === 'object' ? post.author.avatarUrl : post.authorAvatar,
+          authorId: post.authorId || (typeof post.author === 'object' ? post.author.id : undefined)
         };
         setSelectedPost(normalizedPost);
       }
 
       if (commentsResponse.data.success) {
-        setIsLoadingComments(false);
 
-        const normalizedComments = (commentsResponse.data.comments || []).map((comment: any) => ({
-          ...comment,
-          author: typeof comment.author === 'object' ? comment.author.username || comment.author.email : comment.author,
-          authorAvatar: typeof comment.author === 'object' ? comment.author.avatarUrl : comment.authorAvatar,
-          replies: comment.replies?.map((reply: any) => ({
-            ...reply,
-            author: typeof reply.author === 'object' ? reply.author.username || reply.author.email : reply.author,
-            authorAvatar: typeof reply.author === 'object' ? reply.author.avatarUrl : reply.authorAvatar
-          }))
+        const transformedComments: Comment[] = (commentsResponse.data.comments || []).map((c: any) => ({
+          id: parseInt(c.id),
+          author: typeof c.author === 'object' ? c.author.username || c.author.email : c.author,
+          authorId: c.authorId,
+          authorAvatar: typeof c.author === 'object' ? c.author.avatarUrl : c.authorAvatar,
+          authorRole: typeof c.author === 'object' ? c.author.role : c.authorRole,
+          content: c.content,
+          createdAt: c.createdAt,
+          isHidden: c.isHidden || false,
+          isPinned: c.isPinned || false,
+          reactionCounts: c.reactionCounts,
+          replies: []
         }));
-        setPostComments(normalizedComments);
+
+
+        const commentMap = new Map<number, Comment>();
+        const rootComments: Comment[] = [];
         
 
-        const allComments: any[] = [];
-        normalizedComments.forEach((comment: any) => {
+        transformedComments.forEach(comment => {
+          commentMap.set(comment.id, comment);
+        });
+        
+
+        transformedComments.forEach(comment => {
+          const parentId = (commentsResponse.data.comments || []).find((c: any) => parseInt(c.id) === comment.id)?.parentId;
+          
+          if (parentId) {
+            const parent = commentMap.get(parseInt(parentId));
+            if (parent) {
+              parent.replies!.push(comment);
+            }
+          } else {
+            rootComments.push(comment);
+          }
+        });
+
+
+        rootComments.sort((a, b) => {
+          if (a.isPinned && !b.isPinned) return -1;
+          if (!a.isPinned && b.isPinned) return 1;
+          return 0;
+        });
+        
+        setPostComments(rootComments);
+        setIsLoadingComments(false);
+        
+
+        const allComments: Comment[] = [];
+        rootComments.forEach((comment: Comment) => {
           allComments.push(comment);
           if (comment.replies) {
             allComments.push(...comment.replies);
