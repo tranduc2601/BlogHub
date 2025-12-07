@@ -350,6 +350,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   key={post.id} 
                   to={`/post/${post.id}`}
                   className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors group"
+                  draggable="false"
                 >
                   <div className="flex-shrink-0 w-8 h-8 bg-[#2563eb] rounded-lg flex items-center justify-center text-white font-bold text-sm">
                     #{index + 1}
@@ -359,6 +360,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       src={post.authorAvatar} 
                       alt={post.author}
                       className="w-10 h-10 rounded-full object-cover"
+                      draggable="false"
                     />
                   ) : (
                     <div 
@@ -414,6 +416,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   key={user.id} 
                   to={`/userdetail/${user.id}`}
                   className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer group"
+                  draggable="false"
                 >
                   <div className="flex-shrink-0 w-8 h-8 bg-[#2563eb] rounded-lg flex items-center justify-center text-white font-bold text-sm">
                     #{index + 1}
@@ -423,6 +426,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       src={user.avatarUrl} 
                       alt={user.name}
                       className="w-10 h-10 rounded-full object-cover"
+                      draggable="false"
                     />
                   ) : (
                     <div 

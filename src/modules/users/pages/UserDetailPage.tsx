@@ -201,9 +201,10 @@ export default function UserDetailPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto select-none">
-      
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-xl border border-white/20 p-4 md:p-8 mb-6 md:mb-8 animate-fade-in">
+    <>
+      <div className="max-w-6xl mx-auto select-none">
+        
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-xl border border-white/20 p-4 md:p-8 mb-6 md:mb-8 animate-fade-in">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6">
           
           <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0">
@@ -444,12 +445,14 @@ export default function UserDetailPage() {
         </button>
       </div>
 
+      </div>
+
       <ReactionModal
         isOpen={reactionModalState.isOpen}
         onClose={handleCloseReactionModal}
         postId={reactionModalState.postId}
         totalReactions={reactionModalState.totalReactions}
       />
-    </div>
+    </>
   );
 }
