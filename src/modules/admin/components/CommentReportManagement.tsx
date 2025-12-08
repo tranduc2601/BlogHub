@@ -453,7 +453,7 @@ const CommentReportManagement: React.FC = () => {
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <button
             onClick={() => setFilter('all')}
-            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all whitespace-nowrap ${
+            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all whitespace-nowrap cursor-pointer ${
               filter === 'all'
                 ? 'bg-blue-600 text-white shadow-lg'
                 : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 active:bg-gray-100'
@@ -463,7 +463,7 @@ const CommentReportManagement: React.FC = () => {
           </button>
           <button
             onClick={() => setFilter('pending')}
-            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all whitespace-nowrap ${
+            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all whitespace-nowrap cursor-pointer ${
               filter === 'pending'
                 ? 'bg-orange-600 text-white shadow-lg'
                 : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 active:bg-gray-100'
@@ -473,7 +473,7 @@ const CommentReportManagement: React.FC = () => {
           </button>
           <button
             onClick={() => setFilter('action_taken')}
-            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all whitespace-nowrap ${
+            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all whitespace-nowrap cursor-pointer ${
               filter === 'action_taken'
                 ? 'bg-red-600 text-white shadow-lg'
                 : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 active:bg-gray-100'
@@ -483,7 +483,7 @@ const CommentReportManagement: React.FC = () => {
           </button>
           <button
             onClick={() => setFilter('rejected')}
-            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all whitespace-nowrap ${
+            className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all whitespace-nowrap cursor-pointer ${
               filter === 'rejected'
                 ? 'bg-gray-600 text-white shadow-lg'
                 : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 active:bg-gray-100'

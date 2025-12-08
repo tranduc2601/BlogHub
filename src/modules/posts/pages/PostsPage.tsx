@@ -17,6 +17,8 @@ export default function PostsPage() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isAtTop, setIsAtTop] = useState(true);
   const [reactionModalState, setReactionModalState] = useState<{
     isOpen: boolean;
     postId: number;
@@ -129,11 +131,9 @@ export default function PostsPage() {
       const scrollHeight = document.documentElement.scrollHeight;
       const clientHeight = document.documentElement.clientHeight;
 
-
       if (scrollTop + clientHeight >= scrollHeight - 300) {
         setLoadingMore(true);
         
-
         setTimeout(() => {
           setPage(prev => prev + 1);
           setLoadingMore(false);
@@ -144,6 +144,25 @@ export default function PostsPage() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [loadingMore, hasMore]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      
+      setShowScrollTop(true);
+      
+      if (scrollPosition < 100) {
+        setIsAtTop(true);
+      } else {
+        setIsAtTop(false);
+      }
+    };
+
+    handleScroll();
+    
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
 
   useEffect(() => {
@@ -180,6 +199,20 @@ export default function PostsPage() {
 
   const handleCloseReactionModal = () => {
     setReactionModalState({ isOpen: false, postId: 0, totalReactions: 0 });
+  };
+
+  const handleScrollClick = () => {
+    if (isAtTop) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth"
+      });
+    } else {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
   };
 
   if (loading) {
@@ -374,6 +407,18 @@ export default function PostsPage() {
         postId={reactionModalState.postId}
         totalReactions={reactionModalState.totalReactions}
       />
+
+      <button
+        onClick={handleScrollClick}
+        className={`fixed bottom-8 right-8 w-12 h-12 rounded-full bg-[#2664eb] text-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-xl z-50 cursor-pointer ${
+          showScrollTop 
+            ? "opacity-100 translate-y-0" 
+            : "opacity-0 translate-y-16 pointer-events-none"
+        }`}
+        aria-label={isAtTop ? "Scroll to bottom" : "Scroll to top"}
+      >
+        <i className={`fa-solid ${isAtTop ? 'fa-arrow-down' : 'fa-arrow-up'} text-lg transition-transform duration-300`}></i>
+      </button>
     </div>
   );
 }

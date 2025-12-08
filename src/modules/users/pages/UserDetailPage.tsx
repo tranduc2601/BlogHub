@@ -329,7 +329,7 @@ export default function UserDetailPage() {
         </div>
       </div>
 
-      {/* About Section */}
+      
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-xl border border-white/20 p-4 md:p-8 mb-6 md:mb-8 animate-fade-in">
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
