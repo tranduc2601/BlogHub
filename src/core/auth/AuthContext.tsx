@@ -16,8 +16,8 @@ export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ token: string; user: User } | null>;
-  register: (username: string, email: string, password: string, confirmPassword: string) => Promise<void>;
+  login: (email: string, password: string, captchaToken?: string) => Promise<{ token: string; user: User } | null>;
+  register: (username: string, email: string, password: string, confirmPassword: string, captchaToken?: string) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
 }
@@ -78,9 +78,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const login = async (email: string, password: string): Promise<{ token: string; user: User } | null> => {
+  const login = async (email: string, password: string, captchaToken?: string): Promise<{ token: string; user: User } | null> => {
     try {
-      const response = await axiosInstance.post('/auth/login', { email, password });
+      const response = await axiosInstance.post('/auth/login', { email, password, captchaToken });
       if (response.data.success) {
         const { token, user: userData } = response.data;
         setUser(userData);
@@ -101,14 +101,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     username: string, 
     email: string, 
     password: string, 
-    confirmPassword: string
+    confirmPassword: string,
+    captchaToken?: string
   ) => {
     try {
       const response = await axiosInstance.post('/auth/register', {
         username,
         email,
         password,
-        confirmPassword
+        confirmPassword,
+        captchaToken
       });
       
       if (response.data.success) {

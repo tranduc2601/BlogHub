@@ -81,7 +81,7 @@ export default function LoginPage() {
     setErrors({});
 
     try {
-      const result = await login(formData.email, formData.password);
+      const result = await login(formData.email, formData.password, captchaToken || undefined);
       if (result && result.token) {
         if (rememberMe) {
           localStorage.setItem('token', result.token);

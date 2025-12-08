@@ -101,7 +101,8 @@ export default function RegisterPage() {
         formData.username,
         formData.email,
         formData.password,
-        formData.confirmPassword
+        formData.confirmPassword,
+        captchaToken || undefined
       );
       toast.success('Đăng ký thành công! Chào mừng bạn đến với BlogHub.', {
         duration: 3000,
