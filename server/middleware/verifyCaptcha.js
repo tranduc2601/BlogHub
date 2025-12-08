@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 const verifyCaptcha = async (req, res, next) => {
   const { captchaToken } = req.body;
@@ -64,4 +64,4 @@ const verifyCaptcha = async (req, res, next) => {
   }
 };
 
-module.exports = verifyCaptcha;
+export default verifyCaptcha;
