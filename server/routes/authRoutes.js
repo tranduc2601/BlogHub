@@ -1,6 +1,7 @@
 import express from 'express';
 import { register, login, logout, getMe, updateProfile, changePassword, verifyCurrentPassword, deleteAccount, forgotPassword, verifyOTP, resetPassword } from '../controllers/authController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
+import verifyCaptcha from '../middleware/verifyCaptcha.js';
 import multer from 'multer';
 
 
@@ -12,7 +13,7 @@ const fileFilter = (req, file, cb) => {
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Chỉ chấp nhận file ảnh (jpeg, jpg, png, gif, webp)'));
+    cb(new Error('Chỉ chấp nhận file ảnh (jpeg, jpg, png, gif, webp)!'));
   }
 };
 
@@ -24,9 +25,8 @@ const upload = multer({
 
 const router = express.Router();
 
-
-router.post('/register', register);
-router.post('/login', login);
+router.post('/register', verifyCaptcha, register);
+router.post('/login', verifyCaptcha, login);
 router.post('/logout', authMiddleware, logout);
 
 

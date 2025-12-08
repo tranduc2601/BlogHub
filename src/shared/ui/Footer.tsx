@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 select-none">
         <div className="text-center">
           <span className="text-2xl font-extrabold text-blue-700 drop-shadow flex items-center justify-center gap-2">
-            <i className="fa-solid fa-feather" style={{ fontSize: '1.1em', color: '#2563eb', textShadow: '0 2px 8px #a5b4fc' }}></i>
+            <i className="fa-solid fa-blog" style={{ fontSize: '1.1em', color: '#2563eb', textShadow: '0 2px 8px #a5b4fc' }}></i>
             BlogHub © 2025
           </span>
         </div>

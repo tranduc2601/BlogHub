@@ -1,8 +1,10 @@
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/core/auth";
 import toast from "react-hot-toast";
 import backgroundImage from "@/assets/Login_Register_Background.jpg";
+import ReCAPTCHA from "react-google-recaptcha";
+import { ReCaptcha } from "@/shared/ui";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -22,6 +24,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   useEffect(() => {
     if (searchParams.get('locked') === 'true') {
       toast.error('Tài khoản của bạn đã bị khóa bởi quản trị viên. Vui lòng liên hệ Admin để biết thêm chi tiết!', {
@@ -54,10 +58,24 @@ export default function LoginPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleCaptchaChange = (token: string | null) => {
+    setCaptchaToken(token);
+  };
+
+  const handleCaptchaExpired = () => {
+    setCaptchaToken(null);
+    toast.error('CAPTCHA đã hết hạn, vui lòng xác thực lại!');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
+
+    if (!captchaToken) {
+      toast.error('Vui lòng xác thực CAPTCHA trước khi đăng nhập!');
+      return;
+    }
 
     setIsLoading(true);
     setErrors({});
@@ -102,6 +120,10 @@ export default function LoginPage() {
           }, 1000);
         }
       }
+      
+
+      recaptchaRef.current?.reset();
+      setCaptchaToken(null);
     } catch (error: unknown) {
       const err = error as { 
         response?: { 
@@ -160,6 +182,10 @@ export default function LoginPage() {
           position: 'top-right',
         });
       }
+      
+
+      recaptchaRef.current?.reset();
+      setCaptchaToken(null);
     } finally {
       setIsLoading(false);
     }
@@ -270,9 +296,15 @@ export default function LoginPage() {
               </Link>
             </div>
 
+            <ReCaptcha
+              ref={recaptchaRef}
+              onChange={handleCaptchaChange}
+              onExpired={handleCaptchaExpired}
+            />
+
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !captchaToken}
               className="w-full bg-white border-3 border-blue-600 text-blue-700 py-4 rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-200 hover:border-blue-700 hover:bg-blue-50 text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 cursor-pointer"
               style={{ fontFamily: 'Inter, Arial, sans-serif' }}
             >
