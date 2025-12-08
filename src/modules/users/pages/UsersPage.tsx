@@ -328,7 +328,7 @@ export default function UsersPage() {
           <div className="relative flex-1">
             <input
               type="text"
-              placeholder="Tìm kiếm tác giả..."
+              placeholder="Tìm kiếm người dùng..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-11 pr-4 py-2.5 border-3 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-300"

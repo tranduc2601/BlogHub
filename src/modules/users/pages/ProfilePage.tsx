@@ -384,6 +384,7 @@ export default function ProfilePage() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Nhập tên mới..."
                 disabled={!isViewingOwnProfile}
+                draggable="false"
               />
             </div>
 
@@ -401,6 +402,7 @@ export default function ProfilePage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Nhập email mới..."
                 disabled={!isViewingOwnProfile}
+                draggable="false"
               />
             </div>
 
@@ -413,6 +415,7 @@ export default function ProfilePage() {
                 placeholder="Nhập mô tả về bạn..."
                 maxLength={100}
                 disabled={!isViewingOwnProfile}
+                draggable="false"
               />
               <div className="text-xs text-gray-500 mt-1 text-right">{about.length}/100 ký tự</div>
             </div>

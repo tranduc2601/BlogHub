@@ -46,14 +46,10 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
 
     if (showMenu) {
       document.addEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = '';
 
       if (reactionTimeoutRef.current) {
         clearTimeout(reactionTimeoutRef.current);
@@ -370,7 +366,7 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
 
         
         {showMenu && (
-          <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 animate-fadeIn overflow-hidden">
+          <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 animate-fadeIn overflow-y-auto max-h-[70vh]">
             <button
               onClick={handleBookmark}
               disabled={isBookmarking}

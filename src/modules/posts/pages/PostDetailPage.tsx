@@ -253,10 +253,14 @@ export default function PostDetailPage() {
 
     if (showMenu) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = '';
     };
   }, [showMenu]);
 
