@@ -434,11 +434,16 @@ export default function PostDetailPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
+    const datePart = date.toLocaleDateString('vi-VN', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
     });
+    const timePart = date.toLocaleTimeString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    return `${timePart} ${datePart}`;
   };
 
   const calculateReadTime = (content: string) => {

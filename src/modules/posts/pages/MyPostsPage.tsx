@@ -134,7 +134,7 @@ export default function MyPostsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 select-none">
 
         <div className="mb-8 text-center md:text-left">
@@ -154,7 +154,7 @@ export default function MyPostsPage() {
               <p className="text-gray-600 mb-6">Hãy bắt đầu chia sẻ câu chuyện của bạn với mọi người!</p>
               <button
                 onClick={() => window.location.href = '/create'}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center gap-3 cursor-pointer"
+                className="bg-[#2664eb] text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center gap-3 cursor-pointer"
               >
                 <i className="fa-solid fa-plus text-lg"></i>
                 Tạo bài viết đầu tiên

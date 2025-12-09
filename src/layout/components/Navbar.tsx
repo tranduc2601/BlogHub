@@ -7,26 +7,6 @@ import { useRoutePreloader } from "@/core/routing";
 import toast from 'react-hot-toast';
 import { useAdminPendingCount } from "@/modules/admin/hooks/useAdminPendingCount";
 
-function BlogHubLogoSVG() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="2" y="2" width="36" height="36" rx="8" fill="#2563eb" />
-      <text
-        x="50%"
-        y="56%"
-        textAnchor="middle"
-        fontFamily="'Inter', 'Segoe UI', 'Arial', sans-serif"
-        fontWeight="bold"
-        fontSize="16"
-        fill="#fff"
-        dominantBaseline="middle"
-      >
-        BH
-      </text>
-    </svg>
-  );
-}
-
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
   const { activeDropdown, setActiveDropdown } = useDropdown();
@@ -86,7 +66,9 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {location.pathname === "/" ? (
             <div className="flex items-center gap-2 cursor-default select-none">
-              <BlogHubLogoSVG />
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <i className="fa-solid fa-blog text-white text-xl"></i>
+              </div>
               <span className="hidden sm:inline" style={{ fontWeight: 'bold', fontSize: '1.5rem', color: '#2563eb', letterSpacing: '2px', fontFamily: "'Inter', 'Segoe UI', 'Arial', sans-serif" }}>BlogHub</span>
             </div>
           ) : (
@@ -94,7 +76,9 @@ export default function Navbar() {
               className="flex items-center gap-2 cursor-pointer select-none transition-all duration-300 hover:scale-105"
               onClick={() => navigate("/")}
             >
-              <BlogHubLogoSVG />
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <i className="fa-solid fa-blog text-white text-xl"></i>
+              </div>
               <span className="hidden sm:inline" style={{ fontWeight: 'bold', fontSize: '1.5rem', color: '#2563eb', letterSpacing: '2px', fontFamily: "'Inter', 'Segoe UI', 'Arial', sans-serif" }}>BlogHub</span>
             </div>
           )}
