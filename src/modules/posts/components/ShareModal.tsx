@@ -24,6 +24,8 @@ export default function ShareModal({ isOpen, onClose, postId, postTitle }: Share
   const [loading, setLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
 
   const fetchFollowUsers = async () => {
     try {
@@ -83,16 +85,28 @@ export default function ShareModal({ isOpen, onClose, postId, postTitle }: Share
 
   useEffect(() => {
     if (isOpen) {
+      setShouldRender(true);
       fetchFollowUsers();
       document.body.style.overflow = 'hidden';
+      // Bắt đầu animation sau một khoảng ngắn để đảm bảo DOM đã render
+      setTimeout(() => setIsAnimating(true), 10);
     } else {
+      setIsAnimating(false);
       document.body.style.overflow = '';
+      // Chờ animation hoàn tất rồi mới unmount
+      const timer = setTimeout(() => setShouldRender(false), 300);
+      return () => clearTimeout(timer);
     }
     return () => {
       document.body.style.overflow = '';
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
+
+  const handleClose = () => {
+    setIsAnimating(false);
+    setTimeout(() => onClose(), 300);
+  };
 
   const handleUserClick = (user: User) => {
     setSelectedUser(user);
@@ -138,18 +152,28 @@ export default function ShareModal({ isOpen, onClose, postId, postTitle }: Share
     return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   return createPortal(
     <>
-      <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/40">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+      <div 
+        className={`fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/40 transition-opacity duration-300 ${
+          isAnimating ? 'opacity-100' : 'opacity-0'
+        }`}
+        onClick={handleClose}
+      >
+        <div 
+          className={`bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden transition-all duration-300 ${
+            isAnimating ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
           
-          <div className="bg-blue-600 text-white p-6">
+          <div className="bg-blue-600 text-white p-6 select-none">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Chia sẻ bài viết</h2>
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="text-white hover:bg-blue-700 rounded-full p-2 transition-all duration-200"
               >
                 <svg className="w-6 h-6 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -214,7 +214,7 @@ export const login = async (req, res) => {
     console.error('Login error:', error);
     res.status(500).json({ 
       success: false,
-      message: 'Lỗi server, vui lòng thử lại sau' 
+      message: 'Lỗi server, vui lòng thử lại sau!' 
     });
   }
 };
@@ -232,7 +232,7 @@ export const getMe = async (req, res) => {
     if (users.length === 0) {
       return res.status(404).json({ 
         success: false,
-        message: 'Người dùng không tồn tại' 
+        message: 'Người dùng không tồn tại!' 
       });
     }
 
@@ -485,7 +485,7 @@ export const changePassword = async (req, res) => {
     if (newPassword.length < 6) {
       return res.status(400).json({ 
         success: false,
-        message: 'Mật khẩu phải có ít nhất 6 ký tự' 
+        message: 'Mật khẩu phải có ít nhất 6 ký tự!' 
       });
     }
 
@@ -496,7 +496,7 @@ export const changePassword = async (req, res) => {
     if (!hasUpperCase || !hasNumber || !hasSpecialChar) {
       return res.status(400).json({ 
         success: false,
-        message: 'Mật khẩu phải có ít nhất 1 ký tự hoa, 1 chữ số và 1 ký tự đặc biệt' 
+        message: 'Mật khẩu phải có ít nhất 1 ký tự hoa, 1 chữ số và 1 ký tự đặc biệt!' 
       });
     }
 
@@ -509,7 +509,7 @@ export const changePassword = async (req, res) => {
     if (users.length === 0) {
       return res.status(404).json({ 
         success: false,
-        message: 'Người dùng không tồn tại' 
+        message: 'Người dùng không tồn tại!' 
       });
     }
 
@@ -520,7 +520,7 @@ export const changePassword = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ 
         success: false,
-        message: 'Mật khẩu hiện tại không đúng' 
+        message: 'Mật khẩu hiện tại không đúng!' 
       });
     }
 
@@ -529,7 +529,7 @@ export const changePassword = async (req, res) => {
     if (isSamePassword) {
       return res.status(400).json({ 
         success: false,
-        message: 'Mật khẩu mới không được trùng với mật khẩu hiện tại' 
+        message: 'Mật khẩu mới không được trùng với mật khẩu hiện tại!' 
       });
     }
 
@@ -542,7 +542,7 @@ export const changePassword = async (req, res) => {
 
     res.json({ 
       success: true,
-      message: 'Đổi mật khẩu thành công' 
+      message: 'Đổi mật khẩu thành công!' 
     });
   } catch (error) {
     console.error('ChangePassword error:', error);
@@ -800,14 +800,14 @@ export const forgotPassword = async (req, res) => {
 
     res.json({ 
       success: true,
-      message: 'Mã OTP đã được gửi đến email của bạn',
+      message: 'Mã OTP đã được gửi đến email của bạn!',
       otp: otp
     });
   } catch (error) {
     console.error('Forgot password error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi server khi xử lý yêu cầu' 
+      message: 'Lỗi server khi xử lý yêu cầu!' 
     });
   }
 };
@@ -820,7 +820,7 @@ export const verifyOTP = async (req, res) => {
     if (!email || !otp) {
       return res.status(400).json({ 
         success: false,
-        message: 'Vui lòng nhập đầy đủ thông tin' 
+        message: 'Vui lòng nhập đầy đủ thông tin!' 
       });
     }
 
@@ -833,7 +833,7 @@ export const verifyOTP = async (req, res) => {
     if (resets.length === 0) {
       return res.status(400).json({ 
         success: false,
-        message: 'Mã OTP không đúng hoặc đã được sử dụng' 
+        message: 'Mã OTP không đúng hoặc đã được sử dụng!' 
       });
     }
 
@@ -843,19 +843,19 @@ export const verifyOTP = async (req, res) => {
     if (new Date() > new Date(reset.expiresAt)) {
       return res.status(400).json({ 
         success: false,
-        message: 'Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới' 
+        message: 'Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới!' 
       });
     }
 
     res.json({ 
       success: true,
-      message: 'Xác thực OTP thành công' 
+      message: 'Xác thực OTP thành công!' 
     });
   } catch (error) {
     console.error('Verify OTP error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi server khi xác thực OTP' 
+      message: 'Lỗi server khi xác thực OTP!' 
     });
   }
 };
@@ -868,7 +868,7 @@ export const resetPassword = async (req, res) => {
     if (!email || !otp || !newPassword) {
       return res.status(400).json({ 
         success: false,
-        message: 'Vui lòng nhập đầy đủ thông tin' 
+        message: 'Vui lòng nhập đầy đủ thông tin!' 
       });
     }
 
@@ -876,7 +876,7 @@ export const resetPassword = async (req, res) => {
     if (newPassword.length < 6) {
       return res.status(400).json({ 
         success: false,
-        message: 'Mật khẩu phải có ít nhất 6 ký tự' 
+        message: 'Mật khẩu phải có ít nhất 6 ký tự!' 
       });
     }
 
@@ -887,7 +887,7 @@ export const resetPassword = async (req, res) => {
     if (!hasUpperCase || !hasNumber || !hasSpecialChar) {
       return res.status(400).json({ 
         success: false,
-        message: 'Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 số và 1 ký tự đặc biệt' 
+        message: 'Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 số và 1 ký tự đặc biệt!' 
       });
     }
 
@@ -900,7 +900,7 @@ export const resetPassword = async (req, res) => {
     if (resets.length === 0) {
       return res.status(400).json({ 
         success: false,
-        message: 'Mã OTP không đúng hoặc đã được sử dụng' 
+        message: 'Mã OTP không đúng hoặc đã được sử dụng!' 
       });
     }
 
@@ -910,7 +910,7 @@ export const resetPassword = async (req, res) => {
     if (new Date() > new Date(reset.expiresAt)) {
       return res.status(400).json({ 
         success: false,
-        message: 'Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới' 
+        message: 'Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới!' 
       });
     }
 
@@ -938,13 +938,13 @@ export const resetPassword = async (req, res) => {
 
     res.json({ 
       success: true,
-      message: 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại' 
+      message: 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại!' 
     });
   } catch (error) {
     console.error('Reset password error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi server khi đặt lại mật khẩu' 
+      message: 'Lỗi server khi đặt lại mật khẩu!' 
     });
   }
 };

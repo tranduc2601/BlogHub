@@ -119,14 +119,14 @@ export const togglePostStatus = async (req, res) => {
 
     res.json({ 
       success: true, 
-      message: `Đã ${newStatus === 'visible' ? 'hiển thị' : 'ẩn'} bài viết`,
+      message: `Đã ${newStatus === 'visible' ? 'hiển thị' : 'ẩn'} bài viết!`,
       post: updated[0]
     });
   } catch (error) {
     console.error('Toggle post status error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi cập nhật trạng thái bài viết' 
+      message: 'Lỗi khi cập nhật trạng thái bài viết!' 
     });
   }
 };
@@ -142,7 +142,7 @@ export const approvePost = async (req, res) => {
     if (posts.length === 0) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Bài viết không tồn tại' 
+        message: 'Bài viết không tồn tại!' 
       });
     }
 
@@ -183,7 +183,7 @@ export const approvePost = async (req, res) => {
     console.error('Approve post error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Lỗi khi duyệt bài viết' 
+      message: 'Lỗi khi duyệt bài viết!' 
     });
   }
 };
@@ -200,7 +200,7 @@ export const rejectPost = async (req, res) => {
     if (posts.length === 0) {
       return res.status(404).json({ 
         success: false, 
-        message: 'Bài viết không tồn tại' 
+        message: 'Bài viết không tồn tại!' 
       });
     }
 
@@ -489,7 +489,7 @@ export const toggleUserStatus = async (req, res) => {
 
     res.json({ 
       success: true, 
-      message: `Đã ${newStatus === 'locked' ? 'khóa' : 'mở khóa'} tài khoản`,
+      message: `Đã ${newStatus === 'locked' ? 'khóa' : 'mở khóa'} tài khoản!`,
       user: {
         ...updated[0],
         avatarUrl: getFullAvatarUrl(updated[0].avatarUrl)
@@ -523,7 +523,7 @@ export const deleteUser = async (req, res) => {
     if (users[0].role === 'admin') {
       return res.status(403).json({ 
         success: false, 
-        message: 'Không thể xóa tài khoản admin' 
+        message: 'Không thể xóa tài khoản Admin!' 
       });
     }
 

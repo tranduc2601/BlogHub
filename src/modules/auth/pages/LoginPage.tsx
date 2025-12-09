@@ -183,7 +183,11 @@ export default function LoginPage() {
         });
       }
       
-
+      setFormData({
+        email: "",
+        password: "",
+      });
+      setShowPassword(false);
       recaptchaRef.current?.reset();
       setCaptchaToken(null);
     } finally {

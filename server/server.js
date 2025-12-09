@@ -95,7 +95,7 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   res.json({ 
     success: true,
-    message: 'BlogHub API Server đang hoạt động',
+    message: 'BlogHub API Server đang hoạt động!',
     version: '1.0.0',
     environment: process.env.NODE_ENV || 'development',
     endpoints: {

@@ -48,7 +48,7 @@ class ErrorBoundary extends Component<Props, State> {
               Đã xảy ra lỗi
             </h1>
             <p className="text-gray-600 mb-6">
-              {this.state.error?.message || 'Có lỗi không mong muốn xảy ra. Vui lòng thử lại.'}
+              {this.state.error?.message || 'Có lỗi không mong muốn xảy ra. Vui lòng thử lại!'}
             </p>
             <button
               onClick={() => {
