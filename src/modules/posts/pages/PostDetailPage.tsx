@@ -44,6 +44,34 @@ export default function PostDetailPage() {
     total_reactions: 0
   });
   
+  // Hàm tạo màu ngẫu nhiên cho tag dựa trên nội dung (giống PostCard)
+  const getTagColor = (tag: string) => {
+    const colors = [
+      { bg: 'bg-blue-100', text: 'text-blue-700' },
+      { bg: 'bg-green-100', text: 'text-green-700' },
+      { bg: 'bg-purple-100', text: 'text-purple-700' },
+      { bg: 'bg-pink-100', text: 'text-pink-700' },
+      { bg: 'bg-yellow-100', text: 'text-yellow-700' },
+      { bg: 'bg-red-100', text: 'text-red-700' },
+      { bg: 'bg-indigo-100', text: 'text-indigo-700' },
+      { bg: 'bg-orange-100', text: 'text-orange-700' },
+      { bg: 'bg-teal-100', text: 'text-teal-700' },
+      { bg: 'bg-cyan-100', text: 'text-cyan-700' },
+      { bg: 'bg-emerald-100', text: 'text-emerald-700' },
+      { bg: 'bg-rose-100', text: 'text-rose-700' },
+      { bg: 'bg-violet-100', text: 'text-violet-700' },
+      { bg: 'bg-fuchsia-100', text: 'text-fuchsia-700' },
+      { bg: 'bg-lime-100', text: 'text-lime-700' },
+      { bg: 'bg-amber-100', text: 'text-amber-700' },
+    ];
+    // Tạo hash từ chuỗi tag để đảm bảo cùng tag luôn có cùng màu
+    let hash = 0;
+    for (let i = 0; i < tag.length; i++) {
+      hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+  };
+
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
       'Công nghệ': 'bg-blue-500',
@@ -803,11 +831,14 @@ export default function PostDetailPage() {
 
           
           <div className="flex flex-wrap gap-2 mb-6 md:mb-8 mt-6 md:mt-8">
-            {post.tags.map((tag: string, index: number) => (
-              <span key={index} className="bg-gray-100 text-gray-700 px-2.5 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium">
-                #{tag}
-              </span>
-            ))}
+            {post.tags.map((tag: string, index: number) => {
+              const colors = getTagColor(tag);
+              return (
+                <span key={index} className={`${colors.bg} ${colors.text} px-2.5 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium`}>
+                  #{tag}
+                </span>
+              );
+            })}
           </div>
 
           

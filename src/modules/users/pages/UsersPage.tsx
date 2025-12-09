@@ -103,6 +103,8 @@ function FollowButton({ userId, onFollowChange }: { userId: number; onFollowChan
 export default function UsersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isAtTop, setIsAtTop] = useState(true);
   
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
@@ -130,6 +132,39 @@ export default function UsersPage() {
   useEffect(() => {
     setLocalUsers(users);
   }, [users]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      
+      setShowScrollTop(true);
+      
+      if (scrollPosition < 100) {
+        setIsAtTop(true);
+      } else {
+        setIsAtTop(false);
+      }
+    };
+
+    handleScroll();
+    
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleScrollClick = () => {
+    if (isAtTop) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth"
+      });
+    } else {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+  };
 
 
   const filteredAndSortedUsers = useMemo(() => {
@@ -626,6 +661,18 @@ export default function UsersPage() {
           </div>
         </div>
       )}
+
+      <button
+        onClick={handleScrollClick}
+        className={`fixed bottom-8 right-8 w-12 h-12 rounded-full bg-[#2664eb] text-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-xl z-50 cursor-pointer ${
+          showScrollTop 
+            ? "opacity-100 translate-y-0" 
+            : "opacity-0 translate-y-16 pointer-events-none"
+        }`}
+        aria-label={isAtTop ? "Scroll to bottom" : "Scroll to top"}
+      >
+        <i className={`fa-solid ${isAtTop ? 'fa-arrow-down' : 'fa-arrow-up'} text-lg transition-transform duration-300`}></i>
+      </button>
     </div>
   );
 }

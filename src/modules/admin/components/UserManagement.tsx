@@ -29,7 +29,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
     parseInt(searchParams.get('page') || '1', 10)
   );
   const USERS_PER_PAGE = 5;
-  const [hiddenEmails, setHiddenEmails] = useState<Set<number>>(new Set());
+  const [visibleEmails, setVisibleEmails] = useState<Set<number>>(new Set());
 
 
   useEffect(() => {
@@ -299,7 +299,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => {
-                            setHiddenEmails(prev => {
+                            setVisibleEmails(prev => {
                               const newSet = new Set(prev);
                               if (newSet.has(user.id)) {
                                 newSet.delete(user.id);
@@ -309,13 +309,13 @@ const UserManagement: React.FC<UserManagementProps> = ({
                               return newSet;
                             });
                           }}
-                          className="mr-1 text-gray-500 hover:text-blue-600 transition-colors duration-200 focus:outline-none"
-                          title={hiddenEmails.has(user.id) ? 'Hiện email' : 'Ẩn email'}
+                          className="mr-1 text-gray-500 hover:text-blue-600 transition-colors duration-200 focus:outline-none cursor-pointer"
+                          title={visibleEmails.has(user.id) ? 'Ẩn email' : 'Hiện email'}
                         >
-                          <i className={`fa-solid ${hiddenEmails.has(user.id) ? 'fa-eye-slash' : 'fa-eye'} text-base`}></i>
+                          <i className={`fa-solid ${visibleEmails.has(user.id) ? 'fa-eye' : 'fa-eye-slash'} text-base`}></i>
                         </button>
                         <span className="text-sm text-gray-600 transition-all duration-300">
-                          {hiddenEmails.has(user.id) ? '••••••••@••••••' : user.email}
+                          {visibleEmails.has(user.id) ? user.email : '••••••••••••••••'}
                         </span>
                       </div>
                     </td>
