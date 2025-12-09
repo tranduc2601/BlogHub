@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface TopPost {
   id: number;
@@ -58,6 +58,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   topUsers = [], 
   activities = [] 
 }) => {
+  const navigate = useNavigate();
   const ACTIVITIES_PER_PAGE = 10;
   const [displayedActivities, setDisplayedActivities] = useState<Activity[]>([]);
   const [page, setPage] = useState(1);
@@ -157,7 +158,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
 
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
+        <div 
+          onClick={() => navigate('/admin/post-management')}
+          className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-100 text-xs sm:text-sm font-medium">Tổng bài viết</p>
@@ -173,7 +177,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
 
 
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
+        <div 
+          onClick={() => navigate('/admin/user-management')}
+          className="bg-gradient-to-br from-green-500 to-green-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-100 text-xs sm:text-sm font-medium">Tổng người dùng</p>
@@ -205,7 +212,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
 
 
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg">
+        <div 
+          onClick={() => navigate('/admin/comment-report-management')}
+          className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-[16px] p-4 sm:p-6 text-white shadow-lg cursor-pointer hover:shadow-2xl hover:scale-105 transition-all duration-300"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-purple-100 text-xs sm:text-sm font-medium">Bình luận</p>

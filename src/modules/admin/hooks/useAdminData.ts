@@ -14,6 +14,7 @@ export const useAdminData = () => {
   const [comments, setComments] = useState<AdminComment[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
+  const [commentReports, setCommentReports] = useState<Report[]>([]);
   const [monthlyStats, setMonthlyStats] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -209,11 +210,12 @@ export const useAdminData = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [pRes, cRes, uRes, rRes, sRes] = await Promise.all([
+        const [pRes, cRes, uRes, rRes, crRes, sRes] = await Promise.all([
           axios.get('/admin/posts'),
           axios.get('/admin/comments'),
           axios.get('/admin/users'),
           axios.get('/admin/reports').catch(() => ({ data: { reports: [] } })),
+          axios.get('/admin/comment-reports').catch(() => ({ data: { reports: [] } })),
           axios.get('/admin/stats').catch(() => ({ data: { monthlyStats: [] } }))
         ]);
 
@@ -223,6 +225,7 @@ export const useAdminData = () => {
         setComments(cRes.data.comments || []);
         setUsers(uRes.data.users || []);
         setReports(rRes.data.reports || []);
+        setCommentReports(crRes.data.reports || []);
         setMonthlyStats(sRes.data.monthlyStats || []);
       } catch (error: unknown) {
         console.warn('Failed to load admin data from server, falling back to mock data', error);
@@ -250,7 +253,7 @@ export const useAdminData = () => {
     totalPosts: posts.length,
     totalUsers: users.length,
     hotPosts: posts.filter(post => post.likes >= 50).length,    pendingReviewPosts: posts.filter(post => post.status === 'pending').length,
-    pendingReviewComments: comments.filter(comment => comment.needsReview).length,
+    pendingReviewComments: commentReports.filter(report => report.status === 'pending').length,
     activeUsers: users.filter(user => user.status === 'active').length,
     lockedUsers: users.filter(user => user.status === 'locked').length,
     totalReports: reports.length,

@@ -957,98 +957,108 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
 
 
                           {comment.replies && comment.replies.length > 0 && (
-                            <div className="ml-4 sm:ml-8 md:ml-12 mt-3 space-y-3">
+                            <div className="ml-8 mt-3 space-y-3">
                               {comment.replies.map((reply) => {
                                 const replyAvatarUrl = getCommentAvatar(reply.authorAvatar);
                                 const isReplyAdmin = reply.authorRole === 'admin';
+                                const isReplyPostAuthor = currentPostAuthorId && reply.authorId && String(currentPostAuthorId) === String(reply.authorId);
                                 
                                 return (
-                                  <div key={reply.id} className="flex gap-3 group">
-
-                                    <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mt-2">
-                                      {replyAvatarUrl ? (
-                                        <img 
-                                          src={replyAvatarUrl} 
-                                          alt={reply.author}
-                                          className="w-full h-full rounded-full object-cover border-2 border-blue-500 shadow-lg"
-                                          onError={(e) => {
-                                            e.currentTarget.style.display = 'none';
-                                            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                                            if (fallback) fallback.style.display = 'flex';
-                                          }}
-                                        />
-                                      ) : null}
-                                      <div style={{ display: replyAvatarUrl ? 'none' : 'flex' }} className="w-full h-full rounded-full bg-blue-600 items-center justify-center text-white font-bold border-2 border-blue-500 shadow-lg text-xs sm:text-sm">
-                                        {reply.author.charAt(0).toUpperCase()}
-                                      </div>
-                                    </div>
+                                  <div key={reply.id}>
                                     
-
-                                    <div className="flex-1 min-w-0">
-                                      <div className={`rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm transition-all ${
+                                    <div
+                                      className={`p-5 rounded-2xl border-2 shadow-md ${
                                         reply.isHidden 
-                                          ? 'bg-gray-100 opacity-50' 
-                                          : 'bg-gradient-to-br from-blue-50 to-blue-100'
-                                      }`}>
-                                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                          <span className="font-bold text-gray-800 text-sm sm:text-base">{reply.author}</span>
-                                          {reply.author.startsWith('Người dùng ẩn danh') && (
-                                            <span className="text-[10px] sm:text-xs bg-gradient-to-r from-gray-500 to-gray-600 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold shadow-sm">
-                                              <i className="fa-solid fa-user-secret mr-1"></i>Ẩn danh
-                                            </span>
-                                          )}
-                                          {isReplyAdmin && (
-                                            <span className="text-[10px] sm:text-xs bg-gradient-to-r from-red-500 to-pink-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold shadow-sm">
-                                              <i className="fa-solid fa-shield-halved mr-1"></i>Admin
-                                            </span>
-                                          )}
-                                          {currentPostAuthorId && reply.authorId && String(currentPostAuthorId) === String(reply.authorId) && (
-                                            <span className="text-[10px] sm:text-xs bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold shadow-sm">
-                                              <i className="fa-solid fa-pen-nib mr-1"></i>Tác giả
-                                            </span>
-                                          )}
-                                          {reply.isHidden && (
-                                            <span className="text-[10px] sm:text-xs bg-red-100 text-red-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold">
-                                              Đã ẩn
-                                            </span>
-                                          )}
-                                        </div>
-                                        <p className="text-gray-700 text-sm sm:text-base break-words mb-2">{reply.content}</p>
-                                        <div className="flex items-center gap-4 mt-2">
-                                          <p className="text-gray-400 text-[10px] sm:text-xs">
-                                            <i className="fa-solid fa-calendar mr-2"></i>
-                                            {formatDate(reply.createdAt)}
-                                          </p>
-                                          {commentReactions[reply.id] && commentReactions[reply.id].total > 0 && (
+                                          ? 'bg-gray-100 border-gray-300 opacity-50' 
+                                          : 'bg-blue-50 border-blue-200'
+                                      }`}
+                                    >
+                                      <div className="flex justify-between items-start">
+                                        <div className="flex gap-3 flex-1">
+                                          
+                                          <div className="relative w-10 h-10 flex-shrink-0">
+                                            {replyAvatarUrl ? (
+                                              <>
+                                                <img 
+                                                  src={replyAvatarUrl} 
+                                                  alt={reply.author}
+                                                  className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
+                                                  onError={(e) => {
+                                                    e.currentTarget.style.display = 'none';
+                                                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                                    if (fallback) {
+                                                      fallback.style.display = 'flex';
+                                                    }
+                                                  }}
+                                                />
+                                                <div style={{ display: 'none' }} className="w-10 h-10 rounded-full bg-blue-600 items-center justify-center text-white font-bold border-2 border-blue-500">
+                                                  {reply.author.charAt(0).toUpperCase()}
+                                                </div>
+                                              </>
+                                            ) : (
+                                              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold border-2 border-blue-500">
+                                                {reply.author.charAt(0).toUpperCase()}
+                                              </div>
+                                            )}
+                                          </div>
+                                          
+                                          <div className="flex-1">
                                             <div className="flex items-center gap-2">
-                                              {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as const).map((reactionType) => {
-                                                const reactions = commentReactions[reply.id] as Record<string, number>;
-                                                const count = reactions[reactionType] || reactions[reactionType + 's'] || 0;
-                                                if (count > 0) {
-                                                  const emojis: Record<string, string> = {
-                                                    like: '👍',
-                                                    love: '❤️',
-                                                    haha: '😂',
-                                                    wow: '😮',
-                                                    sad: '😢',
-                                                    angry: '😠'
-                                                  };
-                                                  return (
-                                                    <span 
-                                                      key={reactionType}
-                                                      className="flex items-center gap-0.5 bg-gray-50 px-2 py-1 rounded-full shadow-sm border border-gray-300 text-xs"
-                                                      title={`${count} ${reactionType}`}
-                                                    >
-                                                      <span className="text-sm">{emojis[reactionType]}</span>
-                                                      <span className="font-semibold text-gray-700">{count}</span>
-                                                    </span>
-                                                  );
-                                                }
-                                                return null;
-                                              })}
+                                              <p className="font-semibold text-gray-800">{reply.author}</p>
+                                              {isReplyAdmin && (
+                                                <span className="text-xs bg-gradient-to-r from-red-500 to-pink-500 text-white px-2 py-1 rounded-full font-semibold shadow-sm">
+                                                  <i className="fa-solid fa-shield-halved mr-1"></i>Quản trị viên
+                                                </span>
+                                              )}
+                                              {isReplyPostAuthor && !isReplyAdmin && (
+                                                <span className="text-xs bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-2 py-1 rounded-full font-semibold shadow-sm">
+                                                  <i className="fa-solid fa-pen-nib mr-1"></i>Tác giả
+                                                </span>
+                                              )}
                                             </div>
-                                          )}
+                                            <p className="text-gray-600 text-sm mt-1">{reply.content}</p>
+                                            <div className="flex items-center gap-4 mt-2">
+                                              <p className="text-gray-400 text-xs">
+                                                <i className="fa-solid fa-calendar mr-2"></i>
+                                                {formatDate(reply.createdAt)}
+                                              </p>
+                                              {commentReactions[reply.id] && commentReactions[reply.id].total > 0 && (
+                                                <div className="flex items-center gap-2">
+                                                  {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as const).map((reactionType) => {
+                                                    const reactions = commentReactions[reply.id] as Record<string, number>;
+                                                    const count = reactions[reactionType] || reactions[reactionType + 's'] || 0;
+                                                    if (count > 0) {
+                                                      const emojis: Record<string, string> = {
+                                                        like: '👍',
+                                                        love: '❤️',
+                                                        haha: '😂',
+                                                        wow: '😮',
+                                                        sad: '😢',
+                                                        angry: '😠'
+                                                      };
+                                                      return (
+                                                        <span 
+                                                          key={reactionType}
+                                                          className="flex items-center gap-0.5 bg-gray-50 px-2 py-1 rounded-full shadow-sm border border-gray-300 text-xs"
+                                                          title={`${count} ${reactionType}`}
+                                                        >
+                                                          <span className="text-sm">{emojis[reactionType]}</span>
+                                                          <span className="font-semibold text-gray-700">{count}</span>
+                                                        </span>
+                                                      );
+                                                    }
+                                                    return null;
+                                                  })}
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
                                         </div>
+                                        {reply.isHidden && (
+                                          <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">
+                                            Đã ẩn
+                                          </span>
+                                        )}
                                       </div>
                                     </div>
                                   </div>
