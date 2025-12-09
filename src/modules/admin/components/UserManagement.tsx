@@ -29,6 +29,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
     parseInt(searchParams.get('page') || '1', 10)
   );
   const USERS_PER_PAGE = 5;
+  const [hiddenEmails, setHiddenEmails] = useState<Set<number>>(new Set());
 
 
   useEffect(() => {
@@ -295,7 +296,28 @@ const UserManagement: React.FC<UserManagementProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="text-sm text-gray-600"><i className="fa-solid fa-envelope mr-2"></i>{user.email}</span>
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => {
+                            setHiddenEmails(prev => {
+                              const newSet = new Set(prev);
+                              if (newSet.has(user.id)) {
+                                newSet.delete(user.id);
+                              } else {
+                                newSet.add(user.id);
+                              }
+                              return newSet;
+                            });
+                          }}
+                          className="mr-1 text-gray-500 hover:text-blue-600 transition-colors duration-200 focus:outline-none"
+                          title={hiddenEmails.has(user.id) ? 'Hiện email' : 'Ẩn email'}
+                        >
+                          <i className={`fa-solid ${hiddenEmails.has(user.id) ? 'fa-eye-slash' : 'fa-eye'} text-base`}></i>
+                        </button>
+                        <span className="text-sm text-gray-600 transition-all duration-300">
+                          {hiddenEmails.has(user.id) ? '••••••••@••••••' : user.email}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <span

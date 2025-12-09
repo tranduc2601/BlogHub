@@ -679,9 +679,9 @@ export default function PostDetailPage() {
           
 
           <button
-            onClick={() => window.location.href = '/posts'}
+            onClick={() => navigate(-1)}
             className="group mb-4 md:mb-6 flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-all duration-300 cursor-pointer border-2 border-white/40 hover:border-white/60 hover:shadow-2xl hover:shadow-white/20 hover:scale-110 active:scale-95"
-            title="Quay lại danh sách bài viết"
+            title="Quay lại trang trước"
           >
             <i className="fa-solid fa-arrow-left text-white text-base md:text-lg transition-transform duration-300 group-hover:-translate-x-1"></i>
           </button>

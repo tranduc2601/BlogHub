@@ -115,7 +115,7 @@ export default function ReactionModal({ isOpen, onClose, postId, totalReactions 
           <div className="flex items-center gap-2 overflow-x-auto flex-1 mr-2">
             <button
               onClick={() => setActiveTab("all")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-1 ${
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-1 cursor-pointer ${
                 activeTab === "all"
                   ? "bg-blue-500 text-white"
                   : "text-gray-600 hover:bg-gray-100"
