@@ -5,6 +5,7 @@ Nền tảng chia sẻ blog hiện đại với đầy đủ tính năng quản 
 ## 🌟 Tính năng chính
 
 ### Người dùng
+
 - ✍️ Tạo và quản lý bài viết với trình soạn thảo Rich Text (React Quill)
 - 🖼️ Upload ảnh đại diện và ảnh bài viết (Cloudinary)
 - 👥 Theo dõi/Bỏ theo dõi người dùng khác
@@ -17,6 +18,7 @@ Nền tảng chia sẻ blog hiện đại với đầy đủ tính năng quản 
 - 🔒 Quản lý quyền riêng tư bài viết (Public, Followers, Private)
 
 ### Quản trị viên
+
 - 👨‍💼 Dashboard thống kê tổng quan
 - 📊 Biểu đồ thống kê theo tháng
 - Duyệt/Từ chối bài viết chờ duyệt
@@ -28,6 +30,7 @@ Nền tảng chia sẻ blog hiện đại với đầy đủ tính năng quản 
 ## 🛠️ Công nghệ sử dụng
 
 ### Frontend
+
 - ⚛️ **React 18** + **TypeScript**
 - 🎨 **Tailwind CSS 4** - Styling
 - 🚀 **Vite** - Build tool
@@ -40,6 +43,7 @@ Nền tảng chia sẻ blog hiện đại với đầy đủ tính năng quản 
 - 🔄 **Turndown** - Convert HTML to Markdown
 
 ### Backend
+
 - 🟢 **Node.js** + **Express.js**
 - 🗄️ **MySQL** - Database
 - 🔐 **JWT** - Authentication
@@ -57,33 +61,39 @@ Nền tảng chia sẻ blog hiện đại với đầy đủ tính năng quản 
 ## 📦 Cài đặt và chạy local
 
 ### 1. Clone repository
+
 ```bash
 git clone https://github.com/tranduc2601/BlogHub.git
 cd BlogHub
 ```
 
 ### 2. Cài đặt Frontend
+
 ```bash
 npm install
 ```
 
 Tạo file `.env` trong thư mục gốc:
+
 ```env
 VITE_API_URL=http://localhost:3001
 ```
 
 Chạy development server:
+
 ```bash
 npm run dev
 ```
 
 ### 3. Cài đặt Backend
+
 ```bash
 cd server
 npm install
 ```
 
 Tạo file `.env` trong thư mục `server`:
+
 ```env
 DB_HOST=localhost
 DB_USER=root
@@ -101,18 +111,20 @@ PORT=3001
 ```
 
 Khởi tạo database:
+
 ```bash
 npm run setup-db
 ```
 
 Chạy server:
+
 ```bash
 npm start
 ```
 
 ## 📁 Cấu trúc dự án
 
-```
+```text
 BlogHub/
 ├── src/                      # Frontend source code
 │   ├── core/                 # Core utilities (auth, routing, config)
@@ -138,13 +150,15 @@ BlogHub/
 
 ## 🔑 Tài khoản mặc định
 
-Tài khoản admin mặc định:
-- **Email**: 
-- **Password**: 
+Tài khoản Admin mặc định:
 
-## 📝 Script commands
+- **Email**:
+- **Password**:
 
-### Frontend
+## 📝 Script Commands
+
+### Frontend Commands
+
 ```bash
 npm run dev          # Chạy development server
 npm run build        # Build production
@@ -152,7 +166,8 @@ npm run preview      # Preview production build
 npm run lint         # Kiểm tra code
 ```
 
-### Backend
+### Backend Commands
+
 ```bash
 npm start            # Chạy production server
 npm run dev          # Chạy development với nodemon
@@ -164,6 +179,7 @@ npm run reset-db     # Reset database
 ## 🌐 API Endpoints
 
 ### Authentication (`/api/auth`)
+
 - `POST /register` - Đăng ký tài khoản
 - `POST /login` - Đăng nhập
 - `POST /logout` - Đăng xuất
@@ -174,6 +190,7 @@ npm run reset-db     # Reset database
 - `POST /forgot-password` - Quên mật khẩu
 
 ### Posts (`/api/posts`)
+
 - `GET /` - Lấy danh sách bài viết
 - `GET /:id` - Chi tiết bài viết
 - `POST /` - Tạo bài viết mới
@@ -185,6 +202,7 @@ npm run reset-db     # Reset database
 - `POST /:id/report` - Báo cáo vi phạm
 
 ### Comments (`/api/posts`)
+
 - `GET /:postId/comments` - Lấy bình luận
 - `POST /:postId/comments` - Tạo bình luận
 - `PUT /comments/:commentId` - Cập nhật bình luận
@@ -194,6 +212,7 @@ npm run reset-db     # Reset database
 - `POST /comments/:commentId/report` - Báo cáo bình luận
 
 ### Users (`/api/users`)
+
 - `GET /` - Danh sách người dùng
 - `GET /:id` - Thông tin chi tiết user
 - `POST /:userId/follow` - Theo dõi
@@ -202,20 +221,24 @@ npm run reset-db     # Reset database
 - `GET /:userId/following` - Danh sách following
 
 ### Bookmarks (`/api/bookmarks`)
+
 - `GET /` - Bài viết đã lưu
 - `POST /` - Lưu bài viết
 - `DELETE /:postId` - Bỏ lưu bài viết
 
 ### Notifications (`/api/notifications`)
+
 - `GET /` - Danh sách thông báo
 - `GET /unread-count` - Số thông báo chưa đọc
 - `PUT /:id/read` - Đánh dấu đã đọc
 - `PUT /read-all` - Đọc tất cả
 
 ### Upload (`/api/upload`)
+
 - `POST /image` - Upload ảnh (Cloudinary)
 
 ### Admin (`/api/admin`)
+
 - `GET /stats` - Thống kê tổng quan
 - `GET /pending-actions-count` - Số hành động chờ xử lý
 - `PUT /posts/:id/approve` - Duyệt bài viết

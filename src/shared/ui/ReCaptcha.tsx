@@ -22,6 +22,14 @@ const ReCaptcha = forwardRef<ReCAPTCHA, ReCaptchaProps>(
       );
     }
 
+    const originalError = console.error;
+    console.error = (...args) => {
+      if (args[0]?.toString().includes('SecurityError') && args[0]?.toString().includes('recaptcha')) {
+        return;
+      }
+      originalError.apply(console, args);
+    };
+
     return (
       <div className="flex justify-center my-4">
         <ReCAPTCHA
