@@ -431,11 +431,10 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
         return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full"><i className="fa-solid fa-hourglass-end mr-1"></i>Chờ xử lý</span>;
       case 'approved':
       case 'resolved':
-        return <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">✓ Đã duyệt</span>;
-      case 'rejected':
-        return <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">✗ Đã từ chối</span>;
-      case 'reviewed':
         return <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">✓ Đã xử lý</span>;
+      case 'rejected':
+      case 'reviewed':
+        return <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">✗ Đã từ chối</span>;
       default:
         return null;
     }
@@ -492,7 +491,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
             onClick={() => setFilter('approved')}
             className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all cursor-pointer whitespace-nowrap ${
               filter === 'approved'
-                ? 'bg-red-600 text-white shadow-lg shadow-red-200'
+                ? 'bg-green-600 text-white shadow-lg shadow-green-200'
                 : 'bg-white text-gray-700 hover:bg-gray-100 active:bg-gray-200'
             }`}
           >
@@ -502,7 +501,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
             onClick={() => setFilter('rejected')}
             className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all cursor-pointer whitespace-nowrap ${
               filter === 'rejected'
-                ? 'bg-green-600 text-white shadow-lg shadow-green-200'
+                ? 'bg-red-600 text-white shadow-lg shadow-red-200'
                 : 'bg-white text-gray-700 hover:bg-gray-100 active:bg-gray-200'
             }`}
           >
