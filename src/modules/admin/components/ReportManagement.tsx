@@ -566,11 +566,6 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     <h3 className="text-lg sm:text-xl font-bold text-gray-800 break-words mr-1">{report.postTitle}</h3>
                     {getStatusBadge(report.status)}
-                    {report.status !== 'pending' && (
-                      <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                        <i className="fa-solid fa-check-double mr-1"></i>Đã xử lý
-                      </span>
-                    )}
                   </div>
                   
                   <div className="bg-red-50 border-l-4 border-red-500 p-3 sm:p-4 rounded mb-3">
