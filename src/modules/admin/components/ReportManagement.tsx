@@ -495,7 +495,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                 : 'bg-white text-gray-700 hover:bg-gray-100 active:bg-gray-200'
             }`}
           >
-            Duyệt ({reports.filter(r => r.status === 'approved' || r.status === 'resolved').length})
+            Đã duyệt ({reports.filter(r => r.status === 'approved' || r.status === 'resolved').length})
           </button>
           <button
             onClick={() => setFilter('rejected')}
@@ -614,7 +614,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                         title="Duyệt báo cáo"
                       >
                         <i className="fa-solid fa-check mr-1 sm:mr-2"></i>
-                        Đã duyệt
+                        Duyệt
                       </button>
                       
                       <button
