@@ -29,7 +29,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
     parseInt(searchParams.get('page') || '1', 10)
   );
   const USERS_PER_PAGE = 5;
-  const [visibleEmails, setVisibleEmails] = useState<Set<number>>(new Set());
+
 
 
   useEffect(() => {
@@ -297,33 +297,18 @@ const UserManagement: React.FC<UserManagementProps> = ({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => {
-                            setVisibleEmails(prev => {
-                              const newSet = new Set(prev);
-                              if (newSet.has(user.id)) {
-                                newSet.delete(user.id);
-                              } else {
-                                newSet.add(user.id);
-                              }
-                              return newSet;
-                            });
-                          }}
-                          className="mr-1 text-gray-500 hover:text-blue-600 transition-colors duration-200 focus:outline-none cursor-pointer"
-                          title={visibleEmails.has(user.id) ? 'Ẩn email' : 'Hiện email'}
-                        >
-                          <i className={`fa-solid ${visibleEmails.has(user.id) ? 'fa-eye' : 'fa-eye-slash'} text-base`}></i>
-                        </button>
-                        <span className="text-sm text-gray-600 transition-all duration-300">
-                          {visibleEmails.has(user.id) ? user.email : '••••••••••••••••'}
+                        <i className="fa-solid fa-envelope text-gray-500 text-base mr-2"></i>
+                        <span className="text-sm text-gray-600">
+                          {user.email}
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <span
-                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800`}
+                        className={`px-3 py-1 inline-flex items-center gap-1.5 text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800`}
                       >
-                        {'👤 User'}
+                        <i className="fa-solid fa-user"></i>
+                        User
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
