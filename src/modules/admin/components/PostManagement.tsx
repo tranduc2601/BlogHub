@@ -278,6 +278,10 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
       const postData = await postResponse.json();
       if (postData.success && postData.post) {
         setCurrentPostAuthorId(postData.post.authorId);
+        setSelectedPost({
+          ...post,
+          views: postData.post.views || 0
+        });
       }
 
 
