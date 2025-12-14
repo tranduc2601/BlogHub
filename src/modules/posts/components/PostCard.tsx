@@ -314,7 +314,10 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
 
   const getAuthorInitial = (name: string) => {
     if (!name) return 'U';
-    return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+    const words = name.trim().split(' ').filter(word => word.length > 0);
+    if (words.length === 0) return 'U';
+    const lastWord = words[words.length - 1];
+    return lastWord[0].toUpperCase();
   };
 
   const getCategoryColor = (category: string) => {
@@ -341,18 +344,6 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
       'Giáo dục': 'fa-solid fa-graduation-cap'
     };
     return icons[category] || 'fa-solid fa-folder';
-  };
-
-  const getAvatarColor = (category: string) => {
-    const colors: { [key: string]: string } = {
-      'Công nghệ': 'bg-blue-500',
-      'Design': 'bg-purple-500',
-      'Marketing': 'bg-green-500',
-      'Ẩm thực': 'bg-orange-500',
-      'Du lịch': 'bg-indigo-500',
-      'Giáo dục': 'bg-teal-500'
-    };
-    return colors[category] || 'bg-gray-500';
   };
 
 
@@ -474,7 +465,7 @@ export default function PostCard({ post, hideShare = false, onOpenReactionModal 
                 className={`w-10 h-10 rounded-full object-cover border border-blue-200`}
               />
             ) : (
-              <div className={`w-10 h-10 ${getAvatarColor(post.category || 'Khác')} rounded-full flex items-center justify-center text-white font-bold text-sm`}>
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: '#2664eb' }}>
                 {getAuthorInitial(typeof post.author === 'string' ? post.author : post.author?.name || 'User')}
               </div>
             )}

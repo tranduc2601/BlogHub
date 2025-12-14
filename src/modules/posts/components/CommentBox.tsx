@@ -252,7 +252,6 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
       await updateComment(commentId, content.trim());
       setEditingId(null);
       setEditContent("");
-      toast.success('Đã cập nhật bình luận!');
     } catch (error) {
       console.error('Error editing:', error);
       toast.error('Không thể cập nhật bình luận!');
@@ -269,7 +268,6 @@ export default function CommentBox({ postId, postAuthorId, onCommentAdded, onRep
 
     try {
       await deleteComment(commentToDelete);
-      toast.success('Đã xóa bình luận!');
     } catch (error) {
       console.error('Error deleting:', error);
       toast.error('Không thể xóa bình luận!');
@@ -530,6 +528,7 @@ const CommentItem = ({
     const [replyContent, setReplyContent] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
     const [showReplies, setShowReplies] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
     const authorName = getAuthorName(comment.author);
     const avatarUrl = (comment.author as { avatarUrl?: string; avatar?: string }).avatarUrl || 
                      (comment.author as { avatarUrl?: string; avatar?: string }).avatar;
@@ -537,6 +536,23 @@ const CommentItem = ({
     const isPostAuthor = postAuthorId && String(postAuthorId) === String(comment.authorId);
     const isCurrentUserPostAuthor = currentUserId && String(currentUserId) === String(postAuthorId);
     const isPinned = pinnedCommentId === comment.id;
+
+
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+          setShowDropdown(false);
+        }
+      };
+
+      if (showDropdown) {
+        document.addEventListener('mousedown', handleClickOutside);
+      }
+
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, [showDropdown]);
 
     const handleEditClick = () => {
       setEditingId(comment.id);
@@ -596,7 +612,7 @@ const CommentItem = ({
                   </span>
                 </div>
                 {(isOwner || isCurrentUserPostAuthor) && (
-                  <div className="relative flex-shrink-0">
+                  <div className="relative flex-shrink-0" ref={dropdownRef}>
                     <button
                       onClick={() => setShowDropdown(!showDropdown)}
                       className="text-gray-400 hover:text-gray-600 p-1 sm:p-2 rounded-full hover:bg-white/50 transition-all cursor-pointer"
@@ -604,12 +620,7 @@ const CommentItem = ({
                       <i className="fa-solid fa-ellipsis text-base sm:text-lg"></i>
                     </button>
                     {showDropdown && (
-                      <>
-                        <div 
-                          className="fixed inset-0 z-40"
-                          onClick={() => setShowDropdown(false)}
-                        />
-                        <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[120px] sm:min-w-[160px]">
+                      <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[120px] sm:min-w-[160px]">
                           {isCurrentUserPostAuthor && level === 0 && !comment.parentId && (
                             <button
                               onClick={() => {
@@ -646,7 +657,6 @@ const CommentItem = ({
                             </>
                           )}
                         </div>
-                      </>
                     )}
                   </div>
                 )}

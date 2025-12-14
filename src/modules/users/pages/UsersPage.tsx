@@ -505,7 +505,10 @@ export default function UsersPage() {
                   <div className="text-2xl font-bold text-blue-600">
                     {user.postsCount}
                   </div>
-                  <div className="text-xs text-gray-500">Bài viết</div>
+                  <div className="text-xs text-gray-500">
+                    <i className="fa-solid fa-file-alt mr-1"></i>
+                    Bài viết
+                  </div>
                 </div>
                     <div 
                       className="text-center cursor-pointer hover:bg-blue-50 rounded-lg p-2 transition-colors"
@@ -514,7 +517,10 @@ export default function UsersPage() {
                       <div className="text-2xl font-bold text-blue-600">
                         {user.followersCount || 0}
                       </div>
-                      <div className="text-xs text-gray-500">Người theo dõi</div>
+                      <div className="text-xs text-gray-500">
+                        <i className="fa-solid fa-users mr-1"></i>
+                        Người theo dõi
+                      </div>
                     </div>
                     <div 
                       className="text-center cursor-pointer hover:bg-blue-50 rounded-lg p-2 transition-colors"
@@ -523,7 +529,10 @@ export default function UsersPage() {
                       <div className="text-2xl font-bold text-blue-600">
                         {user.followingCount || 0}
                       </div>
-                      <div className="text-xs text-gray-500">Đang theo dõi</div>
+                      <div className="text-xs text-gray-500">
+                        <i className="fa-solid fa-user-check mr-1"></i>
+                        Đang theo dõi
+                      </div>
                     </div>
                   </div>
                 </div>

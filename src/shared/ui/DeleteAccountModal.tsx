@@ -189,7 +189,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
             disabled={isLoading}
           >
             <i className="fa-solid fa-times mr-2 group-hover:rotate-90 transition-transform duration-200"></i>
-            Hủy bỏ
+            Hủy
           </button>
           <button
             className={`group flex-1 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
@@ -208,7 +208,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
             ) : (
               <>
                 <i className="fa-solid fa-trash mr-2"></i>
-                Xóa tài khoản vĩnh viễn
+                Xóa tài khoản
               </>
             )}
           </button>

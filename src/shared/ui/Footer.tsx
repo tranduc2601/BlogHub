@@ -14,20 +14,24 @@ export default function Footer() {
         <div className="flex justify-center gap-6 mt-4">
           <Link 
             to="/terms" 
-            className="text-gray-600 hover:text-blue-600 transition-colors text-sm relative group flex items-center gap-2"
+            className="text-gray-600 hover:text-blue-600 transition-colors text-sm flex items-center gap-2"
           >
-            <i className="fa-solid fa-file-contract mr-2"></i>
-            Điều khoản sử dụng
-            <span className="absolute left-0 -bottom-0.5 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+            <i className="fa-solid fa-file-contract"></i>
+            <span className="relative group">
+              Điều khoản sử dụng
+              <span className="absolute left-0 -bottom-0.5 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+            </span>
           </Link>
           <span className="text-gray-300">|</span>
           <Link 
             to="/privacy" 
-            className="text-gray-600 hover:text-blue-600 transition-colors text-sm relative group flex items-center gap-2"
+            className="text-gray-600 hover:text-blue-600 transition-colors text-sm flex items-center gap-2"
           >
-            <i className="fa-solid fa-user-shield mr-2"></i>
-            Chính sách bảo mật
-            <span className="absolute left-0 -bottom-0.5 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+            <i className="fa-solid fa-user-shield"></i>
+            <span className="relative group">
+              Chính sách bảo mật
+              <span className="absolute left-0 -bottom-0.5 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+            </span>
           </Link>
         </div>
         

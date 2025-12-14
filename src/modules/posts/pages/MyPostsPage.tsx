@@ -135,7 +135,7 @@ export default function MyPostsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 select-none">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 select-none bg-[#eef5ff]">
 
         <div className="mb-8 text-center md:text-left">
           <h2 className="text-3xl sm:text-4xl font-bold bg-[#2664eb] bg-clip-text text-transparent mb-2">
