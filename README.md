@@ -148,13 +148,6 @@ BlogHub/
 └── package.json
 ```
 
-## 🔑 Tài khoản mặc định
-
-Tài khoản Admin mặc định:
-
-- **Email**:
-- **Password**:
-
 ## 📝 Script Commands
 
 ### Frontend Commands
