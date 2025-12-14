@@ -82,7 +82,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
               <i className="fa-solid fa-triangle-exclamation text-red-600 text-xl"></i>
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Xóa tài khoản</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Xóa tài khoản vĩnh viễn</h2>
               <p className="text-sm text-gray-500">Thao tác này không thể hoàn tác</p>
             </div>
           </div>
@@ -103,9 +103,10 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
             <div className="flex-1">
               <h3 className="font-semibold text-red-900 mb-2">Cảnh báo quan trọng!</h3>
               <ul className="text-sm text-red-800 space-y-1">
-                <li>• Tất cả bài viết, bình luận của bạn sẽ bị xoá vĩnh viễn</li>
-                <li>• Bạn sẽ không thể đăng nhập lại với tài khoản này</li>
-                <li>• Dữ liệu cá nhân sẽ bị xóa khỏi hệ thống</li>
+                <li>• Tất cả bài viết, bài viết đã lưu, bình luận của bạn sẽ bị xoá vĩnh viễn.</li>
+                <li>• Bạn sẽ không thể đăng nhập lại với tài khoản này.</li>
+                <li>• Dữ liệu cá nhân của bạn sẽ bị xóa khỏi hệ thống.</li>
+                <li>• Thao tác này không thể hoàn tác, hãy chú ý!</li>
               </ul>
             </div>
           </div>
@@ -146,7 +147,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
         <div className="mb-4">
           <label className="block font-semibold mb-2 text-gray-700">
             <i className="fa-solid fa-keyboard mr-2"></i>
-            Nhập "XÓA TÀI KHOẢN" để xác nhận
+            Nhập "XOA TAI KHOAN" để xác nhận
           </label>
           <input
             type="text"
@@ -176,7 +177,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }: Delet
               disabled={isLoading}
             />
             <span className="text-sm text-gray-700 group-hover:text-gray-900">
-              Tôi hiểu rằng thao tác này không thể hoàn tác và tôi muốn xóa vĩnh viễn tài khoản của mình cùng tất cả dữ liệu liên quan.
+              Tôi hiểu rằng thao tác này không thể hoàn tác và tôi muốn xóa vĩnh viễn tài khoản của mình cùng tất cả dữ liệu có liên quan.
             </span>
           </label>
         </div>

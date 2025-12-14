@@ -132,6 +132,12 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
       setIsLoading(true);
       const response = await axios.get('/admin/reports');
       if (response.data.success) {
+        console.log('📊 Reports data:', response.data.reports);
+        console.log('✅ Approved count:', response.data.reports.filter((r: Report) => r.status === 'approved').length);
+        console.log('❌ Rejected count:', response.data.reports.filter((r: Report) => r.status === 'rejected').length);
+        console.log('⏳ Pending count:', response.data.reports.filter((r: Report) => r.status === 'pending').length);
+        console.log('🔍 All statuses:', [...new Set(response.data.reports.map((r: Report) => r.status))]);
+        
         setReports(response.data.reports);
 
         if (onPendingCountChange) {
@@ -608,7 +614,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                         title="Duyệt báo cáo"
                       >
                         <i className="fa-solid fa-check mr-1 sm:mr-2"></i>
-                        Duyệt
+                        Đã duyệt
                       </button>
                       
                       <button
