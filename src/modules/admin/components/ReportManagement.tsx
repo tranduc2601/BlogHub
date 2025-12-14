@@ -80,6 +80,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
   const [currentPostAuthorId, setCurrentPostAuthorId] = useState<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
   const [commentReactions, setCommentReactions] = useState<Record<number, ReactionCounts>>({});
+  const [postReactions, setPostReactions] = useState<ReactionCounts | null>(null);
 
   const getCommentAvatar = (avatarUrl?: string) => {
     return avatarUrl || null;
@@ -216,12 +217,24 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
     try {
       setPostComments([]);
       setIsLoadingComments(true);
+      setPostReactions(null);
       
 
       const postResponse = await axios.get(`/posts/${postId}`);
       if (postResponse.data.success) {
         setSelectedPost(postResponse.data.post);
         setCurrentPostAuthorId(postResponse.data.post.authorId);
+      }
+
+      // Fetch post reactions
+      try {
+        const reactionsResponse = await fetch(getApiUrl(`posts/${postId}/reaction-stats`));
+        const reactionsData = await reactionsResponse.json();
+        if (reactionsData.success) {
+          setPostReactions(reactionsData.counts);
+        }
+      } catch (err) {
+        console.error('Error fetching post reactions:', err);
       }
 
 
@@ -573,7 +586,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
 
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
                     <p className="text-xs text-gray-500">
-                      Ngày báo cáo: {formatDate(report.createdAt)}
+                      <i className="fa-solid fa-calendar-days mr-2"></i>Ngày báo cáo: {formatDate(report.createdAt)}
                     </p>
                     
                     <button
@@ -780,7 +793,11 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                     return null;
                   })()}
                   
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mt-4">
+                  <div className="flex items-center gap-4 text-sm text-gray-600 mt-4 flex-wrap">
+                    <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full">
+                      <i className="fa-solid fa-user text-blue-600"></i>
+                      <span className="font-medium">{selectedPost.author}</span>
+                    </div>
                     <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full">
                       <i className="fa-solid fa-calendar text-blue-600"></i>
                       <span className="font-medium">{formatDate(selectedPost.createdAt)}</span>
@@ -789,6 +806,34 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                       <i className="fa-solid fa-eye text-green-600"></i>
                       <span className="font-medium">{selectedPost.views} lượt xem</span>
                     </div>
+                    {postReactions && postReactions.total > 0 && (
+                      <div className="flex items-center gap-2">
+                        {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as const).map((reactionType) => {
+                          const count = postReactions[reactionType] || 0;
+                          if (count > 0) {
+                            const emojis: Record<string, string> = {
+                              like: '👍',
+                              love: '❤️',
+                              haha: '😂',
+                              wow: '😮',
+                              sad: '😢',
+                              angry: '😠'
+                            };
+                            return (
+                              <span 
+                                key={reactionType}
+                                className="flex items-center gap-1 bg-gray-50 px-3 py-1.5 rounded-full text-xs border border-gray-200 hover:scale-110 transition-transform shadow-sm"
+                                title={`${count} ${reactionType}`}
+                              >
+                                <span className="text-base">{emojis[reactionType]}</span>
+                                <span className="font-bold text-gray-700">{count}</span>
+                              </span>
+                            );
+                          }
+                          return null;
+                        })}
+                      </div>
+                    )}
                   </div>
                 </div>
 

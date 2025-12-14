@@ -708,14 +708,14 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-4">
                     <div>
-                      <p><span className="font-semibold">👤 Tác giả:</span> {post.author}</p>
+                      <p><span className="font-semibold"><i className="fa-solid fa-user mr-2"></i> Tác giả:</span> {post.author}</p>
                     </div>
                   </div>
                   
 
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
                     <p className="text-xs text-gray-500">
-                      Ngày tạo: {formatDate(post.createdAt)}
+                      <i className="fa-solid fa-calendar-days mr-2"></i>Ngày tạo: {formatDate(post.createdAt)}
                     </p>
                     
                     <button
@@ -966,6 +966,10 @@ const PostManagement: React.FC<PostManagementProps> = ({ posts, onToggleStatus, 
                     <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full">
                       <i className="fa-solid fa-calendar text-blue-600"></i>
                       <span className="font-medium">{formatDate(selectedPost.createdAt)}</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full">
+                      <i className="fa-solid fa-eye text-green-600"></i>
+                      <span className="font-medium">{selectedPost.views || 0} lượt xem</span>
                     </div>
                     {postReactions[selectedPost.id] && postReactions[selectedPost.id].total > 0 && (
                       <div className="flex items-center gap-2">

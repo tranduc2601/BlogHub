@@ -486,7 +486,7 @@ export default function UsersPage() {
                         {user.name}
                       </h3>
                       <p className="text-sm text-gray-500">
-                        Tham gia {formatDate(user.joinedAt)}
+                        <i className="fa-solid fa-calendar-days mr-2"></i>Tham gia {formatDate(user.joinedAt)}
                       </p>
                     </div>
                   </div>
@@ -506,7 +506,7 @@ export default function UsersPage() {
                     {user.postsCount}
                   </div>
                   <div className="text-xs text-gray-500">
-                    <i className="fa-solid fa-file-alt mr-1"></i>
+                    <i className="fa-solid fa-file-alt mr-2"></i>
                     Bài viết
                   </div>
                 </div>
@@ -518,7 +518,7 @@ export default function UsersPage() {
                         {user.followersCount || 0}
                       </div>
                       <div className="text-xs text-gray-500">
-                        <i className="fa-solid fa-users mr-1"></i>
+                        <i className="fa-solid fa-users mr-2"></i>
                         Người theo dõi
                       </div>
                     </div>
@@ -530,7 +530,7 @@ export default function UsersPage() {
                         {user.followingCount || 0}
                       </div>
                       <div className="text-xs text-gray-500">
-                        <i className="fa-solid fa-user-check mr-1"></i>
+                        <i className="fa-solid fa-user-check mr-2"></i>
                         Đang theo dõi
                       </div>
                     </div>

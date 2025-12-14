@@ -89,6 +89,7 @@ export interface AdminPost {
   content: string;
   status: 'pending' | 'visible' | 'hidden';
   likes: number;
+  views?: number;
   createdAt: string;
   needsReview: boolean;
   hasReports?: boolean;

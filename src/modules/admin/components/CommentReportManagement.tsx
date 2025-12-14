@@ -106,6 +106,7 @@ const CommentReportManagement: React.FC = () => {
   const [isClosingDeleteModal, setIsClosingDeleteModal] = useState(false);
   const [isOpeningDeleteModal, setIsOpeningDeleteModal] = useState(false);
   const [commentReactions, setCommentReactions] = useState<Record<number, ReactionCounts>>({});
+  const [postReactions, setPostReactions] = useState<ReactionCounts | null>(null);
 
   useEffect(() => {
     fetchReports();
@@ -234,6 +235,7 @@ const CommentReportManagement: React.FC = () => {
 
   const handleViewPost = async (postId: number) => {
     try {
+      setPostReactions(null);
       const [postResponse, commentsResponse] = await Promise.all([
         axios.get(`/posts/${postId}`),
         axios.get(`/posts/${postId}/comments`)
@@ -249,6 +251,17 @@ const CommentReportManagement: React.FC = () => {
           authorId: post.authorId || (typeof post.author === 'object' ? post.author.id : undefined)
         };
         setSelectedPost(normalizedPost);
+      }
+
+      // Fetch post reactions
+      try {
+        const reactionsResponse = await fetch(getApiUrl(`posts/${postId}/reaction-stats`));
+        const reactionsData = await reactionsResponse.json();
+        if (reactionsData.success) {
+          setPostReactions(reactionsData.counts);
+        }
+      } catch (err) {
+        console.error('Error fetching post reactions:', err);
       }
 
       if (commentsResponse.data.success) {
@@ -904,7 +917,11 @@ const CommentReportManagement: React.FC = () => {
                     return null;
                   })()}
                   
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mt-4">
+                  <div className="flex items-center gap-4 text-sm text-gray-600 mt-4 flex-wrap">
+                    <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full">
+                      <i className="fa-solid fa-user text-blue-600"></i>
+                      <span className="font-medium">{selectedPost.author}</span>
+                    </div>
                     <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full">
                       <i className="fa-solid fa-calendar text-blue-600"></i>
                       <span className="font-medium">{formatDate(selectedPost.createdAt)}</span>
@@ -913,6 +930,34 @@ const CommentReportManagement: React.FC = () => {
                       <i className="fa-solid fa-eye text-green-600"></i>
                       <span className="font-medium">{selectedPost.views} lượt xem</span>
                     </div>
+                    {postReactions && postReactions.total > 0 && (
+                      <div className="flex items-center gap-2">
+                        {(['like', 'love', 'haha', 'wow', 'sad', 'angry'] as const).map((reactionType) => {
+                          const count = postReactions[reactionType] || 0;
+                          if (count > 0) {
+                            const emojis: Record<string, string> = {
+                              like: '👍',
+                              love: '❤️',
+                              haha: '😂',
+                              wow: '😮',
+                              sad: '😢',
+                              angry: '😠'
+                            };
+                            return (
+                              <span 
+                                key={reactionType}
+                                className="flex items-center gap-1 bg-gray-50 px-3 py-1.5 rounded-full text-xs border border-gray-200 hover:scale-110 transition-transform shadow-sm"
+                                title={`${count} ${reactionType}`}
+                              >
+                                <span className="text-base">{emojis[reactionType]}</span>
+                                <span className="font-bold text-gray-700">{count}</span>
+                              </span>
+                            );
+                          }
+                          return null;
+                        })}
+                      </div>
+                    )}
                   </div>
                 </div>
 
