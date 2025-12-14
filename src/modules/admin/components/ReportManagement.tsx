@@ -25,7 +25,7 @@ interface Report {
   postAuthor: string;
   postAuthorId: number;
   reason: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'resolved' | 'reviewed';
   createdAt: string;
   reviewedAt?: string;
   reviewedByUser?: string;
@@ -69,8 +69,8 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
   const [searchParams, setSearchParams] = useSearchParams();
   
   const [reports, setReports] = useState<Report[]>([]);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>(
-    (searchParams.get('status') as 'all' | 'pending' | 'approved' | 'rejected') || 'all'
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'resolved' | 'reviewed'>(
+    (searchParams.get('status') as 'all' | 'pending' | 'approved' | 'rejected' | 'resolved' | 'reviewed') || 'all'
   );
   const [reasonFilter, setReasonFilter] = useState<string>(searchParams.get('reason') || '');
   const [isLoading, setIsLoading] = useState(true);
@@ -132,12 +132,6 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
       setIsLoading(true);
       const response = await axios.get('/admin/reports');
       if (response.data.success) {
-        console.log('📊 Reports data:', response.data.reports);
-        console.log('✅ Approved count:', response.data.reports.filter((r: Report) => r.status === 'approved').length);
-        console.log('❌ Rejected count:', response.data.reports.filter((r: Report) => r.status === 'rejected').length);
-        console.log('⏳ Pending count:', response.data.reports.filter((r: Report) => r.status === 'pending').length);
-        console.log('🔍 All statuses:', [...new Set(response.data.reports.map((r: Report) => r.status))]);
-        
         setReports(response.data.reports);
 
         if (onPendingCountChange) {
@@ -356,7 +350,16 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
 
   const filteredReports = reports
     .filter(report => {
-      const matchesFilter = filter === 'all' || report.status === filter;
+      let matchesFilter = false;
+      if (filter === 'all') {
+        matchesFilter = true;
+      } else if (filter === 'approved') {
+        matchesFilter = report.status === 'approved' || report.status === 'resolved';
+      } else if (filter === 'rejected') {
+        matchesFilter = report.status === 'rejected' || report.status === 'reviewed';
+      } else {
+        matchesFilter = report.status === filter;
+      }
       const matchesSearch = report.postTitle.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesReason = !reasonFilter || report.reason === reasonFilter;
       return matchesFilter && matchesSearch && matchesReason;
@@ -427,9 +430,12 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
       case 'pending':
         return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full"><i className="fa-solid fa-hourglass-end mr-1"></i>Chờ xử lý</span>;
       case 'approved':
+      case 'resolved':
         return <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">✓ Đã duyệt</span>;
       case 'rejected':
         return <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">✗ Đã từ chối</span>;
+      case 'reviewed':
+        return <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">✓ Đã xử lý</span>;
       default:
         return null;
     }
@@ -490,7 +496,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                 : 'bg-white text-gray-700 hover:bg-gray-100 active:bg-gray-200'
             }`}
           >
-            Duyệt ({reports.filter(r => r.status === 'approved').length})
+            Duyệt ({reports.filter(r => r.status === 'approved' || r.status === 'resolved').length})
           </button>
           <button
             onClick={() => setFilter('rejected')}
@@ -500,7 +506,7 @@ const ReportManagement: React.FC<ReportManagementProps> = ({ onPendingCountChang
                 : 'bg-white text-gray-700 hover:bg-gray-100 active:bg-gray-200'
             }`}
           >
-            Từ chối ({reports.filter(r => r.status === 'rejected').length})
+            Từ chối ({reports.filter(r => r.status === 'rejected' || r.status === 'reviewed').length})
           </button>
         </div>
       </div>
