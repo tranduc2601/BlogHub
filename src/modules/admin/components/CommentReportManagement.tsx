@@ -639,7 +639,7 @@ const CommentReportManagement: React.FC = () => {
 
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
                     <p className="text-xs text-gray-500">
-                      Ngày báo cáo: {formatDate(report.createdAt)}
+                      <i className="fa-solid fa-calendar-days mr-1"></i>Ngày báo cáo: {formatDate(report.createdAt)}
                     </p>
                     
                     <button

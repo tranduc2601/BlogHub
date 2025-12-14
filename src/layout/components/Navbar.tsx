@@ -66,9 +66,7 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {location.pathname === "/" ? (
             <div className="flex items-center gap-2 cursor-default select-none">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <i className="fa-solid fa-blog text-white text-xl"></i>
-              </div>
+              <i className="fa-solid fa-blog text-blue-600 text-3xl"></i>
               <span className="hidden sm:inline" style={{ fontWeight: 'bold', fontSize: '1.5rem', color: '#2563eb', letterSpacing: '2px', fontFamily: "'Inter', 'Segoe UI', 'Arial', sans-serif" }}>BlogHub</span>
             </div>
           ) : (
@@ -76,9 +74,7 @@ export default function Navbar() {
               className="flex items-center gap-2 cursor-pointer select-none transition-all duration-300 hover:scale-105"
               onClick={() => navigate("/")}
             >
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <i className="fa-solid fa-blog text-white text-xl"></i>
-              </div>
+              <i className="fa-solid fa-blog text-blue-600 text-3xl"></i>
               <span className="hidden sm:inline" style={{ fontWeight: 'bold', fontSize: '1.5rem', color: '#2563eb', letterSpacing: '2px', fontFamily: "'Inter', 'Segoe UI', 'Arial', sans-serif" }}>BlogHub</span>
             </div>
           )}

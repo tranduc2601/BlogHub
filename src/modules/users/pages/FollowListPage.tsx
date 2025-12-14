@@ -286,8 +286,8 @@ export default function FollowListPage() {
             {searchTerm 
               ? 'Không tìm thấy người dùng nào phù hợp!' 
               : type === 'followers' 
-                ? 'Chưa có người theo dõi!' 
-                : 'Chưa theo dõi ai!'}
+                ? 'Hiện tại bạn chưa có người theo dõi!' 
+                : 'Hiện tại bạn chưa theo dõi người dùng nào!'}
           </p>
         </div>
       )}

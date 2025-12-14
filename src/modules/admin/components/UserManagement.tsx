@@ -297,7 +297,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <i className="fa-solid fa-envelope text-gray-500 text-base mr-2"></i>
+                        <i className="fa-solid fa-envelope text-gray-500 text-base mr-1"></i>
                         <span className="text-sm text-gray-600">
                           {user.email}
                         </span>

@@ -346,7 +346,7 @@ export default function UserDetailPage() {
             ) : (
               <div className="text-gray-500 text-sm md:text-base italic bg-gray-50 rounded-xl p-4 border border-gray-200 flex items-center gap-2">
                 <i className="fa-solid fa-info-circle text-gray-400"></i>
-                <span>Người dùng chưa thêm thông tin giới thiệu.</span>
+                <span>Người dùng này chưa có thông tin giới thiệu bản thân.</span>
               </div>
             )}
           </div>
